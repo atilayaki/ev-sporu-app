@@ -29,6 +29,9 @@ def create_app():
 
     # Removed for Vercel read-only filesystem
 
+    from api import api_bp
+    app.register_blueprint(api_bp)
+
     # DB initialization removed for production
     @app.route('/')
     def index():
@@ -481,5 +484,7 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
