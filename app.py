@@ -27,7 +27,7 @@ def create_app():
     login_manager.login_message = "Bu sayfayÄ± gÃ¶rÃ¼ntÃ¼lemek iÃ§in giriÅŸ yapmalÄ±sÄ±nÄ±z."
     login_manager.login_message_category = "warning"
 
-    os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
+    # Removed for Vercel read-only filesystem
 
     # DB initialization removed for production
     @app.route('/')
@@ -492,4 +492,5 @@ app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
