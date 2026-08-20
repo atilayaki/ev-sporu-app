@@ -41,54 +41,43 @@ def create_app():
                 'baslik': 'Neden Evde Spor?',
                 'ikon': '/static/images/home_gym_icon.jpg',
                 'metin': [
-                    'Spor yapmak iÃ§in her zaman lÃ¼ks bir spor salonuna Ã¼ye olmanÄ±za gerek yoktur. Evinizin rahatlÄ±ÄŸÄ±nda egzersiz yapmanÄ±n sadece finansal deÄŸil, zihinsel ve zamansal birÃ§ok avantajÄ± vardÄ±r.',
+                    'Spor yapmak için her zaman lüks bir spor salonuna üye olmanıza gerek yoktur. Evinizin rahatlığında egzersiz yapmanın sadece finansal değil, zihinsel ve zamansal birçok avantajı vardır.',
                     '## Zaman Tasarrufu',
-                    'Spor salonuna gitmek, yolda geÃ§en sÃ¼re, giyinme odasÄ±nda hazÄ±rlÄ±k ve geri dÃ¶nÃ¼ÅŸ derken gÃ¼nÃ¼nÃ¼zden en az 2 saat Ã§alar. Evde ise sadece Ã¼stÃ¼nÃ¼zÃ¼ deÄŸiÅŸtirip anÄ±nda baÅŸlayabilirsiniz. Bu sayede antrenmanlarÄ±nÄ±zÄ± aksatma ihtimaliniz minimuma iner.',
+                    'Spor salonuna gitmek, yolda geçen süre, giyinme odasında hazırlık ve geri dönüş derken gününüzden en az 2 saat çalar. Evde ise sadece üstünüzü değiştirip anında başlayabilirsiniz. Bu sayede antrenmanlarınızı aksatma ihtimaliniz minimuma iner.',
                     '## Odaklanma ve Disiplin',
-                    'KalabalÄ±k bir salonda baÅŸkalarÄ±nÄ±n bitirmesini beklediÄŸiniz aletler, gÃ¼rÃ¼ltÃ¼ ve dikkatinizi daÄŸÄ±tan unsurlar yoktur. Evde kulaklÄ±ÄŸÄ±nÄ±zÄ± takÄ±p veya hoparlÃ¶rden mÃ¼ziÄŸinizi aÃ§Ä±p sadece vÃ¼cudunuza odaklanabilirsiniz.',
-                    '## Psikolojik RahatlÄ±k',
-                    'Ã–zellikle spora yeni baÅŸlayanlar iÃ§in baÅŸkalarÄ±nÄ±n bakÄ±ÅŸlarÄ± altÄ±nda ter dÃ¶kmek rahatsÄ±z edici olabilir. Kendi evinizin gÃ¼venli alanÄ±nda, nasÄ±l gÃ¶rÃ¼ndÃ¼ÄŸÃ¼nÃ¼zÃ¼ dÃ¼ÅŸÃ¼nmeden sÄ±nÄ±rlarÄ±nÄ±zÄ± zorlayabilirsiniz.',
-                    'UnutmayÄ±n, iyi bir fiziÄŸe ve saÄŸlÄ±ÄŸa ulaÅŸmanÄ±n temelinde pahalÄ± ekipmanlar deÄŸil, istikrar ve doÄŸru beslenme yatar.'
+                    'Kalabalık bir salonda başkalarının bitirmesini beklediğiniz aletler, gürültü ve dikkatinizi dağıtan unsurlar yoktur. Evde kulaklığınızı takıp veya hoparlörden müziğinizi açıp sadece vücudunuza odaklanabilirsiniz.',
+                    '## Psikolojik Rahatlık',
+                    'Özellikle spora yeni başlayanlar için başkalarının bakışları altında ter dökmek rahatsız edici olabilir. Kendi evinizin güvenli alanında, nasıl göründüğünüzü düşünmeden sınırlarınızı zorlayabilirsiniz.',
+                    'Unutmayın, iyi bir fiziğe ve sağlığa ulaşmanın temelinde pahalı ekipmanlar değil, istikrar ve doğru beslenme yatar.'
                 ]
             },
             'vucut-agirligi': {
-                'baslik': 'VÃ¼cut AÄŸÄ±rlÄ±ÄŸÄ± (Calisthenics) GÃ¼cÃ¼',
+                'baslik': 'Vücut Ağırlığı (Calisthenics) Gücü',
                 'ikon': '/static/images/flexed_bicep_icon.jpg',
                 'metin': [
-                    'AÄŸÄ±rlÄ±k kaldÄ±rmak (halter, dambÄ±l) elbette kas geliÅŸtirmek iÃ§in harika bir yÃ¶ntemdir ancak tek yol deÄŸildir. VÃ¼cut aÄŸÄ±rlÄ±ÄŸÄ± egzersizleri (Calisthenics) binlerce yÄ±ldÄ±r kullanÄ±lan en doÄŸal ve fonksiyonel antrenman stilidir.',
-                    '## Kinetik Zincir ve Fonksiyonellik',
-                    'Makinelerde yaptÄ±ÄŸÄ±nÄ±z izole hareketler (Ã¶rneÄŸin Leg Extension) sadece tek bir kas grubunu Ã§alÄ±ÅŸtÄ±rÄ±r. Ancak ÅÄ±nav, Barfiks, Squat gibi hareketler kapalÄ± kinetik zincir hareketleridir. VÃ¼cudunuz bir bÃ¼tÃ¼n olarak senkronize Ã§alÄ±ÅŸÄ±r, merkez (core) bÃ¶lgeniz sÃ¼rekli aktiftir.',
-                    '## AÅŸamalÄ± YÃ¼klenme (Progressive Overload)',
-                    'AÄŸÄ±rlÄ±k plakasÄ± ekleyemediÄŸiniz iÃ§in geliÅŸimin duracaÄŸÄ±nÄ± dÃ¼ÅŸÃ¼nÃ¼yorsanÄ±z yanÄ±lÄ±yorsunuz. VÃ¼cut aÄŸÄ±rlÄ±ÄŸÄ±nda "KaldÄ±raÃ§ Etkisi" (leverage) kullanÄ±larak hareketler zorlaÅŸtÄ±rÄ±lÄ±r.',
-                    '- Normal ÅŸÄ±navdan sÄ±kÄ±ldÄ±nÄ±z mÄ±? AyaklarÄ±nÄ±zÄ± yÃ¼kseÄŸe koyun (Decline Push-up).',
-                    '- O da mÄ± kolay? Tek el ÅŸÄ±nav (One-arm Push-up) deneyin.',
-                    '- Ã‡ift bacak squat kolaylaÅŸtÄ±ysa Pistol Squat (tek bacak) Ã§alÄ±ÅŸÄ±n.',
-                    '## Eklemler Ä°Ã§in GÃ¼venli',
-                    'DÄ±ÅŸarÄ±dan uygulanan suni bir aÄŸÄ±rlÄ±k olmadÄ±ÄŸÄ± iÃ§in vÃ¼cudunuz doÄŸal hareket aralÄ±ÄŸÄ±nda (ROM) Ã§alÄ±ÅŸÄ±r. Eklemlere binen stres Ã§ok daha organik bir ÅŸekilde daÄŸÄ±lÄ±r, sakatlanma riskiniz azalÄ±r.'
+                    'Ağırlık kaldırmak (halter, dambıl) elbette kas geliştirmek için harika bir yöntemdir ancak tek yol değildir. Vücut ağırlığı egzersizleri (Calisthenics) binlerce yıldır kullanılan en doğal ve fonksiyonel antrenman stilidir.',
+                    '## Pratik ve Erişilebilir',
+                    'Şınav, mekik, squat, barfiks gibi temel hareketleri evde, parkta veya seyahatteyken yapabilirsiniz.',
+                    '## Eklemleri Korur',
+                    'Ekstra ağırlık yüklemediğiniz için eklem ve tendonlarınıza binen stres daha doğal seviyelerdedir. Sakatlık riski ağırlık çalışmalarına göre daha düşüktür.',
+                    '## Core (Merkez) Bölgesi Gelişimi',
+                    'Neredeyse tüm vücut ağırlığı egzersizleri dengede kalmak için karın ve bel kaslarınızı aktif kullanmanızı gerektirir. Sadece şınav çekerken bile sıkı bir karına sahip olursunuz.',
+                    'Yeni başlayanlar için vücut ağırlığı ustalaşılması gereken ilk adımdır. Kendi ağırlığını kontrol edemeyen biri harici ağırlıklara geçmemelidir.'
                 ]
             },
-            'surekli-gelisim': {
-                'baslik': 'SÃ¼rekli GeliÅŸim ve Disiplin',
+            'ilerleme-takibi': {
+                'baslik': 'Başarı İçin İlerleme Takibi',
                 'ikon': '/static/images/progress_chart_icon.jpg',
                 'metin': [
-                    'Fitness bir 100 metre koÅŸusu deÄŸil, Ã¶mÃ¼r boyu sÃ¼recek bir maratondur. Ä°stenilen sonuÃ§larÄ± almak sadece fiziksel Ã§aba deÄŸil, mental bir dayanÄ±klÄ±lÄ±k gerektirir.',
-                    '## Motivasyon vs Disiplin',
-                    'Motivasyon, gece saat 3\'te izlediÄŸiniz bir video sonrasÄ± hissettiÄŸiniz "YarÄ±n hayatÄ±mÄ± deÄŸiÅŸtiriyorum" duygusudur. Ancak ertesi gÃ¼n iÅŸten veya okuldan yorgun geldiÄŸinizde o duygu kaybolur. Ä°ÅŸte tam bu noktada devreye **Disiplin** girer.',
-                    'Disiplin, canÄ±nÄ±z hiÃ§ istemediÄŸinde bile o matÄ±n Ã¼zerine Ã§Ä±kÄ±p antrenmanÄ± tamamlamaktÄ±r. Motivasyon sizi baÅŸlatÄ±r, disiplin hedefe ulaÅŸtÄ±rÄ±r.',
-                    '## Veri Takibi (Tracking)',
-                    'GeliÅŸiminizi takip etmiyorsanÄ±z kÃ¶r uÃ§uÅŸ yapÄ±yorsunuz demektir.',
-                    '- **Antrenman Takibi:** DÃ¼n kaÃ§ ÅŸÄ±nav Ã§ektiniz? BugÃ¼n bir tekrar daha fazla yapabildiniz mi?',
-                    '- **Su TÃ¼ketimi:** VÃ¼cudunuzun %70\'i su. KaslarÄ±nÄ±zÄ±n toparlanmasÄ± (recovery) iÃ§in gÃ¼nlÃ¼k 2-3 litre su iÃ§meyi alÄ±ÅŸkanlÄ±k haline getirin.',
-                    '- **OruÃ§/Beslenme:** AralÄ±klÄ± oruÃ§ (Intermittent Fasting) veya sadece temiz beslenme (Clean eating) ile vÃ¼cudunuza giren yakÄ±tÄ± kontrol edin.',
-                    'Sistemimizdeki izleme araÃ§larÄ±nÄ± kullanarak geliÅŸiminizi her gÃ¼n kaydedin. BirkaÃ§ ay sonra geriye dÃ¶nÃ¼p baktÄ±ÄŸÄ±nÄ±zda kat ettiÄŸiniz mesafeye inanamayacaksÄ±nÄ±z.'
+                    'Sürekli aynı şeyleri yaparak farklı sonuçlar elde edemezsiniz. Sporun altın kuralı "Progresif Aşırı Yükleme"dir (Progressive Overload).',
+                    '## Neden Not Almalıyım?',
+                    'Eğer geçen hafta 3 set 10 şınav çektiyseniz, bu hafta bunu 11 şınava çıkarmak hedeflerinizden biri olmalıdır. Not almadığınızda gelişiminizi objektif olarak göremezsiniz.',
+                    '## Küçük Adımların Gücü',
+                    'Her antrenmanda %1 daha iyi olmak, bir yılın sonunda %3700 gelişim demektir.',
+                    'Bu uygulama içerisindeki Liderlik, Rozetler ve Seviye sistemi, ilerlemenizi görselleştirerek motivasyonunuzu yüksek tutmak için tasarlanmıştır.'
                 ]
             }
         }
-        
-        if slug not in icerikler:
-            flash('AradÄ±ÄŸÄ±nÄ±z sayfa bulunamadÄ±.', 'danger')
-            return redirect(url_for('index'))
-            
         return render_template('info.html', icerik=icerikler[slug])
 
     @app.route('/egzersizler')
