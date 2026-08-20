@@ -24,7 +24,7 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'login'
-    login_manager.login_message = "Bu sayfayÄ± gÃ¶rÃ¼ntÃ¼lemek iÃ§in giriÅŸ yapmalÄ±sÄ±nÄ±z."
+    login_manager.login_message = "Bu sayfayı görüntülemek için giriş yapmalısınız."
     login_manager.login_message_category = "warning"
 
     # Removed for Vercel read-only filesystem
@@ -119,7 +119,7 @@ def create_app():
             user_program = UserProgram(user_id=current_user.id, program_id=program.id)
             db.session.add(user_program)
             db.session.commit()
-            flash(f'{program.title} programÄ±na katÄ±ldÄ±nÄ±z!', 'success')
+            flash(f'{program.title} programına katıldınız!', 'success')
         return redirect(url_for('program_detail', slug=slug))
 
     @app.route('/programlar/<slug>/antrenman')
@@ -131,7 +131,7 @@ def create_app():
         # Get exercises for current day
         day_exercises = [pe for pe in program.exercises if pe.day_number == user_program.current_day]
         if not day_exercises:
-            flash('Bu gÃ¼n iÃ§in egzersiz bulunamadÄ±!', 'error')
+            flash('Bu gün için egzersiz bulunamadı!', 'error')
             return redirect(url_for('program_detail', slug=slug))
             
         return render_template('workout_player.html', program=program, user_program=user_program, exercises=day_exercises)
@@ -205,7 +205,7 @@ def create_app():
             user = User(name=form.name.data, email=form.email.data, password_hash=hashed_password)
             db.session.add(user)
             db.session.commit()
-            flash('HesabÄ±nÄ±z oluÅŸturuldu! Åimdi giriÅŸ yapabilirsiniz.', 'success')
+            flash('Başarıyla giriş yaptınız!', 'success')
             return redirect(url_for('login'))
         return render_template('register.html', form=form)
 
@@ -219,10 +219,10 @@ def create_app():
             if user and check_password_hash(user.password_hash, form.password.data):
                 login_user(user, remember=True)
                 next_page = request.args.get('next')
-                flash('BaÅŸarÄ±yla giriÅŸ yaptÄ±nÄ±z!', 'success')
+                flash('Başarıyla giriş yaptınız!', 'success')
                 return redirect(next_page) if next_page else redirect(url_for('index'))
             else:
-                flash('GiriÅŸ baÅŸarÄ±sÄ±z. LÃ¼tfen e-posta ve ÅŸifrenizi kontrol edin.', 'danger')
+                flash('Giriş başarısız. Lütfen e-posta ve şifrenizi kontrol edin.', 'danger')
         return render_template('login.html', form=form)
 
     @app.route('/cikis')
@@ -258,7 +258,7 @@ def create_app():
         exercise = Exercise.query.get_or_404(exercise_id)
         if exercise in current_user.favorites:
             current_user.favorites.remove(exercise)
-            flash(f'{exercise.name} favorilerden Ã§Ä±karÄ±ldÄ±.', 'info')
+            flash(f'{exercise.name} favorilerden çıkarıldı.', 'info')
         else:
             current_user.favorites.append(exercise)
             flash(f'{exercise.name} favorilere eklendi!', 'success')
@@ -296,7 +296,7 @@ def create_app():
         db.session.add(progress)
 
         db.session.commit()
-        flash('Antrenman tamamlandÄ± ve ilerlemeniz kaydedildi! Tebrikler!', 'success')
+        flash('Antrenman tamamlandı ve ilerlemeniz kaydedildi! Tebrikler!', 'success')
         return redirect(url_for('exercise_detail', slug=exercise.slug))
 
     @app.route('/breathe')
@@ -360,7 +360,7 @@ def create_app():
                 user_challenge = UserChallenge(user_id=current_user.id, challenge_id=challenge.id)
                 db.session.add(user_challenge)
                 db.session.commit()
-                flash('Meydan okumaya katÄ±ldÄ±nÄ±z!', 'success')
+                flash('Meydan okumaya katıldınız!', 'success')
             return redirect(url_for('challenge_detail', slug=slug))
             
         # Get exercises grouped by day
