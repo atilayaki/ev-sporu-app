@@ -1,0 +1,9 @@
+/* Custom styles to supplement Tailwind */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.prose {
+    color: #374151;
+}

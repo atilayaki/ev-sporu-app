@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ program.title }} - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto relative z-10">
+    <div class="mb-6">
+        <a href="/programlar" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-sm uppercase tracking-wider">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            Programlara Dön
+        </a>
+    </div>
+
+    <div class="athletic-card rounded-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="relative p-8 md:p-12 border-b border-zinc-800 bg-gradient-to-br from-zinc-900 to-cardbg overflow-hidden">
+            <!-- Decorative Accent Blob -->
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-accent/20 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <h1 class="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter">{{ program.title }}</h1>
+                <p class="text-zinc-400 text-lg md:text-xl mb-8 font-medium max-w-2xl">{{ program.description }}</p>
+                
+                <div class="flex flex-wrap gap-4 md:gap-8">
+                    <div class="bg-zinc-900/80 border border-zinc-800 px-5 py-3 rounded-lg flex flex-col justify-center">
+                        <span class="block text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Süre</span>
+                        <span class="font-black text-white text-xl">{{ program.duration_days }} Gün</span>
+                    </div>
+                    <div class="bg-zinc-900/80 border border-zinc-800 px-5 py-3 rounded-lg flex flex-col justify-center">
+                        <span class="block text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Seviye</span>
+                        <span class="font-black text-white text-xl">{{ program.level }}</span>
+                    </div>
+                    <div class="bg-zinc-900/80 border border-zinc-800 px-5 py-3 rounded-lg flex flex-col justify-center">
+                        <span class="block text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Hedef</span>
+                        <span class="font-black text-accent text-xl">{{ program.goal }}</span>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    {% if current_user.is_authenticated %}
+                        {% if user_program %}
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div class="inline-flex items-center bg-green-500/10 border border-green-500/50 text-green-400 px-6 py-3 rounded-md font-bold uppercase tracking-wide">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Programa Katıldın (Gün {{ user_program.current_day }})
+                                </div>
+                                {% if user_program.current_day <= program.duration_days %}
+                                <a href="/programlar/{{ program.slug }}/antrenman" class="bg-accent hover:bg-orange-500 text-white px-8 py-3 rounded-md font-black uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                    Günün Antrenmanına Başla
+                                </a>
+                                {% else %}
+                                <div class="inline-flex items-center bg-zinc-800 border border-zinc-700 text-zinc-400 px-6 py-3 rounded-md font-bold uppercase tracking-wide">
+                                    Program Tamamlandı!
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <form action="/programlar/{{ program.slug }}/katil" method="POST" class="inline-block">
+                                <button type="submit" class="bg-accent hover:bg-orange-500 text-white px-8 py-3 rounded-md font-black uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20">
+                                    Programa Katıl
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="/giris" class="inline-block bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-3 rounded-md font-bold uppercase tracking-widest transition-colors">
+                            Katılmak İçin Giriş Yap
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-8 md:p-12">
+            <h3 class="text-2xl font-black text-white mb-8 uppercase tracking-tight flex items-center">
+                <svg class="w-6 h-6 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                Program İçeriği
+            </h3>
+            
+            {% set current_day = 0 %}
+            {% for pe in program.exercises|sort(attribute='day_number') %}
+                {% if pe.day_number != current_day %}
+                    {% if current_day != 0 %}</div>{% endif %}
+                    <div class="mb-10">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-accent text-white font-black text-sm px-3 py-1 rounded-sm uppercase tracking-widest">Gün {{ pe.day_number }}</div>
+                            <div class="h-px bg-zinc-800 flex-grow ml-4"></div>
+                        </div>
+                    {% set current_day = pe.day_number %}
+                {% endif %}
+                
+                <a href="/egzersizler/{{ pe.exercise.slug }}" class="block group mb-3">
+                    <div class="bg-zinc-900/50 border border-zinc-800 p-4 md:p-5 rounded-xl flex items-center justify-between transition-all duration-300 group-hover:bg-zinc-900 group-hover:border-accent/50 group-hover:-translate-y-1 group-hover:shadow-[0_10px_20px_-10px_rgba(234,88,12,0.2)]">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden relative">
+                                <img src="/static/images/{{ pe.exercise.slug }}.jpg" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                     class="absolute inset-0 w-full h-full object-cover mix-blend-lighten" alt="">
+                                <div class="hidden text-2xl text-zinc-600 font-black">?</div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-lg uppercase tracking-tight group-hover:text-accent transition-colors">{{ pe.exercise.name }}</h4>
+                                <p class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">{{ pe.exercise.muscle_group }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex flex-col items-end">
+                            <span class="inline-block bg-zinc-800 text-white text-sm font-black px-3 py-1 rounded-md uppercase tracking-wide mb-1">{{ pe.sets }} Set × {{ pe.reps }} Tekrar</span>
+                            <span class="text-xs font-bold text-zinc-500 uppercase flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{ pe.rest_seconds }}sn Dinlenme
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+            {% if current_day != 0 %}</div>{% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

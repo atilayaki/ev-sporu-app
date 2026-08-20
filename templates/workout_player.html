@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Antrenman: {{ program.title }} - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto relative z-10" x-data="workoutPlayer()">
+    <!-- Navigation (Before Start) -->
+    <div class="mb-6" x-show="status === 'ready'">
+        <a href="/programlar/{{ program.slug }}" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-sm uppercase tracking-wider">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            Programa Dön
+        </a>
+    </div>
+
+    <!-- Main Player Card -->
+    <div class="athletic-card rounded-2xl overflow-hidden relative">
+        <!-- Background Image of current exercise -->
+        <div class="absolute inset-0 opacity-10 z-0">
+            <img :src="'/static/images/' + currentExercise.slug + '.jpg'" class="w-full h-full object-cover mix-blend-lighten" alt="">
+        </div>
+        
+        <div class="relative z-10 p-8 md:p-12 min-h-[500px] flex flex-col justify-between">
+            
+            <!-- Header Info -->
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h2 class="text-accent font-black text-sm uppercase tracking-widest">{{ program.title }} - Gün {{ user_program.current_day }}</h2>
+                    <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mt-2" x-text="status === 'completed' ? 'Antrenman Bitti!' : (status === 'resting' ? 'Dinlenme' : currentExercise.name)"></h1>
+                </div>
+                
+                <div class="text-right flex space-x-4">
+                    <div class="text-zinc-400">
+                        <span class="block text-xs font-bold uppercase tracking-widest">Süre</span>
+                        <span class="text-xl font-mono font-black text-white" x-text="formatTime(totalSeconds)">00:00</span>
+                    </div>
+                    <div class="text-zinc-400">
+                        <span class="block text-xs font-bold uppercase tracking-widest">Kalori</span>
+                        <span class="text-xl font-mono font-black text-orange-400" x-text="Math.floor(totalCalories)">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Central Content Area -->
+            <div class="flex-grow flex flex-col items-center justify-center text-center py-10">
+                
+                <!-- Ready State -->
+                <div x-show="status === 'ready'" class="space-y-6">
+                    <p class="text-zinc-400 text-lg font-medium">Bugün <span class="text-white font-bold">{{ exercises|length }}</span> hareket seni bekliyor.</p>
+                    <button @click="startExercise()" class="bg-accent hover:bg-orange-500 text-white w-32 h-32 rounded-full font-black uppercase tracking-widest transition-transform transform hover:scale-105 shadow-[0_0_40px_-10px_rgba(234,88,12,0.5)] flex items-center justify-center text-2xl mx-auto">
+                        Başla
+                    </button>
+                    <p class="text-xs text-zinc-500 uppercase tracking-widest font-bold mt-4">Sesli komutları açmayı unutma</p>
+                </div>
+
+                <!-- Active State (Sets/Reps) -->
+                <div x-show="status === 'active'" class="space-y-8">
+                    <div class="text-6xl md:text-8xl font-black text-white tracking-tighter" x-text="currentExercise.sets + ' x ' + currentExercise.reps"></div>
+                    <p class="text-zinc-400 font-bold uppercase tracking-widest">Set / Tekrar</p>
+                    
+                    <button @click="finishExercise()" class="bg-green-500 hover:bg-green-400 text-white px-10 py-4 rounded-full font-black text-lg uppercase tracking-widest transition-colors shadow-lg shadow-green-500/20 mx-auto mt-8">
+                        Bitirdim
+                    </button>
+                </div>
+
+                <!-- Resting State -->
+                <div x-show="status === 'resting'" class="space-y-8">
+                    <div class="text-7xl md:text-9xl font-mono font-black text-accent tracking-tighter" x-text="timeLeft"></div>
+                    <p class="text-zinc-400 font-bold uppercase tracking-widest">Saniye Kaldı</p>
+                    
+                    <button @click="skipRest()" class="text-zinc-500 hover:text-white uppercase font-bold text-xs tracking-widest border-b border-zinc-500 hover:border-white transition-colors pb-1">
+                        Dinlenmeyi Atla
+                    </button>
+                    
+                    <div class="mt-8 p-4 bg-zinc-900/80 rounded-xl border border-zinc-800">
+                        <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mb-1">Sıradaki Hareket</p>
+                        <p class="text-white font-bold uppercase" x-text="nextExercise ? nextExercise.name : 'Bitiş'"></p>
+                    </div>
+                </div>
+                
+                <!-- Completed State -->
+                <div x-show="status === 'completed'" class="space-y-6">
+                    <div class="w-24 h-24 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto border border-green-500">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <p class="text-zinc-300 text-lg">Harika iş çıkardın! Günlük hedefini tamamladın.</p>
+                    <button @click="finishWorkout()" class="bg-accent hover:bg-orange-500 text-white px-10 py-4 rounded-full font-black text-lg uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20 mx-auto">
+                        Antrenmanı Kaydet
+                    </button>
+                </div>
+
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden" x-show="status !== 'ready'">
+                <div class="bg-accent h-full transition-all duration-500" :style="'width: ' + ((currentIndex / exercises.length) * 100) + '%'"></div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    // Prepare data from backend
+    const exercisesData = [
+        {% for pe in exercises %}
+        {
+            name: "{{ pe.exercise.name }}",
+            slug: "{{ pe.exercise.slug }}",
+            sets: {{ pe.sets }},
+            reps: {{ pe.reps }},
+            rest: {{ pe.rest_seconds }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    function workoutPlayer() {
+        return {
+            exercises: exercisesData,
+            currentIndex: 0,
+            status: 'ready', // ready, active, resting, completed
+            timeLeft: 0,
+            totalSeconds: 0,
+            totalCalories: 0,
+            timerInterval: null,
+            restInterval: null,
+            speechSynth: window.speechSynthesis,
+            
+            get currentExercise() {
+                if (this.currentIndex >= this.exercises.length) {
+                    return this.exercises[this.exercises.length - 1];
+                }
+                return this.exercises[this.currentIndex];
+            },
+            
+            get nextExercise() {
+                if (this.currentIndex + 1 >= this.exercises.length) return null;
+                return this.exercises[this.currentIndex + 1];
+            },
+            
+            init() {
+                // Initialize component
+            },
+            
+            speak(text) {
+                if (this.speechSynth) {
+                    this.speechSynth.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'tr-TR';
+                    utterance.rate = 1.0;
+                    this.speechSynth.speak(utterance);
+                }
+            },
+            
+            formatTime(seconds) {
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                return `${m}:${s}`;
+            },
+            
+            startExercise() {
+                if (this.status === 'ready') {
+                    // Start global timer
+                    this.timerInterval = setInterval(() => {
+                        if (this.status !== 'completed') {
+                            this.totalSeconds++;
+                            this.totalCalories += (8 / 60); // approx 8 kcal per min
+                        }
+                    }, 1000);
+                }
+                
+                this.status = 'active';
+                this.speak(`Sıradaki hareket: ${this.currentExercise.name}. Başla!`);
+            },
+            
+            finishExercise() {
+                if (this.currentIndex >= this.exercises.length - 1) {
+                    this.status = 'completed';
+                    this.speak('Tebrikler. Antrenmanı tamamladınız!');
+                    clearInterval(this.timerInterval);
+                    return;
+                }
+                
+                this.status = 'resting';
+                this.timeLeft = this.currentExercise.rest;
+                this.speak(`Dinlenme zamanı. ${this.timeLeft} saniye dinlenin.`);
+                
+                this.restInterval = setInterval(() => {
+                    this.timeLeft--;
+                    if (this.timeLeft === 10) {
+                        this.speak('Son 10 saniye. Hazırlanın.');
+                    }
+                    if (this.timeLeft <= 0) {
+                        this.skipRest();
+                    }
+                }, 1000);
+            },
+            
+            skipRest() {
+                clearInterval(this.restInterval);
+                this.currentIndex++;
+                this.startExercise();
+            },
+            
+            finishWorkout() {
+                fetch('/programlar/{{ program.slug }}/tamamla', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        duration_spent: this.totalSeconds,
+                        calories_burned: Math.floor(this.totalCalories)
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        window.location.href = data.redirect;
+                    }
+                });
+            }
+        }
+    }
+</script>
+{% endblock %}

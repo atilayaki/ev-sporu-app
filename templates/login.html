@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Giriş Yap - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto athletic-card rounded-xl overflow-hidden mt-10">
+    <div class="bg-zinc-900 border-b border-zinc-800 p-6 text-center">
+        <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Giriş <span class="text-accent">Yap</span></h2>
+    </div>
+    <div class="p-8">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <div class="mb-5">
+                {{ form.email.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
+                {{ form.email(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
+            </div>
+            <div class="mb-8">
+                {{ form.password.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
+                {{ form.password(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
+            </div>
+            <div class="flex items-center justify-between">
+                {{ form.submit(class="bg-accent hover:bg-accentHover text-white font-bold py-3 px-4 rounded-md w-full cursor-pointer uppercase tracking-wide text-sm transition-colors") }}
+            </div>
+        </form>
+        <p class="text-center text-sm text-zinc-500 mt-6 font-medium">
+            Hesabın yok mu? <a href="/kayit" class="text-white hover:text-accent font-bold transition-colors">Kayıt Ol</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

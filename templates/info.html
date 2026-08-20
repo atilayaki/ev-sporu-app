@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ icerik.baslik }} - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6">
+    <div class="bg-cardbg border border-zinc-800 rounded-2xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col md:flex-row items-center gap-8 mb-10 relative z-10">
+            <div class="w-32 h-32 flex-shrink-0 rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(234,88,12,0.3)]">
+                <img src="{{ icerik.ikon }}" alt="{{ icerik.baslik }}" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h1 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter mb-4">{{ icerik.baslik }}</h1>
+                <div class="w-20 h-1.5 bg-accent rounded-full"></div>
+            </div>
+        </div>
+
+        <div class="prose prose-invert prose-orange max-w-none text-zinc-300 space-y-6 text-lg leading-relaxed relative z-10">
+            {% for paragraf in icerik.metin %}
+                {% if paragraf.startswith('##') %}
+                    <h2 class="text-2xl font-bold text-white mt-8 mb-4">{{ paragraf | replace('## ', '') }}</h2>
+                {% elif paragraf.startswith('- ') %}
+                    <li class="ml-4">{{ paragraf | replace('- ', '') }}</li>
+                {% else %}
+                    <p>{{ paragraf }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="mt-12 flex justify-center relative z-10">
+            <a href="/" class="text-accent hover:text-white font-bold tracking-wide uppercase transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Anasayfaya Dön
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

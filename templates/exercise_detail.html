@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exercise.name }} - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto relative z-10">
+    <div class="mb-8">
+        <a href="/egzersizler" class="inline-flex items-center text-zinc-400 hover:text-accent font-semibold transition-colors text-sm uppercase tracking-wide">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Egzersizlere Dön
+        </a>
+    </div>
+
+    <div class="athletic-card rounded-xl overflow-hidden relative border border-zinc-800">
+        <div class="h-48 md:h-80 bg-zinc-900 flex items-center justify-center border-b border-zinc-800 relative overflow-hidden">
+            <img src="/static/images/{{ exercise.slug }}.jpg" 
+                 onerror="this.style.display='none'; document.getElementById('spline-bg').style.display='block'; document.getElementById('emoji-icon').style.display='block';"
+                 class="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-lighten z-20" alt="{{ exercise.name }}">
+            
+            <spline-viewer id="spline-bg" url="https://prod.spline.design/qBvV-yN8LhJqZpG6/scene.splinecode" class="absolute inset-0 w-full h-full opacity-30" style="display:none;"></spline-viewer>
+            <div id="emoji-icon" class="text-zinc-500 text-6xl relative z-10" style="display:none;">💪</div>
+        </div>
+        
+        <div class="p-8 md:p-10 relative z-10">
+            <h1 class="text-3xl md:text-5xl font-black text-white mb-8 tracking-tighter uppercase">{{ exercise.name }}</h1>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
+                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Hedef Kas</span>
+                    <span class="font-bold text-white text-lg">{{ exercise.muscle_group }}</span>
+                </div>
+                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
+                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Seviye</span>
+                    <span class="font-bold text-white text-lg">{{ exercise.difficulty }}</span>
+                </div>
+                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
+                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Ekipman</span>
+                    <span class="font-bold text-white text-lg">{{ exercise.equipment }}</span>
+                </div>
+                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
+                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Kalori</span>
+                    <span class="font-bold text-white text-lg">~{{ exercise.calories_estimate or '--' }} kcal</span>
+                </div>
+            </div>
+
+            <div class="space-y-8 text-zinc-300">
+                <section>
+                    <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-tight flex items-center">
+                        <span class="text-accent mr-2">/</span> Hakkında
+                    </h3>
+                    <p class="text-lg leading-relaxed text-zinc-400">{{ exercise.description }}</p>
+                </section>
+
+                <section>
+                    <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-tight flex items-center">
+                        <span class="text-accent mr-2">/</span> Nasıl Yapılır?
+                    </h3>
+                    <div class="bg-zinc-900 p-6 rounded-md border border-zinc-800 text-lg leading-relaxed text-zinc-400">
+                        {{ exercise.instructions }}
+                    </div>
+                </section>
+                
+                <!-- Timer -->
+                <section>
+                    <div class="bg-zinc-900 border-l-4 border-accent rounded-r-md p-6 relative overflow-hidden" x-data="{ time: {{ exercise.duration_seconds or 60 }}, timer: null, running: false, get formatTime() { let m = Math.floor(this.time / 60); let s = this.time % 60; return (m < 10 ? '0'+m : m) + ':' + (s < 10 ? '0'+s : s); } }">
+                        <h3 class="text-sm font-bold text-zinc-500 mb-4 uppercase tracking-widest">
+                            Zamanlayıcı
+                        </h3>
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div class="text-6xl font-mono font-black text-white tracking-widest" x-text="formatTime"></div>
+                            <div class="flex flex-wrap gap-2">
+                                <button @click="if(!running) { running=true; timer=setInterval(() => { if(time>0) time--; else { clearInterval(timer); running=false; } }, 1000) }" x-show="!running" class="bg-accent hover:bg-accentHover text-white font-bold py-2 px-6 rounded-sm uppercase tracking-wide text-sm transition-colors">Başlat</button>
+                                <button @click="running=false; clearInterval(timer)" x-show="running" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-sm uppercase tracking-wide text-sm transition-colors">Durdur</button>
+                                <button @click="running=false; clearInterval(timer); time={{ exercise.duration_seconds or 60 }}" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 px-6 rounded-sm uppercase tracking-wide text-sm transition-colors border border-zinc-700">Sıfırla</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Butonlar -->
+                {% if current_user.is_authenticated %}
+                <div class="flex flex-col sm:flex-row gap-4 border-t border-zinc-800 pt-8 mt-8">
+                    <form action="/favori-ekle/{{ exercise.id }}" method="POST" class="flex-1">
+                        <button type="submit" class="w-full flex items-center justify-center px-6 py-4 rounded-md font-bold uppercase tracking-wide text-sm transition-colors {% if is_favorite %}bg-zinc-800 text-white border border-zinc-700 hover:bg-zinc-700{% else %}bg-transparent text-zinc-400 border border-zinc-800 hover:border-zinc-600 hover:text-white{% endif %}">
+                            <svg class="w-5 h-5 mr-2 {% if is_favorite %}fill-current text-accent{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            {% if is_favorite %}Favorilerden Çıkar{% else %}Favorilere Ekle{% endif %}
+                        </button>
+                    </form>
+
+                    <form action="/ilerleme-kaydet/{{ exercise.id }}" method="POST" class="flex-[2]">
+                        <button type="submit" class="w-full flex items-center justify-center px-6 py-4 bg-white hover:bg-zinc-200 text-black font-black uppercase tracking-wide text-sm rounded-md transition-colors">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Antrenmanı Tamamla
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-6 text-zinc-400 text-center mt-8 text-sm">
+                    Favorilere eklemek veya ilerlemenizi kaydetmek için <a href="/giris" class="font-bold text-white underline hover:text-accent transition-colors">giriş yapmalısınız</a>.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

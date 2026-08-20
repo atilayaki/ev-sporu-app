@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Programlar - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="mb-10 pb-6 relative z-10">
+    <h1 class="text-4xl font-black text-white uppercase tracking-tighter">Antrenman <span class="text-accent">Programları</span></h1>
+    <p class="text-zinc-400 mt-2 text-lg font-medium">Amacına ve seviyene uygun hazır programları seç ve hedefine doğru yola çık.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+    {% for program in programs %}
+    <div class="athletic-card rounded-xl overflow-hidden relative group">
+        <div class="p-8 md:p-10 relative z-10 flex flex-col h-full">
+            <h2 class="text-2xl font-black text-white mb-2 group-hover:text-accent transition-colors uppercase">{{ program.title }}</h2>
+            <p class="text-zinc-400 mb-8 text-sm leading-relaxed flex-grow">{{ program.description }}</p>
+            
+            <div class="grid grid-cols-3 gap-4 mb-8 text-center border-t border-b border-zinc-800 py-6">
+                <div>
+                    <span class="block text-3xl font-black text-white">{{ program.duration_days }}</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1 block">Gün</span>
+                </div>
+                <div class="flex flex-col justify-center border-l border-r border-zinc-800">
+                    <span class="block text-sm font-bold text-white uppercase">{{ program.level }}</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2 block">Seviye</span>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <span class="block text-sm font-bold text-white uppercase">{{ program.goal }}</span>
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2 block">Hedef</span>
+                </div>
+            </div>
+            
+            <a href="/programlar/{{ program.slug }}" class="block text-center w-full bg-zinc-800 hover:bg-accent text-white font-bold py-4 px-6 rounded-md transition duration-300 uppercase tracking-wide text-sm">
+                İncele & Başla
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-span-full text-center py-20 athletic-card rounded-xl border border-dashed border-zinc-700">
+        <div class="text-zinc-600 text-5xl mb-6">🗓️</div>
+        <h3 class="text-xl font-bold text-white uppercase tracking-tight">Çok Yakında</h3>
+        <p class="text-zinc-400 mt-2 text-sm">Senin için en iyi antrenman programlarını hazırlıyoruz.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

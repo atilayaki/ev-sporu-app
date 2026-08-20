@@ -1,0 +1,155 @@
+﻿{% extends 'base.html' %}
+{% block title %}Kişiselleştirme Testi - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto relative z-10" x-data="quiz()">
+    <!-- Progress Bar -->
+    <div class="mb-8">
+        <div class="h-2 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+            <div class="h-full bg-accent transition-all duration-500 ease-out" :style="'width: ' + ((step / 3) * 100) + '%'"></div>
+        </div>
+        <p class="text-zinc-500 text-sm font-bold uppercase tracking-widest mt-3 text-center">Adım <span x-text="step"></span> / 3</p>
+    </div>
+
+    <!-- Step 1: Goal -->
+    <div x-show="step === 1" x-transition.opacity.duration.300ms class="athletic-card p-8 md:p-12 rounded-2xl border border-zinc-800 bg-cardbg text-center">
+        <h2 class="text-3xl font-black text-white uppercase tracking-tighter mb-4">Öncelikli Hedefin Nedir?</h2>
+        <p class="text-zinc-400 mb-8">Sana en uygun programı seçmemiz için ana hedefini belirle.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button @click="select('goal', 'Kilo Verme')" :class="answers.goal === 'Kilo Verme' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide flex flex-col items-center justify-center gap-3">
+                <span class="text-4xl">🔥</span> Kilo Verme
+            </button>
+            <button @click="select('goal', 'Kas Geliştirme')" :class="answers.goal === 'Kas Geliştirme' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide flex flex-col items-center justify-center gap-3">
+                <span class="text-4xl">💪</span> Kas Geliştirme
+            </button>
+            <button @click="select('goal', 'Fit Kalma')" :class="answers.goal === 'Fit Kalma' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide flex flex-col items-center justify-center gap-3">
+                <span class="text-4xl">🏃‍♂️</span> Fit Kalma
+            </button>
+            <button @click="select('goal', 'Esneklik')" :class="answers.goal === 'Esneklik' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide flex flex-col items-center justify-center gap-3">
+                <span class="text-4xl">🧘‍♀️</span> Esneklik
+            </button>
+        </div>
+        
+        <button @click="nextStep()" :disabled="!answers.goal" :class="!answers.goal ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-500'" class="mt-10 w-full bg-accent text-white font-black py-4 rounded-xl uppercase tracking-widest transition-colors">
+            Devam Et
+        </button>
+    </div>
+
+    <!-- Step 2: Fitness Level -->
+    <div x-show="step === 2" x-transition.opacity.duration.300ms style="display: none;" class="athletic-card p-8 md:p-12 rounded-2xl border border-zinc-800 bg-cardbg text-center">
+        <h2 class="text-3xl font-black text-white uppercase tracking-tighter mb-4">Fitness Seviyen Nedir?</h2>
+        <p class="text-zinc-400 mb-8">Antrenman geçmişine göre zorluk seviyesini ayarlayacağız.</p>
+        
+        <div class="space-y-4 text-left">
+            <button @click="select('fitness_level', 'Başlangıç')" :class="answers.fitness_level === 'Başlangıç' ? 'border-accent bg-accent/10' : 'border-zinc-700 bg-zinc-900 hover:border-zinc-500'" class="w-full p-5 rounded-xl border-2 transition-all flex items-center justify-between">
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wide">Başlangıç</h4>
+                    <p class="text-zinc-500 text-sm mt-1">Daha önce düzenli spor yapmadım.</p>
+                </div>
+                <div :class="answers.fitness_level === 'Başlangıç' ? 'border-accent bg-accent' : 'border-zinc-600'" class="w-6 h-6 rounded-full border-2 flex items-center justify-center">
+                    <div x-show="answers.fitness_level === 'Başlangıç'" class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                </div>
+            </button>
+            
+            <button @click="select('fitness_level', 'Orta')" :class="answers.fitness_level === 'Orta' ? 'border-accent bg-accent/10' : 'border-zinc-700 bg-zinc-900 hover:border-zinc-500'" class="w-full p-5 rounded-xl border-2 transition-all flex items-center justify-between">
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wide">Orta</h4>
+                    <p class="text-zinc-500 text-sm mt-1">Haftada 1-2 gün spor yapıyorum.</p>
+                </div>
+                <div :class="answers.fitness_level === 'Orta' ? 'border-accent bg-accent' : 'border-zinc-600'" class="w-6 h-6 rounded-full border-2 flex items-center justify-center">
+                    <div x-show="answers.fitness_level === 'Orta'" class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                </div>
+            </button>
+            
+            <button @click="select('fitness_level', 'İleri')" :class="answers.fitness_level === 'İleri' ? 'border-accent bg-accent/10' : 'border-zinc-700 bg-zinc-900 hover:border-zinc-500'" class="w-full p-5 rounded-xl border-2 transition-all flex items-center justify-between">
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wide">İleri</h4>
+                    <p class="text-zinc-500 text-sm mt-1">Düzenli ve yoğun antrenman yapıyorum.</p>
+                </div>
+                <div :class="answers.fitness_level === 'İleri' ? 'border-accent bg-accent' : 'border-zinc-600'" class="w-6 h-6 rounded-full border-2 flex items-center justify-center">
+                    <div x-show="answers.fitness_level === 'İleri'" class="w-2.5 h-2.5 bg-white rounded-full"></div>
+                </div>
+            </button>
+        </div>
+        
+        <div class="flex gap-4 mt-10">
+            <button @click="step--" class="w-1/3 bg-zinc-800 text-white font-bold py-4 rounded-xl uppercase tracking-widest hover:bg-zinc-700 transition-colors">Geri</button>
+            <button @click="nextStep()" :disabled="!answers.fitness_level" :class="!answers.fitness_level ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-500'" class="w-2/3 bg-accent text-white font-black py-4 rounded-xl uppercase tracking-widest transition-colors">
+                Devam Et
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 3: Target Area -->
+    <div x-show="step === 3 && !isSubmitting && !isFinished" x-transition.opacity.duration.300ms style="display: none;" class="athletic-card p-8 md:p-12 rounded-2xl border border-zinc-800 bg-cardbg text-center">
+        <h2 class="text-3xl font-black text-white uppercase tracking-tighter mb-4">Odak Bölgesi Nedir?</h2>
+        <p class="text-zinc-400 mb-8">Vücudunda özellikle çalıştırmak istediğin bölüm neresi?</p>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <button @click="select('target_area', 'Göbek')" :class="answers.target_area === 'Göbek' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide">Göbek</button>
+            <button @click="select('target_area', 'Bacak/Kalça')" :class="answers.target_area === 'Bacak/Kalça' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide">Bacak / Kalça</button>
+            <button @click="select('target_area', 'Kollar')" :class="answers.target_area === 'Kollar' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide">Kollar / Üst Vücut</button>
+            <button @click="select('target_area', 'Tüm Vücut')" :class="answers.target_area === 'Tüm Vücut' ? 'border-accent bg-accent/10 text-accent' : 'border-zinc-700 bg-zinc-900 text-white hover:border-zinc-500'" class="p-6 rounded-xl border-2 transition-all font-bold uppercase tracking-wide">Tüm Vücut</button>
+        </div>
+        
+        <div class="flex gap-4 mt-10">
+            <button @click="step--" class="w-1/3 bg-zinc-800 text-white font-bold py-4 rounded-xl uppercase tracking-widest hover:bg-zinc-700 transition-colors">Geri</button>
+            <button @click="submitQuiz()" :disabled="!answers.target_area" :class="!answers.target_area ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-500'" class="w-2/3 bg-accent text-white font-black py-4 rounded-xl uppercase tracking-widest transition-colors flex items-center justify-center">
+                Testi Bitir
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading AI State -->
+    <div x-show="isSubmitting" style="display: none;" class="athletic-card p-12 rounded-2xl border border-zinc-800 bg-cardbg text-center flex flex-col items-center justify-center min-h-[400px]">
+        <svg class="animate-spin w-12 h-12 text-accent mb-6" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <h2 class="text-2xl font-black text-white uppercase tracking-tighter mb-2">Yapay Zeka Planını Hazırlıyor...</h2>
+        <p class="text-zinc-400">Verilerin analiz ediliyor ve en uygun program seçiliyor.</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('quiz', () => ({
+        step: 1,
+        isSubmitting: false,
+        isFinished: false,
+        answers: {
+            goal: null,
+            fitness_level: null,
+            target_area: null
+        },
+        select(field, value) {
+            this.answers[field] = value;
+        },
+        nextStep() {
+            this.step++;
+        },
+        submitQuiz() {
+            this.isSubmitting = true;
+            
+            // Simüle edilmiş AI bekleme süresi
+            setTimeout(() => {
+                fetch('/quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.answers)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        window.location.href = '/profil'; // Profilde özel plan göstereceğiz
+                    }
+                });
+            }, 2000);
+        }
+    }))
+})
+</script>
+{% endblock %}

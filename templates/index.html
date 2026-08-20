@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Background Image (Full Width & Home Theme) -->
+<div class="absolute z-0 h-[80vh] w-[100vw] left-[50%] -translate-x-1/2 -top-10 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 bg-gradient-to-b from-darkbg/40 via-darkbg/30 to-darkbg z-10"></div>
+    <img src="https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=2000&auto=format&fit=crop" 
+         alt="Evde Spor Arkaplan" 
+         class="w-full h-full object-cover opacity-70 object-center">
+</div>
+
+<div class="relative z-10 text-center py-24 lg:py-32">
+    <div class="inline-block px-4 py-1.5 rounded-full bg-zinc-900 text-zinc-400 text-xs font-bold tracking-widest uppercase mb-6 border border-zinc-800">
+        Gerçek Sonuçlar, Gerçek Çaba
+    </div>
+    <h1 class="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter uppercase">
+        Sınırlarını <span class="text-accent">Aş</span>
+    </h1>
+    <p class="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto font-medium">
+        Spor salonunu evine taşı. Ekipmansız, kendi vücut ağırlığınla yapabileceğin antrenman programları ve egzersiz kütüphanesi.
+    </p>
+    
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+        {% if current_user.is_authenticated and not current_user.quiz_completed %}
+            <a href="/quiz" class="bg-accent hover:bg-orange-500 text-white font-black py-4 px-10 rounded-xl text-lg uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] animate-pulse">Sana Özel Planını Oluştur</a>
+        {% else %}
+            <a href="/egzersizler" class="bg-accent hover:bg-orange-500 text-white font-bold py-4 px-10 rounded-xl text-lg uppercase tracking-wide transition-colors">Harekete Geç</a>
+            <a href="/programlar" class="bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-700 font-bold py-4 px-10 rounded-xl text-lg uppercase tracking-wide transition-colors">Program Seç</a>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="relative z-10 grid md:grid-cols-3 gap-6 mt-12 pb-20">
+    <a href="/bilgi/evde-spor" class="athletic-card p-10 rounded-xl text-center group cursor-pointer block">
+        <div class="h-24 w-24 mx-auto mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(234,88,12,0.5)] overflow-hidden rounded-2xl"><img src="/static/images/home_gym_icon.jpg" alt="Ev" class="w-full h-full object-cover"></div>
+        <h3 class="text-xl font-bold mb-3 text-white uppercase tracking-tight">Evde Spor</h3>
+        <p class="text-zinc-400 text-sm leading-relaxed">Spor salonuna gitmene gerek yok. İhtiyacın olan tek şey biraz alan ve kararlılık.</p>
+    </a>
+    <a href="/bilgi/vucut-agirligi" class="athletic-card p-10 rounded-xl text-center group cursor-pointer block">
+        <div class="h-24 w-24 mx-auto mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(234,88,12,0.5)] overflow-hidden rounded-2xl"><img src="/static/images/flexed_bicep_icon.jpg" alt="Güç" class="w-full h-full object-cover"></div>
+        <h3 class="text-xl font-bold mb-3 text-white uppercase tracking-tight">Vücut Ağırlığı</h3>
+        <p class="text-zinc-400 text-sm leading-relaxed">Pahalı ekipmanlara para harcamadan, kendi vücudunu kullanarak forma gir.</p>
+    </a>
+    <a href="/bilgi/surekli-gelisim" class="athletic-card p-10 rounded-xl text-center group cursor-pointer block">
+        <div class="h-24 w-24 mx-auto mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(234,88,12,0.5)] overflow-hidden rounded-2xl"><img src="/static/images/progress_chart_icon.jpg" alt="Gelişim" class="w-full h-full object-cover"></div>
+        <h3 class="text-xl font-bold mb-3 text-white uppercase tracking-tight">Sürekli Gelişim</h3>
+        <p class="text-zinc-400 text-sm leading-relaxed">Akıllı ilerleme takibi ve detaylı istatistiklerle gelişimini her gün takip et.</p>
+    </a>
+</div>
+{% endblock %}

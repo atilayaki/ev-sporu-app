@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% block title %}Profilim - Evde Spor{% endblock %}
+
+{% block content %}
+
+<div class="mb-12 relative z-10">
+    <div class="athletic-card p-8 rounded-2xl border border-zinc-800 bg-cardbg overflow-hidden relative">
+        <!-- Glow -->
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-accent/10 blur-3xl rounded-full pointer-events-none"></div>
+        
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+            <!-- Greeting & Goal -->
+            <div>
+                <h1 class="text-3xl font-black text-white uppercase tracking-tighter mb-2">Merhaba, {{ current_user.name }}!</h1>
+                {% if current_user.quiz_completed %}
+                    <div class="inline-flex items-center bg-accent/20 border border-accent text-accent px-4 py-1.5 rounded-lg text-sm font-bold uppercase tracking-widest">
+                        🎯 Hedef: {{ current_user.goal }} - {{ current_user.target_area }}
+                    </div>
+                {% else %}
+                    <a href="/quiz" class="inline-flex items-center bg-accent text-white px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-[0_0_15px_rgba(234,88,12,0.4)] animate-pulse">
+                        Özel Planını Oluştur ➔
+                    </a>
+                {% endif %}
+            </div>
+            
+            <!-- Gamification: Rings & Streak -->
+            <div class="flex items-center gap-8">
+                <!-- Streak -->
+                <div class="text-center">
+                    <div class="text-5xl mb-1 filter drop-shadow-[0_0_10px_rgba(234,88,12,0.5)]">🔥</div>
+                    <div class="text-2xl font-black text-white leading-none">{{ current_user.current_streak }}</div>
+                    <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Gün Seri</div>
+                </div>
+                
+                <!-- Simplified Activity Rings -->
+                {% set water = today_log.water_ml if today_log and today_log.water_ml else 0 %}
+                {% set cals = today_log.calories_consumed if today_log and today_log.calories_consumed else 0 %}
+                {% set dur = today_duration if today_duration else 0 %}
+                
+                {% set water_pct = [(water / 2000.0), 1.0]|min %}
+                {% set cal_pct = [(cals / 2500.0), 1.0]|min %}
+                {% set dur_pct = [(dur / 3600.0), 1.0]|min %}
+                
+                {% set water_offset = 125 - (125 * water_pct) %}
+                {% set cal_offset = 188 - (188 * cal_pct) %}
+                {% set dur_offset = 251 - (251 * dur_pct) %}
+                
+                <div class="relative w-24 h-24">
+                    <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+                        <!-- Egzersiz (Dış Halka - Turuncu) -->
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#27272a" stroke-width="8"></circle>
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#ea580c" stroke-width="8" stroke-dasharray="251" stroke-dashoffset="{{ dur_offset }}" stroke-linecap="round"></circle>
+                        
+                        <!-- Kalori (Orta Halka - Mavi) -->
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#27272a" stroke-width="8"></circle>
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="188" stroke-dashoffset="{{ cal_offset }}" stroke-linecap="round"></circle>
+                        
+                        <!-- Su (İç Halka - Yeşil) -->
+                        <circle cx="50" cy="50" r="20" fill="none" stroke="#27272a" stroke-width="8"></circle>
+                        <circle cx="50" cy="50" r="20" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="125" stroke-dashoffset="{{ water_offset }}" stroke-linecap="round"></circle>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-10 pb-6 relative z-10 flex items-end justify-between">
+    <div>
+        <h1 class="text-4xl font-black text-white uppercase tracking-tighter">Profil<span class="text-accent">im</span></h1>
+        <p class="text-zinc-400 mt-2 text-lg font-medium">İlerlemeni takip et, favori egzersizlerine hızlıca ulaş.</p>
+    </div>
+</div>
+
+<!-- Wellness Widgets -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 relative z-10">
+    
+    <!-- Checklist -->
+    <div class="athletic-card rounded-xl p-6" x-data="{
+            tasks: JSON.parse(localStorage.getItem('evdeSporTasks')) || [
+                { id: 1, text: '2 Litre Su İç', done: false },
+                { id: 2, text: '15 Dk Egzersiz Yap', done: false },
+                { id: 3, text: '3 Dk Nefes Egzersizi', done: false }
+            ],
+            toggle(task) {
+                task.done = !task.done;
+                localStorage.setItem('evdeSporTasks', JSON.stringify(this.tasks));
+            }
+        }">
+        <h3 class="text-lg font-bold text-white mb-4 uppercase tracking-tight text-accent">Günlük Hedefler</h3>
+        <ul class="space-y-3">
+            <template x-for="task in tasks" :key="task.id">
+                <li class="flex items-center space-x-3 cursor-pointer" @click="toggle(task)">
+                    <div class="w-5 h-5 border-2 border-zinc-600 rounded flex items-center justify-center transition-colors"
+                         :class="task.done ? 'bg-accent border-accent' : ''">
+                        <svg x-show="task.done" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <span class="text-sm font-medium transition-colors"
+                          :class="task.done ? 'text-zinc-500 line-through' : 'text-zinc-300'"
+                          x-text="task.text"></span>
+                </li>
+            </template>
+        </ul>
+    </div>
+
+    <!-- Water Tracker -->
+    <div class="athletic-card rounded-xl p-6 text-center" x-data="{
+            water: {{ today_log.water_ml if today_log else 0 }},
+            addWater() {
+                fetch('/api/water', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({amount: 250})
+                }).then(res => res.json()).then(data => {
+                    this.water = data.water_ml;
+                    window.location.reload();
+                });
+            },
+            resetWater() {
+                fetch('/api/water', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({action: 'reset'})
+                }).then(res => res.json()).then(data => {
+                    this.water = data.water_ml;
+                    window.location.reload();
+                });
+            }
+        }">
+        <h3 class="text-lg font-bold text-white mb-2 uppercase tracking-tight text-blue-400">Su Takibi</h3>
+        <div class="text-3xl font-black text-white mb-1"><span x-text="water"></span> <span class="text-lg text-zinc-500">ml</span></div>
+        <p class="text-xs text-zinc-500 mb-4 font-bold tracking-widest uppercase">Hedef: 2000 ml</p>
+        
+        <div class="flex justify-center space-x-2">
+            <button @click="addWater()" class="bg-blue-500/20 hover:bg-blue-500/40 border border-blue-500 text-blue-400 px-4 py-2 rounded-md font-bold text-sm transition-colors flex items-center">
+                +250ml
+            </button>
+            <button @click="resetWater()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 px-3 py-2 rounded-md font-bold text-sm transition-colors">Sıfırla</button>
+        </div>
+    </div>
+
+    
+    <!-- Nutrition / Calories -->
+    <div class="athletic-card rounded-xl p-6 text-center" x-data="{
+            calories: {{ today_log.calories_consumed if today_log and today_log.calories_consumed else 0 }},
+            addCalories(amount) {
+                fetch('/api/calories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({amount: amount})
+                }).then(res => res.json()).then(data => {
+                    this.calories = data.calories;
+                    window.location.reload(); // Reload to update SVG rings
+                });
+            }
+        }">
+        <h3 class="text-lg font-bold text-white mb-2 uppercase tracking-tight text-orange-400">Kalori</h3>
+        <div class="text-3xl font-black text-white mb-1"><span x-text="calories"></span> <span class="text-lg text-zinc-500">kcal</span></div>
+        <p class="text-xs text-zinc-500 mb-4 font-bold tracking-widest uppercase">Bugün Alınan</p>
+        
+        <div class="flex justify-center space-x-2">
+            <button @click="addCalories(100)" class="bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500 text-orange-400 px-3 py-2 rounded-md font-bold text-xs transition-colors">
+                +100
+            </button>
+            <button @click="addCalories(500)" class="bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500 text-orange-400 px-3 py-2 rounded-md font-bold text-xs transition-colors">
+                +500
+            </button>
+        </div>
+    </div>
+
+    <!-- Fasting Timer -->
+    <div class="athletic-card rounded-xl p-6 text-center" x-data="{
+            fastingStart: '{{ current_user.fasting_start.isoformat() if current_user.fasting_start else '' }}',
+            displayTime: '00:00:00',
+            interval: null,
+            init() {
+                if(this.fastingStart) this.startTimer();
+            },
+            toggleFasting() {
+                const action = this.fastingStart ? 'stop' : 'start';
+                fetch('/api/fasting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({action: action})
+                }).then(res => res.json()).then(data => {
+                    this.fastingStart = data.fasting_start;
+                    if(this.fastingStart) {
+                        this.startTimer();
+                    } else {
+                        clearInterval(this.interval);
+                        this.displayTime = '00:00:00';
+                    }
+                });
+            },
+            startTimer() {
+                clearInterval(this.interval);
+                this.updateDisplay();
+                this.interval = setInterval(() => this.updateDisplay(), 1000);
+            },
+            updateDisplay() {
+                if(!this.fastingStart) return;
+                const start = new Date(this.fastingStart + 'Z'); // Z forces UTC which matches python utcnow
+                const diff = Math.floor((new Date() - start) / 1000);
+                if(diff < 0) return;
+                const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+                const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                const s = String(diff % 60).padStart(2, '0');
+                this.displayTime = `${h}:${m}:${s}`;
+            }
+        }">
+        <h3 class="text-lg font-bold text-white mb-2 uppercase tracking-tight text-green-400">Aralıklı Oruç</h3>
+        <div class="text-3xl font-mono font-black text-white mb-1 tracking-tight" x-text="displayTime">00:00:00</div>
+        <p class="text-xs text-zinc-500 mb-4 font-bold tracking-widest uppercase">Hedef: 16 Saat</p>
+        
+        <button @click="toggleFasting()" class="px-6 py-2 rounded-md font-bold text-sm transition-colors border"
+                :class="fastingStart ? 'bg-red-500/20 hover:bg-red-500/40 border-red-500 text-red-400' : 'bg-green-500/20 hover:bg-green-500/40 border-green-500 text-green-400'">
+            <span x-text="fastingStart ? 'Orucu Bitir' : 'Oruca Başla'"></span>
+        </button>
+    </div>
+
+</div>
+
+<!-- Aktif Programlar -->
+<div class="athletic-card rounded-xl p-8 mb-8 relative z-10">
+    <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
+        <svg class="w-6 h-6 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        Aktif Programlarım
+    </h2>
+    
+    {% if active_programs %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for up in active_programs %}
+            <a href="/programlar/{{ up.program.slug }}" class="block group">
+                <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl flex items-center justify-between transition-all duration-300 group-hover:border-accent/50 group-hover:-translate-y-1">
+                    <div>
+                        <h4 class="font-black text-white text-lg uppercase tracking-tight group-hover:text-accent transition-colors">{{ up.program.title }}</h4>
+                        <div class="flex items-center mt-2 space-x-4">
+                            <p class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Gün {{ up.current_day }} / {{ up.program.duration_days }}</p>
+                            <div class="w-24 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-accent" style="width: {{ (up.current_day / up.program.duration_days * 100)|round }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-zinc-400 group-hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-10 bg-zinc-900 rounded-md border border-zinc-800">
+            <p class="text-zinc-500 text-sm font-medium">Henüz katıldığınız bir program yok.</p>
+            <a href="/programlar" class="inline-block mt-4 text-accent font-bold hover:underline uppercase text-xs tracking-widest">Programlara Göz At</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+    <!-- Favori Egzersizler -->
+    <div class="athletic-card rounded-xl p-8">
+        <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
+            <svg class="w-6 h-6 mr-3 text-accent" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+            Favorilerim
+        </h2>
+        
+        {% if favorites %}
+            <ul class="space-y-3">
+            {% for fav in favorites %}
+                <li class="bg-zinc-900 border border-zinc-800 p-4 rounded-md flex justify-between items-center transition-colors hover:border-zinc-700">
+                    <div>
+                        <a href="/egzersizler/{{ fav.slug }}" class="font-bold text-white hover:text-accent transition-colors uppercase">{{ fav.name }}</a>
+                        <p class="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-wide">{{ fav.muscle_group }}</p>
+                    </div>
+                    <form action="/favori-ekle/{{ fav.id }}" method="POST">
+                        <button type="submit" class="text-zinc-500 hover:text-white hover:bg-zinc-800 text-xs font-bold border border-zinc-700 px-3 py-2 rounded-sm uppercase tracking-wide transition-colors">Kaldır</button>
+                    </form>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-center py-10 bg-zinc-900 rounded-md border border-zinc-800">
+                <p class="text-zinc-500 text-sm font-medium">Henüz favori egzersiziniz yok.</p>
+                <a href="/egzersizler" class="inline-block mt-4 text-accent font-bold hover:underline uppercase text-xs tracking-widest">Egzersizleri Keşfet</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- İlerleme Takibi -->
+    <div class="athletic-card rounded-xl p-8">
+        <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
+            <svg class="w-6 h-6 mr-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Son Antrenmanlar
+        </h2>
+        
+        {% if progress %}
+            <ul class="space-y-3">
+            {% for p in progress %}
+                <li class="bg-zinc-900 border border-zinc-800 p-4 rounded-md transition-colors hover:border-zinc-700">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-white uppercase">{{ p.exercise.name if p.exercise else 'Antrenman' }}</span>
+                        <span class="text-xs font-mono font-bold text-zinc-500">{{ p.completed_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-wide">
+                        <span class="bg-zinc-800 text-white px-2 py-1 rounded-sm">
+                            🔥 {{ p.calories_burned }} kcal
+                        </span>
+                        <span class="bg-zinc-800 text-zinc-400 px-2 py-1 rounded-sm">
+                            ⏱️ {{ p.duration_spent }} sn
+                        </span>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-center py-10 bg-zinc-900 rounded-md border border-zinc-800">
+                <p class="text-zinc-500 text-sm font-medium">Henüz kaydedilmiş bir ilerlemeniz yok.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Başarı Rozetleri -->
+    <div class="athletic-card rounded-xl p-8 lg:col-span-2">
+        <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
+            <svg class="w-6 h-6 mr-3 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            Kazanılan Rozetler
+        </h2>
+        
+        {% if user_badges %}
+            <div class="flex flex-wrap gap-4">
+            {% for ub in user_badges %}
+                <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex items-center gap-4 transition-all hover:border-accent/50 w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="{{ ub.badge.icon }}"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold text-sm uppercase tracking-tight">{{ ub.badge.name }}</h4>
+                        <p class="text-zinc-500 text-xs font-medium">{{ ub.badge.description }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-10 bg-zinc-900 rounded-md border border-zinc-800">
+                <p class="text-zinc-500 text-sm font-medium">Henüz bir rozet kazanmadınız. Antrenmanlara başlayarak rozetleri toplayın!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
