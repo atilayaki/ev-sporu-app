@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from extensions import db, login_manager
 from models import Exercise, Program, ProgramExercise, User, UserProgress, Challenge, UserChallenge, DailyLog, ChallengeDay, ChallengeExercise, UserProgram, Badge, UserBadge
 from forms import RegistrationForm, LoginForm
