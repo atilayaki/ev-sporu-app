@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+﻿from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Program, Exercise, UserProgress
 import jwt
@@ -19,7 +19,7 @@ def get_programs():
             'description': p.description,
             'level': p.level,
             'duration_days': p.duration_days,
-            'goal': p.goal
+            'goal': p.goal, 'image_url': 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=600&auto=format&fit=crop'
         })
     return jsonify({'success': True, 'data': data})
 
@@ -65,3 +65,4 @@ def get_exercises():
             'image_url': f'/static/images/{e.slug}.jpg'
         })
     return jsonify({'success': True, 'data': data})
+
