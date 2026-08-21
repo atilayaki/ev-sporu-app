@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Antrenman: {{ program.title }} - Evde Spor{% endblock %}
 
@@ -8,7 +8,7 @@
     <div class="mb-6" x-show="status === 'ready'">
         <a href="/programlar/{{ program.slug }}" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-sm uppercase tracking-wider">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-            Programa Dön
+            Programa DÃ¶n
         </a>
     </div>
 
@@ -24,13 +24,13 @@
             <!-- Header Info -->
             <div class="flex justify-between items-start mb-8">
                 <div>
-                    <h2 class="text-accent font-black text-sm uppercase tracking-widest">{{ program.title }} - Gün {{ user_program.current_day }}</h2>
+                    <h2 class="text-accent font-black text-sm uppercase tracking-widest">{{ program.title }} - GÃ¼n {{ user_program.current_day }}</h2>
                     <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mt-2" x-text="status === 'completed' ? 'Antrenman Bitti!' : (status === 'resting' ? 'Dinlenme' : currentExercise.name)"></h1>
                 </div>
                 
                 <div class="text-right flex space-x-4">
                     <div class="text-zinc-400">
-                        <span class="block text-xs font-bold uppercase tracking-widest">Süre</span>
+                        <span class="block text-xs font-bold uppercase tracking-widest">SÃ¼re</span>
                         <span class="text-xl font-mono font-black text-white" x-text="formatTime(totalSeconds)">00:00</span>
                     </div>
                     <div class="text-zinc-400">
@@ -45,11 +45,11 @@
                 
                 <!-- Ready State -->
                 <div x-show="status === 'ready'" class="space-y-6">
-                    <p class="text-zinc-400 text-lg font-medium">Bugün <span class="text-white font-bold">{{ exercises|length }}</span> hareket seni bekliyor.</p>
+                    <p class="text-zinc-400 text-lg font-medium">BugÃ¼n <span class="text-white font-bold">{{ exercises|length }}</span> hareket seni bekliyor.</p>
                     <button @click="startExercise()" class="bg-accent hover:bg-orange-500 text-white w-32 h-32 rounded-full font-black uppercase tracking-widest transition-transform transform hover:scale-105 shadow-[0_0_40px_-10px_rgba(234,88,12,0.5)] flex items-center justify-center text-2xl mx-auto">
-                        Başla
+                        BaÅŸla
                     </button>
-                    <p class="text-xs text-zinc-500 uppercase tracking-widest font-bold mt-4">Sesli komutları açmayı unutma</p>
+                    <p class="text-xs text-zinc-500 uppercase tracking-widest font-bold mt-4">Sesli komutlarÄ± aÃ§mayÄ± unutma</p>
                 </div>
 
                 <!-- Active State (Sets/Reps) -->
@@ -65,15 +65,15 @@
                 <!-- Resting State -->
                 <div x-show="status === 'resting'" class="space-y-8">
                     <div class="text-7xl md:text-9xl font-mono font-black text-accent tracking-tighter" x-text="timeLeft"></div>
-                    <p class="text-zinc-400 font-bold uppercase tracking-widest">Saniye Kaldı</p>
+                    <p class="text-zinc-400 font-bold uppercase tracking-widest">Saniye KaldÄ±</p>
                     
                     <button @click="skipRest()" class="text-zinc-500 hover:text-white uppercase font-bold text-xs tracking-widest border-b border-zinc-500 hover:border-white transition-colors pb-1">
                         Dinlenmeyi Atla
                     </button>
                     
                     <div class="mt-8 p-4 bg-zinc-900/80 rounded-xl border border-zinc-800">
-                        <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mb-1">Sıradaki Hareket</p>
-                        <p class="text-white font-bold uppercase" x-text="nextExercise ? nextExercise.name : 'Bitiş'"></p>
+                        <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mb-1">SÄ±radaki Hareket</p>
+                        <p class="text-white font-bold uppercase" x-text="nextExercise ? nextExercise.name : 'BitiÅŸ'"></p>
                     </div>
                 </div>
                 
@@ -82,9 +82,9 @@
                     <div class="w-24 h-24 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto border border-green-500">
                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
-                    <p class="text-zinc-300 text-lg">Harika iş çıkardın! Günlük hedefini tamamladın.</p>
+                    <p class="text-zinc-300 text-lg">Harika iÅŸ Ã§Ä±kardÄ±n! GÃ¼nlÃ¼k hedefini tamamladÄ±n.</p>
                     <button @click="finishWorkout()" class="bg-accent hover:bg-orange-500 text-white px-10 py-4 rounded-full font-black text-lg uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20 mx-auto">
-                        Antrenmanı Kaydet
+                        AntrenmanÄ± Kaydet
                     </button>
                 </div>
 
@@ -123,7 +123,6 @@
             totalCalories: 0,
             timerInterval: null,
             restInterval: null,
-            speechSynth: window.speechSynthesis,
             
             get currentExercise() {
                 if (this.currentIndex >= this.exercises.length) {
@@ -141,13 +140,12 @@
                 // Initialize component
             },
             
-            speak(text) {
-                if (this.speechSynth) {
-                    this.speechSynth.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'tr-TR';
-                    utterance.rate = 1.0;
-                    this.speechSynth.speak(utterance);
+            playAudio(filename) {
+                try {
+                    const audio = new Audio(`https://raw.githubusercontent.com/atilayaki/ev-sporu-app/main/static/audio/${filename}`);
+                    audio.play().catch(e => console.log('Audio play blocked or failed', e));
+                } catch(e) {
+                    console.log('Error playing audio', e);
                 }
             },
             
@@ -169,25 +167,25 @@
                 }
                 
                 this.status = 'active';
-                this.speak(`Sıradaki hareket: ${this.currentExercise.name}. Başla!`);
+                this.playAudio(`${this.currentExercise.slug}.mp3`);
             },
             
             finishExercise() {
                 if (this.currentIndex >= this.exercises.length - 1) {
                     this.status = 'completed';
-                    this.speak('Tebrikler. Antrenmanı tamamladınız!');
+                    this.playAudio('finished.mp3');
                     clearInterval(this.timerInterval);
                     return;
                 }
                 
                 this.status = 'resting';
                 this.timeLeft = this.currentExercise.rest;
-                this.speak(`Dinlenme zamanı. ${this.timeLeft} saniye dinlenin.`);
+                this.playAudio('rest.mp3');
                 
                 this.restInterval = setInterval(() => {
                     this.timeLeft--;
-                    if (this.timeLeft === 10) {
-                        this.speak('Son 10 saniye. Hazırlanın.');
+                    if (this.timeLeft === 3) {
+                        this.playAudio('3_2_1.mp3');
                     }
                     if (this.timeLeft <= 0) {
                         this.skipRest();
@@ -221,3 +219,4 @@
     }
 </script>
 {% endblock %}
+
