@@ -32,10 +32,11 @@ def get_program_detail(slug):
     exercises = []
     for pe in p.exercises:
         exercises.append({
-            'id': pe.id,
+            'id': pe.exercise.id,
             'name': pe.exercise.name,
             'slug': pe.exercise.slug,
             'description': pe.exercise.description,
+            'instructions': pe.exercise.instructions,
             'muscle_group': pe.exercise.muscle_group,
             'difficulty': pe.exercise.difficulty,
             'image_url': f'/static/images/{pe.exercise.slug}.jpg'
@@ -62,9 +63,12 @@ def get_exercises():
             'slug': e.slug,
             'muscle_group': e.muscle_group,
             'difficulty': e.difficulty,
+            'description': e.description,
+            'instructions': e.instructions,
             'image_url': f'/static/images/{e.slug}.jpg'
         })
     return jsonify({'success': True, 'data': data})
+
 
 
 
