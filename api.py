@@ -29,9 +29,13 @@ def get_program_detail(slug):
     if not p:
         return jsonify({'success': False, 'message': 'Not found'}), 404
         
-    exercises = []
+    days_dict = {}
     for pe in p.exercises:
-        exercises.append({
+        day = pe.day_number
+        if day not in days_dict:
+            days_dict[day] = []
+            
+        days_dict[day].append({
             'id': pe.exercise.id,
             'name': pe.exercise.name,
             'slug': pe.exercise.slug,
@@ -39,7 +43,17 @@ def get_program_detail(slug):
             'instructions': pe.exercise.instructions,
             'muscle_group': pe.exercise.muscle_group,
             'difficulty': pe.exercise.difficulty,
-            'image_url': f'/static/images/{pe.exercise.slug}.jpg'
+            'image_url': f'/static/images/{pe.exercise.slug}.jpg',
+            'sets': pe.sets,
+            'reps': pe.reps,
+            'rest_seconds': pe.rest_seconds
+        })
+        
+    days_list = []
+    for day in sorted(days_dict.keys()):
+        days_list.append({
+            'day_number': day,
+            'exercises': days_dict[day]
         })
         
     return jsonify({
@@ -47,8 +61,13 @@ def get_program_detail(slug):
         'data': {
             'id': p.id,
             'title': p.title,
+            'slug': p.slug,
             'description': p.description,
-            'exercises': exercises
+            'duration_days': p.duration_days,
+            'level': p.level,
+            'goal': p.goal,
+            'image_url': f'/static/images/{p.slug}.jpg',
+            'days': days_list
         }
     })
 
@@ -68,6 +87,7 @@ def get_exercises():
             'image_url': f'/static/images/{e.slug}.jpg'
         })
     return jsonify({'success': True, 'data': data})
+
 
 
 
