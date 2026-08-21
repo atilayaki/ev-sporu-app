@@ -29,25 +29,24 @@ def get_program_detail(slug):
     if not p:
         return jsonify({'success': False, 'message': 'Not found'}), 404
         
-    days_dict = {}
+    days_dict = {day: [] for day in range(1, p.duration_days + 1)}
+    
     for pe in p.exercises:
         day = pe.day_number
-        if day not in days_dict:
-            days_dict[day] = []
-            
-        days_dict[day].append({
-            'id': pe.exercise.id,
-            'name': pe.exercise.name,
-            'slug': pe.exercise.slug,
-            'description': pe.exercise.description,
-            'instructions': pe.exercise.instructions,
-            'muscle_group': pe.exercise.muscle_group,
-            'difficulty': pe.exercise.difficulty,
-            'image_url': f'/static/images/{pe.exercise.slug}.jpg',
-            'sets': pe.sets,
-            'reps': pe.reps,
-            'rest_seconds': pe.rest_seconds
-        })
+        if day in days_dict:
+            days_dict[day].append({
+                'id': pe.exercise.id,
+                'name': pe.exercise.name,
+                'slug': pe.exercise.slug,
+                'description': pe.exercise.description,
+                'instructions': pe.exercise.instructions,
+                'muscle_group': pe.exercise.muscle_group,
+                'difficulty': pe.exercise.difficulty,
+                'image_url': f'/static/images/{pe.exercise.slug}.jpg',
+                'sets': pe.sets,
+                'reps': pe.reps,
+                'rest_seconds': pe.rest_seconds
+            })
         
     days_list = []
     for day in sorted(days_dict.keys()):
@@ -87,6 +86,7 @@ def get_exercises():
             'image_url': f'/static/images/{e.slug}.jpg'
         })
     return jsonify({'success': True, 'data': data})
+
 
 
 
