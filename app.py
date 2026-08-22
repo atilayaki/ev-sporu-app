@@ -439,6 +439,32 @@ def create_app():
     def ai_coach():
         return render_template('ai_coach.html')
 
+    @app.route('/api/programs')
+    def api_programs():
+        programs = Program.query.all()
+        return jsonify([{
+            'id': p.id,
+            'name': p.name,
+            'slug': p.slug,
+            'description': p.description,
+            'level': p.level,
+            'duration_weeks': p.duration_weeks,
+            'image_url': f"/static/images/{p.slug}.jpg"
+        } for p in programs])
+        
+    @app.route('/api/exercises')
+    def api_exercises():
+        exercises = Exercise.query.all()
+        return jsonify([{
+            'id': e.id,
+            'name': e.name,
+            'slug': e.slug,
+            'description': e.description,
+            'muscle_group': e.muscle_group,
+            'difficulty': e.difficulty,
+            'image_url': f"/static/images/{e.slug}.jpg"
+        } for e in exercises])
+
     return app
 
 
