@@ -228,3 +228,36 @@ def get_leaderboard():
         
     leaderboard_data = sorted(leaderboard_data, key=lambda x: x['score'], reverse=True)[:10]
     return jsonify({'success': True, 'data': leaderboard_data})
+
+﻿@api_bp.route('/sync-progress', methods=['POST'])
+def sync_progress():
+    data = request.get_json()
+    from models import db, User, UserProgress
+    # Dummy user sync (without real JWT auth for now, use simple name matching)
+    username = data.get('username')
+    duration = data.get('duration_spent', 0)
+    calories = data.get('calories_burned', 0)
+    readiness = data.get('readiness_score')
+    exertion = data.get('perceived_exertion')
+    
+    if not username:
+        return jsonify({'success': False, 'message': 'Username required'})
+        
+    user = User.query.filter_by(name=username).first()
+    if not user:
+        # Create user if doesn't exist
+        user = User(name=username, email=f"{username}@mobile.com", password="dummy")
+        db.session.add(user)
+        db.session.commit()
+        
+    prog = UserProgress(
+        user_id=user.id,
+        duration_spent=duration,
+        calories_burned=calories,
+        readiness_score=readiness,
+        perceived_exertion=exertion
+    )
+    db.session.add(prog)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Progress synced!'})
