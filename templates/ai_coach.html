@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Yapay Zeka Koçu (Beta){% endblock %}
+{% block title %}Yapay Zeka KoÃ§u (Beta){% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto py-8 px-4">
     <div class="text-center mb-8">
-        <h1 class="text-4xl font-black text-white uppercase tracking-wider mb-2">YAPAY ZEKA KOÇU <span class="text-accent text-sm align-top">BETA</span></h1>
-        <p class="text-zinc-400">Kameraný aç ve formunu analiz edelim. Þu anda <strong class="text-accent">Squat</strong> hareketini sayabiliyor.</p>
+        <h1 class="text-4xl font-black text-white uppercase tracking-wider mb-2">YAPAY ZEKA KOÃ‡U <span class="text-accent text-sm align-top">BETA</span></h1>
+        <p class="text-zinc-400">KameranÄ± aÃ§ ve formunu analiz edelim. Åžu anda <strong class="text-accent">Squat</strong> hareketini sayabiliyor.</p>
     </div>
 
     <div class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 relative overflow-hidden flex flex-col items-center">
@@ -18,7 +18,7 @@
             </div>
             
             <div class="bg-zinc-800 px-6 py-2 rounded-lg border border-accent">
-                <span class="text-accent text-sm block font-bold">Tekrar Sayýsý</span>
+                <span class="text-accent text-sm block font-bold">Tekrar SayÄ±sÄ±</span>
                 <span id="rep-counter" class="text-5xl font-black text-white text-center block">0</span>
             </div>
         </div>
@@ -27,9 +27,9 @@
         <div class="relative w-full max-w-2xl bg-black rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
             <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10">
                 <div class="w-12 h-12 border-4 border-zinc-700 border-t-accent rounded-full animate-spin mb-4"></div>
-                <p class="text-zinc-400">Yapay Zeka Modeli Yükleniyor...</p>
+                <p class="text-zinc-400">Yapay Zeka Modeli YÃ¼kleniyor...</p>
                 <button id="start-btn" class="mt-4 bg-accent text-zinc-900 font-bold py-2 px-6 rounded hover:bg-orange-500 transition-colors hidden">
-                    Kamerayý Aç ve Baþla
+                    KamerayÄ± AÃ§ ve BaÅŸla
                 </button>
             </div>
             
@@ -39,19 +39,19 @@
         
         <div class="w-full max-w-2xl mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-zinc-800 p-4 rounded-lg">
-                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Nasýl Çalýþýr?</h3>
+                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">NasÄ±l Ã‡alÄ±ÅŸÄ±r?</h3>
                 <ul class="text-sm text-zinc-400 space-y-2">
-                    <li>1. Cihazýný yere/masaya koy.</li>
-                    <li>2. Tüm vücudun (özellikle bacaklarýn) kameraya girdiðinden emin ol.</li>
-                    <li>3. Squat yapmaya baþla.</li>
+                    <li>1. CihazÄ±nÄ± yere/masaya koy.</li>
+                    <li>2. TÃ¼m vÃ¼cudun (Ã¶zellikle bacaklarÄ±n) kameraya girdiÄŸinden emin ol.</li>
+                    <li>3. Squat yapmaya baÅŸla.</li>
                 </ul>
             </div>
             <div class="bg-zinc-800 p-4 rounded-lg">
-                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Form Ýpuçlarý</h3>
+                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Form Ä°puÃ§larÄ±</h3>
                 <ul class="text-sm text-zinc-400 space-y-2">
                     <li id="form-feedback" class="text-green-400 font-medium">Harika gidiyorsun!</li>
-                    <li><span class="text-accent">Mavi iskelet:</span> Seni görüyor.</li>
-                    <li><span class="text-orange-500">Turuncu açý:</span> Dizinin kýrýlma açýsý.</li>
+                    <li><span class="text-accent">Mavi iskelet:</span> Seni gÃ¶rÃ¼yor.</li>
+                    <li><span class="text-orange-500">Turuncu aÃ§Ä±:</span> Dizinin kÄ±rÄ±lma aÃ§Ä±sÄ±.</li>
                 </ul>
             </div>
         </div>
@@ -78,7 +78,7 @@
     let isDown = false;
     let camera = null;
 
-    // Açý hesaplama fonksiyonu
+    // AÃ§Ä± hesaplama fonksiyonu
     function calculateAngle(a, b, c) {
         const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
         let angle = Math.abs(radians * 180.0 / Math.PI);
@@ -106,18 +106,18 @@
             const ankle = results.poseLandmarks[27];
 
             if (hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
-                statusText.innerText = "Pozisyon yakalandý! Harekete baþla.";
+                statusText.innerText = "Pozisyon yakalandÄ±! Harekete baÅŸla.";
                 statusText.className = "text-green-400 font-bold";
 
                 const angle = calculateAngle(hip, knee, ankle);
 
                 canvasCtx.fillStyle = "#ea580c";
                 canvasCtx.font = "30px Arial";
-                canvasCtx.fillText(Math.round(angle) + "°", knee.x * canvasElement.width + 20, knee.y * canvasElement.height);
+                canvasCtx.fillText(Math.round(angle) + "Â°", knee.x * canvasElement.width + 20, knee.y * canvasElement.height);
 
                 if (angle < 90) { 
                     if (!isDown) {
-                        formFeedback.innerText = "Yeterince indin, þimdi kalk!";
+                        formFeedback.innerText = "Yeterince indin, ÅŸimdi kalk!";
                         formFeedback.className = "text-accent font-bold";
                     }
                     isDown = true;
@@ -131,7 +131,7 @@
                     formFeedback.className = "text-green-400 font-bold";
                 }
             } else {
-                statusText.innerText = "Tüm vücudunu göremiyorum, geriye git.";
+                statusText.innerText = "TÃ¼m vÃ¼cudunu gÃ¶remiyorum, geriye git.";
                 statusText.className = "text-red-400 font-bold";
             }
         } else {
@@ -158,7 +158,7 @@
 
     startBtn.classList.remove('hidden');
     loadingOverlay.querySelector('.animate-spin').classList.add('hidden');
-    loadingOverlay.querySelector('p').innerText = "Model hazýr!";
+    loadingOverlay.querySelector('p').innerText = "Model hazÄ±r!";
 
     startBtn.addEventListener('click', () => {
         loadingOverlay.classList.add('hidden');
@@ -176,4 +176,4 @@
         camera.start();
     });
 </script>
-{% endblock %}
+{% endblock %}
