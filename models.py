@@ -75,6 +75,8 @@ class UserProgress(db.Model):
     completed_at = db.Column(db.DateTime, default=datetime.utcnow)
     duration_spent = db.Column(db.Integer, nullable=True)
     calories_burned = db.Column(db.Integer, nullable=True)
+    readiness_score = db.Column(db.Integer, nullable=True) # 0-10 before workout
+    perceived_exertion = db.Column(db.Integer, nullable=True) # 0-10 after workout
 
     user = db.relationship('User', backref=db.backref('progress', lazy=True))
     program = db.relationship('Program')
