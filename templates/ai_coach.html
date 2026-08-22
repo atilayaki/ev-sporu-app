@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Yapay Zeka Koçu (Beta){% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8 px-4">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-black text-white uppercase tracking-wider mb-2">YAPAY ZEKA KOÇU <span class="text-accent text-sm align-top">BETA</span></h1>
+        <p class="text-zinc-400">Kameraný aç ve formunu analiz edelim. Þu anda <strong class="text-accent">Squat</strong> hareketini sayabiliyor.</p>
+    </div>
+
+    <div class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 relative overflow-hidden flex flex-col items-center">
+        <!-- Stats Overlay -->
+        <div class="w-full flex justify-between items-center mb-4">
+            <div class="bg-zinc-800 px-4 py-2 rounded-lg border border-zinc-700">
+                <span class="text-zinc-400 text-sm block">Durum</span>
+                <span id="status-text" class="text-white font-bold">Kamera bekleniyor...</span>
+            </div>
+            
+            <div class="bg-zinc-800 px-6 py-2 rounded-lg border border-accent">
+                <span class="text-accent text-sm block font-bold">Tekrar Sayýsý</span>
+                <span id="rep-counter" class="text-5xl font-black text-white text-center block">0</span>
+            </div>
+        </div>
+
+        <!-- Camera / Canvas Container -->
+        <div class="relative w-full max-w-2xl bg-black rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
+            <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10">
+                <div class="w-12 h-12 border-4 border-zinc-700 border-t-accent rounded-full animate-spin mb-4"></div>
+                <p class="text-zinc-400">Yapay Zeka Modeli Yükleniyor...</p>
+                <button id="start-btn" class="mt-4 bg-accent text-zinc-900 font-bold py-2 px-6 rounded hover:bg-orange-500 transition-colors hidden">
+                    Kamerayý Aç ve Baþla
+                </button>
+            </div>
+            
+            <video id="webcam" class="hidden" autoplay playsinline></video>
+            <canvas id="output_canvas" class="w-full h-full object-cover"></canvas>
+        </div>
+        
+        <div class="w-full max-w-2xl mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-zinc-800 p-4 rounded-lg">
+                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Nasýl Çalýþýr?</h3>
+                <ul class="text-sm text-zinc-400 space-y-2">
+                    <li>1. Cihazýný yere/masaya koy.</li>
+                    <li>2. Tüm vücudun (özellikle bacaklarýn) kameraya girdiðinden emin ol.</li>
+                    <li>3. Squat yapmaya baþla.</li>
+                </ul>
+            </div>
+            <div class="bg-zinc-800 p-4 rounded-lg">
+                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Form Ýpuçlarý</h3>
+                <ul class="text-sm text-zinc-400 space-y-2">
+                    <li id="form-feedback" class="text-green-400 font-medium">Harika gidiyorsun!</li>
+                    <li><span class="text-accent">Mavi iskelet:</span> Seni görüyor.</li>
+                    <li><span class="text-orange-500">Turuncu açý:</span> Dizinin kýrýlma açýsý.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load MediaPipe Pose -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+<script>
+    const videoElement = document.getElementById('webcam');
+    const canvasElement = document.getElementById('output_canvas');
+    const canvasCtx = canvasElement.getContext('2d');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const startBtn = document.getElementById('start-btn');
+    const statusText = document.getElementById('status-text');
+    const repCounter = document.getElementById('rep-counter');
+    const formFeedback = document.getElementById('form-feedback');
+
+    let reps = 0;
+    let isDown = false;
+    let camera = null;
+
+    // Açý hesaplama fonksiyonu
+    function calculateAngle(a, b, c) {
+        const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+        let angle = Math.abs(radians * 180.0 / Math.PI);
+        if (angle > 180.0) {
+            angle = 360 - angle;
+        }
+        return angle;
+    }
+
+    function onResults(results) {
+        canvasCtx.save();
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        
+        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+        if (results.poseLandmarks) {
+            drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
+                           {color: '#00FF00', lineWidth: 4});
+            drawLandmarks(canvasCtx, results.poseLandmarks,
+                          {color: '#ea580c', lineWidth: 2});
+
+            // Get landmarks for left leg
+            const hip = results.poseLandmarks[23];
+            const knee = results.poseLandmarks[25];
+            const ankle = results.poseLandmarks[27];
+
+            if (hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
+                statusText.innerText = "Pozisyon yakalandý! Harekete baþla.";
+                statusText.className = "text-green-400 font-bold";
+
+                const angle = calculateAngle(hip, knee, ankle);
+
+                canvasCtx.fillStyle = "#ea580c";
+                canvasCtx.font = "30px Arial";
+                canvasCtx.fillText(Math.round(angle) + "°", knee.x * canvasElement.width + 20, knee.y * canvasElement.height);
+
+                if (angle < 90) { 
+                    if (!isDown) {
+                        formFeedback.innerText = "Yeterince indin, þimdi kalk!";
+                        formFeedback.className = "text-accent font-bold";
+                    }
+                    isDown = true;
+                }
+                
+                if (angle > 160 && isDown) {
+                    reps++;
+                    repCounter.innerText = reps;
+                    isDown = false;
+                    formFeedback.innerText = "1 Tekrar eklendi! Devam et.";
+                    formFeedback.className = "text-green-400 font-bold";
+                }
+            } else {
+                statusText.innerText = "Tüm vücudunu göremiyorum, geriye git.";
+                statusText.className = "text-red-400 font-bold";
+            }
+        } else {
+            statusText.innerText = "Ekranda kimse yok!";
+            statusText.className = "text-zinc-400 font-bold";
+        }
+        canvasCtx.restore();
+    }
+
+    const pose = new Pose({locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+    }});
+    
+    pose.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        smoothSegmentation: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+    
+    pose.onResults(onResults);
+
+    startBtn.classList.remove('hidden');
+    loadingOverlay.querySelector('.animate-spin').classList.add('hidden');
+    loadingOverlay.querySelector('p').innerText = "Model hazýr!";
+
+    startBtn.addEventListener('click', () => {
+        loadingOverlay.classList.add('hidden');
+        
+        canvasElement.width = 640;
+        canvasElement.height = 480;
+
+        camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await pose.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+    });
+</script>
+{% endblock %}
