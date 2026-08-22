@@ -44,40 +44,40 @@ def create_app():
                 'baslik': 'Neden Evde Spor?',
                 'ikon': '/static/images/home_gym_icon.jpg',
                 'metin': [
-                    'Spor yapmak iÃ§in her zaman lÃ¼ks bir spor salonuna Ã¼ye olmanÄ±za gerek yoktur. Evinizin rahatlÄ±ÄŸÄ±nda egzersiz yapmanÄ±n sadece finansal deÄŸil, zihinsel ve zamansal birÃ§ok avantajÄ± vardÄ±r.',
+                    'Spor yapmak için her zaman lüks bir spor salonuna üye olmanıza gerek yoktur. Evinizin rahatlığında egzersiz yapmanın sadece finansal değil, zihinsel ve zamansal birçok avantajı vardır.',
                     '## Zaman Tasarrufu',
-                    'Spor salonuna gitmek, yolda geÃ§en sÃ¼re, giyinme odasÄ±nda hazÄ±rlÄ±k ve geri dÃ¶nÃ¼ÅŸ derken gÃ¼nÃ¼nÃ¼zden en az 2 saat Ã§alar. Evde ise sadece Ã¼stÃ¼nÃ¼zÃ¼ deÄŸiÅŸtirip anÄ±nda baÅŸlayabilirsiniz. Bu sayede antrenmanlarÄ±nÄ±zÄ± aksatma ihtimaliniz minimuma iner.',
+                    'Spor salonuna gitmek, yolda geçen süre, giyinme odasında hazırlık ve geri dönüş derken gününüzden en az 2 saat çalar. Evde ise sadece üstünüzü değiştirip anında başlayabilirsiniz. Bu sayede antrenmanlarınızı aksatma ihtimaliniz minimuma iner.',
                     '## Odaklanma ve Disiplin',
-                    'KalabalÄ±k bir salonda baÅŸkalarÄ±nÄ±n bitirmesini beklediÄŸiniz aletler, gÃ¼rÃ¼ltÃ¼ ve dikkatinizi daÄŸÄ±tan unsurlar yoktur. Evde kulaklÄ±ÄŸÄ±nÄ±zÄ± takÄ±p veya hoparlÃ¶rden mÃ¼ziÄŸinizi aÃ§Ä±p sadece vÃ¼cudunuza odaklanabilirsiniz.',
-                    '## Psikolojik RahatlÄ±k',
-                    'Ã–zellikle spora yeni baÅŸlayanlar iÃ§in baÅŸkalarÄ±nÄ±n bakÄ±ÅŸlarÄ± altÄ±nda ter dÃ¶kmek rahatsÄ±z edici olabilir. Kendi evinizin gÃ¼venli alanÄ±nda, nasÄ±l gÃ¶rÃ¼ndÃ¼ÄŸÃ¼nÃ¼zÃ¼ dÃ¼ÅŸÃ¼nmeden sÄ±nÄ±rlarÄ±nÄ±zÄ± zorlayabilirsiniz.',
-                    'UnutmayÄ±n, iyi bir fiziÄŸe ve saÄŸlÄ±ÄŸa ulaÅŸmanÄ±n temelinde pahalÄ± ekipmanlar deÄŸil, istikrar ve doÄŸru beslenme yatar.'
+                    'Kalabalık bir salonda başkalarının bitirmesini beklediğiniz aletler, gürültü ve dikkatinizi dağıtan unsurlar yoktur. Evde kulaklığınızı takıp veya hoparlörden müziğinizi açıp sadece vücudunuza odaklanabilirsiniz.',
+                    '## Psikolojik Rahatlık',
+                    'Özellikle spora yeni başlayanlar için başkalarının bakışları altında ter dökmek rahatsız edici olabilir. Kendi evinizin güvenli alanında, nasıl göründüğünüzü düşünmeden sınırlarınızı zorlayabilirsiniz.',
+                    'Unutmayın, iyi bir fiziğe ve sağlığa ulaşmanın temelinde pahalı ekipmanlar değil, istikrar ve doğru beslenme yatar.'
                 ]
             },
             'vucut-agirligi': {
-                'baslik': 'VÃ¼cut AÄŸÄ±rlÄ±ÄŸÄ± (Calisthenics) GÃ¼cÃ¼',
+                'baslik': 'Vücut Ağırlığı (Calisthenics) Gücü',
                 'ikon': '/static/images/flexed_bicep_icon.jpg',
                 'metin': [
-                    'AÄŸÄ±rlÄ±k kaldÄ±rmak (halter, dambÄ±l) elbette kas geliÅŸtirmek iÃ§in harika bir yÃ¶ntemdir ancak tek yol deÄŸildir. VÃ¼cut aÄŸÄ±rlÄ±ÄŸÄ± egzersizleri (Calisthenics) binlerce yÄ±ldÄ±r kullanÄ±lan en doÄŸal ve fonksiyonel antrenman stilidir.',
-                    '## Pratik ve EriÅŸilebilir',
-                    'ÅÄ±nav, mekik, squat, barfiks gibi temel hareketleri evde, parkta veya seyahatteyken yapabilirsiniz.',
+                    'Ağırlık kaldırmak (halter, dambıl) elbette kas geliştirmek için harika bir yöntemdir ancak tek yol değildir. Vücut ağırlığı egzersizleri (Calisthenics) binlerce yıldır kullanılan en doğal ve fonksiyonel antrenman stilidir.',
+                    '## Pratik ve Erişilebilir',
+                    'Şınav, mekik, squat, barfiks gibi temel hareketleri evde, parkta veya seyahatteyken yapabilirsiniz.',
                     '## Eklemleri Korur',
-                    'Ekstra aÄŸÄ±rlÄ±k yÃ¼klemediÄŸiniz iÃ§in eklem ve tendonlarÄ±nÄ±za binen stres daha doÄŸal seviyelerdedir. SakatlÄ±k riski aÄŸÄ±rlÄ±k Ã§alÄ±ÅŸmalarÄ±na gÃ¶re daha dÃ¼ÅŸÃ¼ktÃ¼r.',
-                    '## Core (Merkez) BÃ¶lgesi GeliÅŸimi',
-                    'Neredeyse tÃ¼m vÃ¼cut aÄŸÄ±rlÄ±ÄŸÄ± egzersizleri dengede kalmak iÃ§in karÄ±n ve bel kaslarÄ±nÄ±zÄ± aktif kullanmanÄ±zÄ± gerektirir. Sadece ÅŸÄ±nav Ã§ekerken bile sÄ±kÄ± bir karÄ±na sahip olursunuz.',
-                    'Yeni baÅŸlayanlar iÃ§in vÃ¼cut aÄŸÄ±rlÄ±ÄŸÄ± ustalaÅŸÄ±lmasÄ± gereken ilk adÄ±mdÄ±r. Kendi aÄŸÄ±rlÄ±ÄŸÄ±nÄ± kontrol edemeyen biri harici aÄŸÄ±rlÄ±klara geÃ§memelidir.'
+                    'Ekstra ağırlık yüklemediğiniz için eklem ve tendonlarınıza binen stres daha doğal seviyelerdedir. Sakatlık riski ağırlık çalışmalarına göre daha düşüktür.',
+                    '## Core (Merkez) Bölgesi Gelişimi',
+                    'Neredeyse tüm vücut ağırlığı egzersizleri dengede kalmak için karın ve bel kaslarınızı aktif kullanmanızı gerektirir. Sadece şınav çekerken bile sıkı bir karına sahip olursunuz.',
+                    'Yeni başlayanlar için vücut ağırlığı ustalaşılması gereken ilk adımdır. Kendi ağırlığını kontrol edemeyen biri harici ağırlıklara geçmemelidir.'
                 ]
             },
             'ilerleme-takibi': {
-                'baslik': 'BaÅŸarÄ± Ä°Ã§in Ä°lerleme Takibi',
+                'baslik': 'Başarı İçin İlerleme Takibi',
                 'ikon': '/static/images/progress_chart_icon.jpg',
                 'metin': [
-                    'SÃ¼rekli aynÄ± ÅŸeyleri yaparak farklÄ± sonuÃ§lar elde edemezsiniz. Sporun altÄ±n kuralÄ± "Progresif AÅŸÄ±rÄ± YÃ¼kleme"dir (Progressive Overload).',
-                    '## Neden Not AlmalÄ±yÄ±m?',
-                    'EÄŸer geÃ§en hafta 3 set 10 ÅŸÄ±nav Ã§ektiyseniz, bu hafta bunu 11 ÅŸÄ±nava Ã§Ä±karmak hedeflerinizden biri olmalÄ±dÄ±r. Not almadÄ±ÄŸÄ±nÄ±zda geliÅŸiminizi objektif olarak gÃ¶remezsiniz.',
-                    '## KÃ¼Ã§Ã¼k AdÄ±mlarÄ±n GÃ¼cÃ¼',
-                    'Her antrenmanda %1 daha iyi olmak, bir yÄ±lÄ±n sonunda %3700 geliÅŸim demektir.',
-                    'Bu uygulama iÃ§erisindeki Liderlik, Rozetler ve Seviye sistemi, ilerlemenizi gÃ¶rselleÅŸtirerek motivasyonunuzu yÃ¼ksek tutmak iÃ§in tasarlanmÄ±ÅŸtÄ±r.'
+                    'Sürekli aynı şeyleri yaparak farklı sonuçlar elde edemezsiniz. Sporun altın kuralı "Progresif Aşırı Yükleme"dir (Progressive Overload).',
+                    '## Neden Not Almalıyım?',
+                    'Eğer geçen hafta 3 set 10 şınav çektiyseniz, bu hafta bunu 11 şınava çıkarmak hedeflerinizden biri olmalıdır. Not almadığınızda gelişiminizi objektif olarak göremezsiniz.',
+                    '## Küçük Adımların Gücü',
+                    'Her antrenmanda %1 daha iyi olmak, bir yılın sonunda %3700 gelişim demektir.',
+                    'Bu uygulama içerisindeki Liderlik, Rozetler ve Seviye sistemi, ilerlemenizi görselleştirerek motivasyonunuzu yüksek tutmak için tasarlanmıştır.'
                 ]
             }
         }
@@ -122,7 +122,7 @@ def create_app():
             user_program = UserProgram(user_id=current_user.id, program_id=program.id)
             db.session.add(user_program)
             db.session.commit()
-            flash(f'{program.title} programÄ±na katÄ±ldÄ±nÄ±z!', 'success')
+            flash(f'{program.title} programına katıldınız!', 'success')
         return redirect(url_for('program_detail', slug=slug))
 
     @app.route('/programlar/<slug>/antrenman')
@@ -134,7 +134,7 @@ def create_app():
         # Get exercises for current day
         day_exercises = [pe for pe in program.exercises if pe.day_number == user_program.current_day]
         if not day_exercises:
-            flash('Bu gÃ¼n iÃ§in egzersiz bulunamadÄ±!', 'error')
+            flash('Bu gün için egzersiz bulunamadı!', 'error')
             return redirect(url_for('program_detail', slug=slug))
             
         return render_template('workout_player.html', program=program, user_program=user_program, exercises=day_exercises)
@@ -208,7 +208,7 @@ def create_app():
             user = User(name=form.name.data, email=form.email.data, password_hash=hashed_password)
             db.session.add(user)
             db.session.commit()
-            flash('BaÅŸarÄ±yla giriÅŸ yaptÄ±nÄ±z!', 'success')
+            flash('Başarıyla giriş yaptınız!', 'success')
             return redirect(url_for('login'))
         return render_template('register.html', form=form)
 
@@ -222,10 +222,10 @@ def create_app():
             if user and check_password_hash(user.password_hash, form.password.data):
                 login_user(user, remember=True)
                 next_page = request.args.get('next')
-                flash('BaÅŸarÄ±yla giriÅŸ yaptÄ±nÄ±z!', 'success')
+                flash('Başarıyla giriş yaptınız!', 'success')
                 return redirect(next_page) if next_page else redirect(url_for('index'))
             else:
-                flash('GiriÅŸ baÅŸarÄ±sÄ±z. LÃ¼tfen e-posta ve ÅŸifrenizi kontrol edin.', 'danger')
+                flash('Giriş başarısız. Lütfen e-posta ve şifrenizi kontrol edin.', 'danger')
         return render_template('login.html', form=form)
 
     @app.route('/cikis')
@@ -261,7 +261,7 @@ def create_app():
         exercise = Exercise.query.get_or_404(exercise_id)
         if exercise in current_user.favorites:
             current_user.favorites.remove(exercise)
-            flash(f'{exercise.name} favorilerden Ã§Ä±karÄ±ldÄ±.', 'info')
+            flash(f'{exercise.name} favorilerden çıkarıldı.', 'info')
         else:
             current_user.favorites.append(exercise)
             flash(f'{exercise.name} favorilere eklendi!', 'success')
@@ -299,7 +299,7 @@ def create_app():
         db.session.add(progress)
 
         db.session.commit()
-        flash('Antrenman tamamlandÄ± ve ilerlemeniz kaydedildi! Tebrikler!', 'success')
+        flash('Antrenman tamamlandı ve ilerlemeniz kaydedildi! Tebrikler!', 'success')
         return redirect(url_for('exercise_detail', slug=exercise.slug))
 
     @app.route('/breathe')
@@ -363,7 +363,7 @@ def create_app():
                 user_challenge = UserChallenge(user_id=current_user.id, challenge_id=challenge.id)
                 db.session.add(user_challenge)
                 db.session.commit()
-                flash('Meydan okumaya katÄ±ldÄ±nÄ±z!', 'success')
+                flash('Meydan okumaya katıldınız!', 'success')
             return redirect(url_for('challenge_detail', slug=slug))
             
         # Get exercises grouped by day
@@ -437,55 +437,10 @@ def create_app():
 
 
 def seed_data():
-    exercises = [
-        Exercise(name='Ã…ÂÃ„Â±nav (Push-up)', slug='sinav-push-up', description='Temel ÃƒÂ¼st vÃƒÂ¼cut egzersizi.', instructions='Yere yÃƒÂ¼zÃƒÂ¼stÃƒÂ¼ uzanÃ„Â±n, ellerinizi omuz geniÃ…Å¸liÃ„Å¸inde aÃƒÂ§arak yeri itin.', muscle_group='GÃƒÂ¶Ã„Å¸ÃƒÂ¼s, Arka Kol', difficulty='Orta', equipment='EkipmansÃ„Â±z', duration_seconds=None, calories_estimate=50),
-        Exercise(name='Mekik (Crunch)', slug='mekik-crunch', description='Temel karÃ„Â±n egzersizi.', instructions='SÃ„Â±rtÃƒÂ¼stÃƒÂ¼ uzanÃ„Â±n, dizlerinizi bÃƒÂ¼kÃƒÂ¼n ve gÃƒÂ¶vdenizi dizlerinize doÃ„Å¸ru kaldÃ„Â±rÃ„Â±n.', muscle_group='KarÃ„Â±n', difficulty='BaÃ…Å¸langÃ„Â±ÃƒÂ§', equipment='EkipmansÃ„Â±z', duration_seconds=None, calories_estimate=30),
-        Exercise(name='Squat', slug='squat', description='Temel alt vÃƒÂ¼cut egzersizi.', instructions='AyaklarÃ„Â±nÃ„Â±zÃ„Â± omuz geniÃ…Å¸liÃ„Å¸inde aÃƒÂ§Ã„Â±n, sandalyeye oturur gibi kalÃƒÂ§anÃ„Â±zÃ„Â± geriye vererek ÃƒÂ§ÃƒÂ¶mÃƒÂ¼n ve kalkÃ„Â±n.', muscle_group='Bacak, KalÃƒÂ§a', difficulty='BaÃ…Å¸langÃ„Â±ÃƒÂ§', equipment='EkipmansÃ„Â±z', duration_seconds=None, calories_estimate=60),
-        Exercise(name='Plank', slug='plank', description='TÃƒÂ¼m karÃ„Â±n bÃƒÂ¶lgesini (core) ÃƒÂ§alÃ„Â±Ã…Å¸tÃ„Â±ran izometrik hareket.', instructions='Dirsekleriniz ve ayak parmak uÃƒÂ§larÃ„Â±nÃ„Â±z ÃƒÂ¼zerinde yere paralel durun. VÃƒÂ¼cudunuz dÃƒÂ¼z bir ÃƒÂ§izgi oluÃ…Å¸turmalÃ„Â±.', muscle_group='Core (Merkez)', difficulty='Orta', equipment='EkipmansÃ„Â±z', duration_seconds=60, calories_estimate=20),
-        Exercise(name='Jumping Jack', slug='jumping-jack', description='TÃƒÂ¼m vÃƒÂ¼cudu ÃƒÂ§alÃ„Â±Ã…Å¸tÃ„Â±ran kardiyo hareketi.', instructions='Ayakta durun, zÃ„Â±playarak ayaklarÃ„Â±nÃ„Â±zÃ„Â± omuz geniÃ…Å¸liÃ„Å¸inden biraz daha fazla aÃƒÂ§Ã„Â±n ve kollarÃ„Â±nÃ„Â±zÃ„Â± baÃ…Å¸Ã„Â±nÃ„Â±zÃ„Â±n ÃƒÂ¼zerinde birleÃ…Å¸tirin.', muscle_group='TÃƒÂ¼m VÃƒÂ¼cut', difficulty='BaÃ…Å¸langÃ„Â±ÃƒÂ§', equipment='EkipmansÃ„Â±z', duration_seconds=60, calories_estimate=80)
-    ]
-    db.session.add_all(exercises)
+    pass
+    # Seed data is obsolete and removed to clean up corrupted text.
     
-    p1 = Program(title='7 GÃƒÂ¼nlÃƒÂ¼k BaÃ…Å¸langÃ„Â±ÃƒÂ§', slug='7-gunluk-baslangic', description='Fitness ile yeni tanÃ„Â±Ã…Å¸anlar iÃƒÂ§in tÃƒÂ¼m vÃƒÂ¼cudu aktive eden, hafif tempolu baÃ…Å¸langÃ„Â±ÃƒÂ§ serisi.', duration_days=7, level='BaÃ…Å¸langÃ„Â±ÃƒÂ§', goal='Genel Kondisyon')
-    db.session.add(p1)
-    
-    db.session.commit()
-    
-    # Egzersizleri programa ekle
-    ex_squat = Exercise.query.filter_by(slug='squat').first()
-    ex_crunch = Exercise.query.filter_by(slug='mekik-crunch').first()
-    
-    db.session.add(ProgramExercise(program_id=p1.id, exercise_id=ex_squat.id, day_number=1, sets=3, reps=10, rest_seconds=60))
-    db.session.add(ProgramExercise(program_id=p1.id, exercise_id=ex_crunch.id, day_number=1, sets=3, reps=15, rest_seconds=45))
-    
-    db.session.commit()
-
-
-    if Challenge.query.count() == 0:
-        c1 = Challenge(title='21 GÃƒÂ¼nlÃƒÂ¼k KarÃ„Â±n KasÃ„Â±', slug='21-gun-karin', description='Yaz gelmeden sÃ„Â±msÃ„Â±kÃ„Â± bir karÃ„Â±n iÃƒÂ§in her gÃƒÂ¼n artan zorluk seviyesiyle 21 gÃƒÂ¼nlÃƒÂ¼k maraton.', duration_days=21)
-        db.session.add(c1)
-        db.session.commit()
-        
-        cd1 = ChallengeDay(challenge_id=c1.id, day_number=1, title='IsÃ„Â±nma ve Temel Core')
-        db.session.add(cd1)
-        db.session.commit()
-        
-        ex_crunch = Exercise.query.filter_by(slug='mekik-crunch').first()
-        ex_plank = Exercise.query.filter_by(slug='plank').first()
-        
-        if ex_crunch:
-            db.session.add(ChallengeExercise(challenge_day_id=cd1.id, exercise_id=ex_crunch.id, sets=3, reps=15, rest_seconds=30))
-        if ex_plank:
-            db.session.add(ChallengeExercise(challenge_day_id=cd1.id, exercise_id=ex_plank.id, sets=3, reps=1, rest_seconds=60))
-            
-        db.session.commit()
-
 app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
