@@ -54,7 +54,7 @@
         }
     </style>
 </head>
-<body class="font-sans min-h-screen flex flex-col antialiased">
+<body class="font-sans min-h-screen flex flex-col antialiased pb-16 md:pb-0">
     
     <nav class="glass-nav sticky top-0 z-50 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,6 +108,33 @@
     <footer class="bg-darkbg mt-auto py-8 text-center text-zinc-600 border-t border-zinc-900 relative z-10 text-sm">
         <p>&copy; 2026 Evde Spor. Bahanelere yer yok.</p>
     </footer>
+
+      <!-- Mobile Bottom Navigation -->
+      <div class="md:hidden fixed bottom-0 left-0 w-full bg-zinc-900 border-t border-zinc-800 z-40 px-4 py-2 flex justify-around items-center pb-safe">
+          <a href="/" class="flex flex-col items-center text-zinc-500 hover:text-accent">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+              <span class="text-[10px] uppercase font-bold mt-1">Ev</span>
+          </a>
+          <a href="/egzersizler" class="flex flex-col items-center text-zinc-500 hover:text-accent">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span class="text-[10px] uppercase font-bold mt-1">Egzersiz</span>
+          </a>
+          <a href="/ai-koc" class="flex flex-col items-center text-accent">
+              <div class="bg-accent text-white p-2 rounded-full -mt-5 border-4 border-darkbg shadow-lg shadow-accent/30 relative">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>
+                  <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                  </span>
+              </div>
+              <span class="text-[10px] uppercase font-black mt-1">AI KOÇ</span>
+          </a>
+          <a href="/programlar" class="flex flex-col items-center text-zinc-500 hover:text-accent">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+              <span class="text-[10px] uppercase font-bold mt-1">Program</span>
+          </a>
+      </div>
+
 
     <!-- AI Coach Widget -->
     <div x-data="{ open: false, messages: [{sender: 'ai', text: 'Merhaba! Ben Evde Spor AI Koçun. Sana nasıl yardımcı olabilirim? (Örn: Karın kası nasıl yapılır?, Karnım ağrıyor)'}], input: '' }" 
