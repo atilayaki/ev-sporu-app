@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request
 import os
 import json
 import google.generativeai as genai
@@ -107,6 +107,16 @@ def ai_coach_generate():
         return jsonify({'success': False, 'message': 'Prompt gerekli.'}), 400
         
     user_prompt = data['prompt']
+    readiness = data.get('readiness', 5)
+    
+    if readiness < 4:
+        adaptation = f"Kullanici bugun cok yorgun hissediyor (Enerji: {readiness}/10). Lutfen eklem yormayan, dusuk tekrarlı, esneme veya aktif dinlenme odakli hafif bir antrenman ver."
+    elif readiness > 7:
+        adaptation = f"Kullanici bugun cok enerjik! (Enerji: {readiness}/10). Onu gercekten zorlayacak, yuksek tekrarlı, patlayici guc gerektiren zor bir antrenman hazirla."
+    else:
+        adaptation = f"Kullanicinin enerjisi normal seviyede (Enerji: {readiness}/10). Standart, dengeli bir antrenman hazirla."
+        
+    user_prompt = f"{user_prompt} \n\n{adaptation}"
     
     exercises = Exercise.query.all()
     exercise_context = []
