@@ -223,7 +223,7 @@ def analyze_nutrition():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
-﻿@api_bp.route('/leaderboard', methods=['GET'])
+@api_bp.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     from models import User
     users = User.query.all()
@@ -239,7 +239,7 @@ def get_leaderboard():
     leaderboard_data = sorted(leaderboard_data, key=lambda x: x['score'], reverse=True)[:10]
     return jsonify({'success': True, 'data': leaderboard_data})
 
-﻿@api_bp.route('/sync-progress', methods=['POST'])
+@api_bp.route('/sync-progress', methods=['POST'])
 def sync_progress():
     data = request.get_json()
     from models import db, User, UserProgress
