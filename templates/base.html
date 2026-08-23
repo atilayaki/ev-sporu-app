@@ -56,7 +56,8 @@
 </head>
 <body class="font-sans min-h-screen flex flex-col antialiased pb-16 md:pb-0">
     
-    <nav class="glass-nav sticky top-0 z-50 text-white">
+    {% if not hide_nav %}
+<nav class="glass-nav sticky top-0 z-50 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center">
@@ -88,6 +89,7 @@
             </div>
         </div>
     </nav>
+{% endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -109,7 +111,8 @@
         <p>&copy; 2026 Evde Spor. Bahanelere yer yok.</p>
     </footer>
 
-      <!-- Mobile Bottom Navigation -->
+      {% if not hide_nav %}
+<!-- Mobile Bottom Navigation -->
       <div class="md:hidden fixed bottom-0 left-0 w-full bg-zinc-900 border-t border-zinc-800 z-40 px-4 py-2 flex justify-around items-center pb-safe">
           <a href="/" class="flex flex-col items-center text-zinc-500 hover:text-accent">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -127,6 +130,7 @@
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                   </span>
               </div>
+{% endif %}
               <span class="text-[10px] uppercase font-black mt-1">AI KOÇ</span>
           </a>
           <a href="/programlar" class="flex flex-col items-center text-zinc-500 hover:text-accent">
@@ -136,7 +140,8 @@
       </div>
 
 
-    <!-- AI Coach Widget -->
+    {% if not hide_nav %}
+<!-- AI Coach Widget -->
     <div x-data="{ open: false, messages: [{sender: 'ai', text: 'Merhaba! Ben Evde Spor AI Koçun. Sana nasıl yardımcı olabilirim? (Örn: Karın kası nasıl yapılır?, Karnım ağrıyor)'}], input: '' }" 
          class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
          
@@ -153,6 +158,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
+{% endif %}
             
             <!-- Messages -->
             <div class="p-4 h-64 overflow-y-auto flex flex-col gap-3 bg-zinc-900/50" id="chat-messages">
