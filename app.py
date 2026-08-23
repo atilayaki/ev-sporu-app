@@ -20,7 +20,7 @@ def create_app():
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
         
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_url or ('sqlite:///' + os.path.join(basedir, 'instance', 'site.db'))
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'postgresql://postgres.zfwgxqomsikktyovfktn:2478152Qwd.@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
