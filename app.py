@@ -15,8 +15,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'dev-secret-key-for-ev-sporu'
     
     basedir = os.path.abspath(os.path.dirname(__name__))
-    # Supabase (veya baÃ…Å¸ka bir PostgreSQL) iÃƒÂ§in ortam deÃ„Å¸iÃ…Å¸keninden DATABASE_URL al
-    db_url = os.environ.get('DATABASE_URL', 'postgresql://postgres.zfwgxqomsikktyovfktn:2478152Qwd.@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres')
+    db_url = 'postgresql://postgres.zfwgxqomsikktyovfktn:2478152Qwd.@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
         

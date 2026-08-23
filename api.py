@@ -272,7 +272,7 @@ def sync_progress():
     
     return jsonify({'success': True, 'message': 'Progress synced!'})
 
-﻿@api_bp.route('/debug-db', methods=['GET'])
+@api_bp.route('/debug-db', methods=['GET'])
 def debug_db():
     import os
     from flask import current_app
