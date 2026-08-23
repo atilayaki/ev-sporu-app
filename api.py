@@ -256,7 +256,7 @@ def sync_progress():
     user = User.query.filter_by(name=username).first()
     if not user:
         # Create user if doesn't exist
-        user = User(name=username, email=f"{username}@mobile.com", password="dummy")
+        user = User(name=username, email=f"{username}@mobile.com", password_hash="dummy")
         db.session.add(user)
         db.session.commit()
         
