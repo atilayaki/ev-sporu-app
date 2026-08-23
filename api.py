@@ -271,3 +271,12 @@ def sync_progress():
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Progress synced!'})
+
+﻿@api_bp.route('/debug-db', methods=['GET'])
+def debug_db():
+    import os
+    from flask import current_app
+    return jsonify({
+        'env_url': os.environ.get('DATABASE_URL', 'NOT_SET'),
+        'config_url': current_app.config['SQLALCHEMY_DATABASE_URI']
+    })
