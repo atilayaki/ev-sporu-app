@@ -11,12 +11,31 @@
             Programa Dön
         </a>
 
-        <!-- Voice Coach Toggle -->
-        <button @click="toggleVoice()" class="flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all"
-                :class="voiceEnabled ? 'bg-orange-500/10 border-orange-500 text-orange-400' : 'bg-zinc-800/80 border-zinc-700 text-zinc-400'">
-            <span x-text="voiceEnabled ? '🔊' : '🔇'"></span>
-            <span x-text="voiceEnabled ? 'Sesli Koç Aktif' : 'Sesli Koç Kapalı'"></span>
-        </button>
+        <!-- Voice Coach Options: Voice Selector & Toggle -->
+        <div class="flex items-center space-x-2">
+            <!-- Voice Persona Selector (Bella / Adam) -->
+            <div class="flex items-center p-0.5 rounded-full bg-zinc-900 border border-zinc-700/80 text-[11px] font-bold">
+                <button @click="setVoice('bella')" 
+                        class="px-2.5 py-1 rounded-full transition-all flex items-center space-x-1"
+                        :class="selectedVoice === 'bella' ? 'bg-orange-500 text-white shadow-sm' : 'text-zinc-400 hover:text-white'">
+                    <span>👩</span>
+                    <span>Bella</span>
+                </button>
+                <button @click="setVoice('adam')" 
+                        class="px-2.5 py-1 rounded-full transition-all flex items-center space-x-1"
+                        :class="selectedVoice === 'adam' ? 'bg-orange-500 text-white shadow-sm' : 'text-zinc-400 hover:text-white'">
+                    <span>👨</span>
+                    <span>Adam</span>
+                </button>
+            </div>
+
+            <!-- Voice Coach Toggle -->
+            <button @click="toggleVoice()" class="flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all"
+                    :class="voiceEnabled ? 'bg-orange-500/15 border-orange-500 text-orange-400 shadow-sm' : 'bg-zinc-800/80 border-zinc-700 text-zinc-400'">
+                <span x-text="voiceEnabled ? '🔊' : '🔇'"></span>
+                <span x-text="voiceEnabled ? 'Sesli Koç' : 'Sessiz'"></span>
+            </button>
+        </div>
     </div>
 
     <!-- Main Player Card -->
@@ -194,6 +213,9 @@
             coachComment: "Hazır olduğunda başla!",
             audioCtx: null,
 
+            selectedVoice: 'bella', // Default to Bella (ElevenLabs high quality studio voice)
+            activeAudio: null,
+
             get currentExercise() {
                 if (!this.exercises || this.exercises.length === 0) return { name: "Egzersiz", sets: 3, reps: 10, rest: 30, slug: "squat" };
                 if (this.currentIndex >= this.exercises.length) {
@@ -208,18 +230,68 @@
             },
 
             init() {
-                // Initialize Web Audio context on user gesture
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (AudioContext) {
                     this.audioCtx = new AudioContext();
                 }
             },
 
+            setVoice(voice) {
+                this.selectedVoice = voice;
+                const name = voice === 'bella' ? 'Bella' : 'Adam';
+                this.playVoiceAudio('welcome.mp3', `${name} koç devrede.`);
+            },
+
             toggleVoice() {
                 this.voiceEnabled = !this.voiceEnabled;
                 if (this.voiceEnabled) {
-                    this.speak("Sesli koç aktif edildi. Yanındayım!");
+                    this.playVoiceAudio('welcome.mp3', "Sesli koç aktif edildi. Yanındayım!");
                 }
+            },
+
+            // Play Studio ElevenLabs Audio with Graceful Fallback
+            playVoiceAudio(filename, fallbackText) {
+                if (!this.voiceEnabled) return;
+                try {
+                    if (this.activeAudio) {
+                        this.activeAudio.pause();
+                        this.activeAudio.currentTime = 0;
+                    }
+                } catch(e) {}
+
+                // Try selected voice folder first (/static/audio/bella/filename)
+                const voicePath = `/static/audio/${this.selectedVoice}/${filename}`;
+                const basePath = `/static/audio/${filename}`;
+
+                const audio = new Audio(voicePath);
+                this.activeAudio = audio;
+
+                audio.play().catch(err => {
+                    // Fallback to base audio path
+                    const fallbackAudio = new Audio(basePath);
+                    this.activeAudio = fallbackAudio;
+                    fallbackAudio.play().catch(e => {
+                        // Ultimate fallback to browser speech if audio is blocked
+                        if (fallbackText) {
+                            this.speakFallback(fallbackText);
+                        }
+                    });
+                });
+            },
+
+            speakFallback(text) {
+                if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
+                try {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'tr-TR';
+                    utterance.rate = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                } catch(e) {}
+            },
+
+            speak(text) {
+                this.speakFallback(text);
             },
 
             // Web Audio Synthesizer: Beeps & Fanfares
@@ -255,26 +327,6 @@
                     setTimeout(() => this.playBeep(freq, 0.25, 'triangle'), idx * 160);
                 });
             },
-
-            // Web Speech API Turkish Voice Coach
-            speak(text) {
-                if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
-                try {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'tr-TR';
-                    utterance.rate = 1.05;
-                    utterance.pitch = 1.0;
-
-                    const voices = window.speechSynthesis.getVoices();
-                    const trVoice = voices.find(v => v.lang.startsWith('tr'));
-                    if (trVoice) utterance.voice = trVoice;
-
-                    window.speechSynthesis.speak(utterance);
-                } catch(e) {
-                    console.log('Speech error:', e);
-                }
-            },
             
             formatTime(seconds) {
                 const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -301,7 +353,8 @@
                 this.playBeep(880, 0.2);
 
                 const exercise = this.currentExercise;
-                this.speak(`Sıradaki hareket: ${exercise.name}. ${exercise.sets} set, ${exercise.reps} tekrar. Hazır ol ve başla!`);
+                // Play ElevenLabs Studio Audio for this exercise!
+                this.playVoiceAudio(`${exercise.slug}.mp3`, `Sıradaki hareket: ${exercise.name}. Hazır ol ve başla!`);
             },
             
             finishExercise() {
@@ -311,30 +364,30 @@
                     this.status = 'completed';
                     clearInterval(this.timerInterval);
                     this.playVictoryFanfare();
-                    this.speak("Tebrikler! Bugünkü antrenmanı harika bir disiplinle bitirdin. Şimdi sonuçlarını kaydet!");
+                    this.playVoiceAudio("finished.mp3", "Tebrikler! Bugünkü antrenmanı harika bir disiplinle bitirdin. Şimdi sonuçlarını kaydet!");
                     return;
                 }
                 
                 this.status = 'resting';
                 this.timeLeft = this.currentExercise.rest || 30;
                 
-                const nextName = this.nextExercise ? this.nextExercise.name : "son bölüm";
-                this.speak(`Güzel iş! ${this.timeLeft} saniye dinlen. Sıradaki hareket: ${nextName}.`);
+                // Play ElevenLabs rest audio
+                this.playVoiceAudio("rest.mp3", `Güzel iş! ${this.timeLeft} saniye dinlen.`);
                 
                 clearInterval(this.restInterval);
                 this.restInterval = setInterval(() => {
                     this.timeLeft--;
 
-                    // 3-2-1 Countdown beeps & speech
+                    // 3-2-1 Countdown audio
                     if (this.timeLeft === 3) {
                         this.playBeep(440, 0.1);
-                        this.speak("Üç");
+                        this.playVoiceAudio("count_3.mp3", "Üç");
                     } else if (this.timeLeft === 2) {
                         this.playBeep(440, 0.1);
-                        this.speak("İki");
+                        this.playVoiceAudio("count_2.mp3", "İki");
                     } else if (this.timeLeft === 1) {
                         this.playBeep(440, 0.1);
-                        this.speak("Bir");
+                        this.playVoiceAudio("count_1.mp3", "Bir");
                     }
 
                     if (this.timeLeft <= 0) {
@@ -347,6 +400,7 @@
                 clearInterval(this.restInterval);
                 this.currentIndex++;
                 this.playBeep(880, 0.2);
+                this.playVoiceAudio("skip_rest.mp3", "Dinlenmeyi geçtin.");
                 this.startExercise();
             },
             

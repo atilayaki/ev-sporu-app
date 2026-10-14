@@ -14,12 +14,19 @@
             ✕
         </button>
 
-        <!-- Center Audio / Sesli Koç Pill -->
-        <button onclick="toggleVoice()" id="voice-btn" 
-                class="px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md">
-            <span id="voice-icon">🔊</span>
-            <span id="voice-text">Sesli Koç</span>
-        </button>
+        <!-- Center Audio / Sesli Koç & Persona Pill -->
+        <div class="flex items-center gap-1.5">
+            <button onclick="toggleVoicePersona()" id="persona-btn" title="Koç Değiştir (Bella / Adam)"
+                    class="px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md flex items-center gap-1 cursor-pointer">
+                <span id="persona-emoji">👩</span>
+                <span id="persona-name">Bella</span>
+            </button>
+            <button onclick="toggleVoice()" id="voice-btn" 
+                    class="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md cursor-pointer">
+                <span id="voice-icon">🔊</span>
+                <span id="voice-text">Sesli Koç</span>
+            </button>
+        </div>
 
         <!-- Right Settings / Guidelines Toggle -->
         <button onclick="toggleGuideModal()" title="Form Kuralları & İpuçları"
@@ -608,7 +615,10 @@
 
     function announceRep(num) {
         if (!voiceEnabled) return;
-        if (num % 5 === 0) {
+        if (num === 1) playCoachAudio('count_1.mp3', 'Bir');
+        else if (num === 2) playCoachAudio('count_2.mp3', 'İki');
+        else if (num === 3) playCoachAudio('count_3.mp3', 'Üç');
+        else if (num % 5 === 0) {
             speakText(`${num}! Harika!`);
         } else if (numberWords[num]) {
             speakText(numberWords[num]);
@@ -708,14 +718,57 @@
         setTimeout(() => playBeep(659.25, 0.12), 80);
     }
 
-    // Turkish Speech Synthesis
+    let currentVoicePersona = 'bella'; // Default Bella (ElevenLabs Studio Voice)
+    let activeCoachAudio = null;
+
+    function toggleVoicePersona() {
+        currentVoicePersona = currentVoicePersona === 'bella' ? 'adam' : 'bella';
+        const emojiEl = document.getElementById('persona-emoji');
+        const nameEl = document.getElementById('persona-name');
+        if (currentVoicePersona === 'bella') {
+            if (emojiEl) emojiEl.innerText = "👩";
+            if (nameEl) nameEl.innerText = "Bella";
+            playCoachAudio('welcome.mp3', "Bella koç devrede.");
+        } else {
+            if (emojiEl) emojiEl.innerText = "👨";
+            if (nameEl) nameEl.innerText = "Adam";
+            playCoachAudio('welcome.mp3', "Adam koç devrede.");
+        }
+    }
+
+    // Play ElevenLabs Studio Audio with Automatic Fallback
+    function playCoachAudio(filename, fallbackText) {
+        if (!voiceEnabled) return;
+        try {
+            if (activeCoachAudio) {
+                activeCoachAudio.pause();
+                activeCoachAudio.currentTime = 0;
+            }
+        } catch(e) {}
+
+        const voicePath = `/static/audio/${currentVoicePersona}/${filename}`;
+        const basePath = `/static/audio/${filename}`;
+
+        const audio = new Audio(voicePath);
+        activeCoachAudio = audio;
+
+        audio.play().catch(() => {
+            const fallbackAudio = new Audio(basePath);
+            activeCoachAudio = fallbackAudio;
+            fallbackAudio.play().catch(() => {
+                if (fallbackText) speakText(fallbackText);
+            });
+        });
+    }
+
+    // Turkish Speech Synthesis (Fallback)
     function speakText(text) {
         if (!voiceEnabled || !('speechSynthesis' in window)) return;
         try {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'tr-TR';
-            utterance.rate = 1.05;
+            utterance.rate = 1.0;
             window.speechSynthesis.speak(utterance);
         } catch(e) {}
     }
@@ -728,12 +781,12 @@
         if (voiceEnabled) {
             textEl.innerText = "Sesli Koç";
             iconEl.innerText = "🔊";
-            btn.className = "px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md";
-            speakText("Sesli koç aktif.");
+            btn.className = "px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md cursor-pointer";
+            playCoachAudio('welcome.mp3', "Sesli koç aktif.");
         } else {
             textEl.innerText = "Sessiz";
             iconEl.innerText = "🔇";
-            btn.className = "px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:bg-black/80 active:scale-95 transition-all shadow-md";
+            btn.className = "px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:bg-black/80 active:scale-95 transition-all shadow-md cursor-pointer";
         }
     }
 
@@ -785,7 +838,7 @@
         formFeedback.innerText = "Pozisyon bekleniyor";
         formFeedback.className = "text-zinc-400 font-bold";
 
-        speakText(conf.voicePrompt);
+        playCoachAudio(`${exKey}.mp3`, conf.voicePrompt);
     }
 
     function updateCalories() {
@@ -1260,7 +1313,7 @@
         document.getElementById('modal-subtitle').innerText = `${exerciseConfig[currentExercise].name} antrenmanın başarıyla tamamlandı!`;
         modal.classList.remove('hidden');
         playSuccessChime();
-        speakText("Tebrikler! Antrenmanın başarıyla kaydedildi.");
+        playCoachAudio('finished.mp3', "Tebrikler! Antrenmanın başarıyla kaydedildi.");
     }
 
     function closeModal() {
@@ -1329,7 +1382,7 @@
         loadingOverlay.classList.add('hidden');
         initCamera();
         setZoomMode(0.5);
-        speakText("Yapay zeka antrenörü hazır. İstediğin hareketi seç ve başla!");
+        playCoachAudio('welcome.mp3', "Yapay zeka antrenörü hazır. İstediğin hareketi seç ve başla!");
     });
 </script>
 {% endblock %}
