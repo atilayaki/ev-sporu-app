@@ -16,8 +16,8 @@
     <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Evde Spor">
     <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 
     <title>{% block title %}Evde Spor{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -156,9 +156,13 @@
         <div class="flex justify-between items-center h-16 md:h-20 gap-4">
             <!-- Left: Logo & Nav Links -->
             <div class="flex items-center gap-4 lg:gap-8 min-w-0">
-                <a href="/" class="shrink-0 text-xl md:text-2xl font-black tracking-tighter uppercase text-white flex items-center gap-1 hover:opacity-90 transition-opacity">
-                    <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-sm shadow-lg shadow-orange-500/30">⚡</span>
-                    <span>EVDE<span class="text-accent">SPOR</span></span>
+                <a href="/" class="shrink-0 text-xl md:text-2xl font-black tracking-tight uppercase text-white flex items-center gap-2.5 group hover:opacity-95 transition-opacity">
+                    <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200 border border-orange-500/30 bg-zinc-950 shrink-0">
+                        <img src="/static/images/app_logo.jpg" alt="Evde Spor Logo" class="w-full h-full object-cover">
+                    </div>
+                    <span class="font-heading font-black tracking-tight text-white flex items-center">
+                        EVDE<span class="text-orange-500 ml-0.5">SPOR</span>
+                    </span>
                 </a>
 
                 <!-- Desktop / Tablet Nav Links -->
