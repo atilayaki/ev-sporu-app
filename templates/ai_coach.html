@@ -3,7 +3,7 @@
 {% block title %}Yapay Zeka Canlı Kamera Koçu - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto py-3 md:py-6 px-2 sm:px-4 space-y-4 md:space-y-6">
+<div class="max-w-6xl mx-auto py-3 md:py-6 px-2 sm:px-4 space-y-4 md:space-y-6 pb-28 sm:pb-12">
     <!-- Header with Breadcrumb and Mode Toggles -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
         <div>
@@ -126,22 +126,22 @@
         <canvas id="output_canvas" class="w-full h-full object-cover"></canvas>
 
         <!-- Initial Start & Permission Loading Screen -->
-        <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-6 text-center backdrop-blur-md">
-            <div class="relative w-24 h-24 mb-6">
+        <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-4 sm:p-6 text-center backdrop-blur-md">
+            <div class="relative w-16 h-16 sm:w-20 sm:h-20 mb-3 sm:mb-5">
                 <div class="absolute inset-0 rounded-full border-4 border-orange-500/20"></div>
                 <div class="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
-                <div class="absolute inset-0 flex items-center justify-center text-4xl">📸</div>
+                <div class="absolute inset-0 flex items-center justify-center text-2xl sm:text-3xl">📸</div>
             </div>
             
-            <h2 class="text-2xl sm:text-3xl font-black text-white font-heading uppercase tracking-tight mb-2" id="loading-title">
+            <h2 class="text-xl sm:text-3xl font-black text-white font-heading uppercase tracking-tight mb-2" id="loading-title">
                 MediaPipe AI Hazırlanıyor...
             </h2>
-            <p class="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed mb-6" id="loading-desc">
+            <p class="text-zinc-400 text-xs sm:text-sm max-w-sm sm:max-w-md mx-auto leading-relaxed mb-4 sm:mb-6" id="loading-desc">
                 Kameranızı Instagram gibi tam boyutta açıp yapay zeka ile hareketlerinizi canlı sayacağız. Görüntüleriniz cihazınızda güvenle işlenir, sunucuya gönderilmez.
             </p>
             
             <button id="start-btn" 
-                    class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm uppercase tracking-wider py-4 px-10 rounded-2xl shadow-xl shadow-orange-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer hidden flex items-center gap-2">
+                    class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs sm:text-sm uppercase tracking-wider py-3.5 sm:py-4 px-8 sm:px-10 rounded-2xl shadow-xl shadow-orange-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer hidden flex items-center gap-2">
                 <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
                 Kamerayı Aç ve Başla
             </button>
