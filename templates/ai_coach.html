@@ -28,14 +28,14 @@
         </button>
     </header>
 
-    <!-- MAIN VIEWFINDER SCREEN (Instagram Rounded Viewport) -->
-    <main class="relative flex-1 w-full mx-auto px-2 sm:px-4 py-0 flex items-center justify-center min-h-0">
+    <!-- MAIN VIEWFINDER SCREEN (Instagram 9:16 Fullscreen Rounded Viewport) -->
+    <main class="relative flex-1 w-full mx-auto px-1 sm:px-4 py-0 flex items-center justify-center min-h-0 overflow-hidden">
         <div id="camera-viewfinder-container" 
-             class="relative w-full h-full max-w-md sm:max-w-xl mx-auto rounded-[32px] sm:rounded-[40px] overflow-hidden bg-zinc-950 border border-white/15 shadow-2xl flex items-center justify-center">
+             class="relative w-full h-full max-w-[420px] mx-auto rounded-[32px] sm:rounded-[40px] overflow-hidden bg-zinc-950 border border-white/15 shadow-2xl flex items-center justify-center aspect-[9/16]">
             
-            <!-- Video & Canvas (True Uncropped Fit) -->
+            <!-- Video & Canvas (True 9:16 Full Bleed, Zero Black Bars) -->
             <video id="webcam" class="hidden" autoplay playsinline muted></video>
-            <canvas id="output_canvas" class="w-full h-full object-contain transition-all duration-300"></canvas>
+            <canvas id="output_canvas" class="w-full h-full object-cover transition-all duration-300"></canvas>
 
             <!-- Loading & Start Overlay -->
             <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-6 text-center backdrop-blur-md">
@@ -317,7 +317,7 @@
     let timerInterval = null;
     let audioCtx = null;
     let camera = null;
-    let isFitContain = true;
+    let isFitContain = false; // default false = 9:16 full screen object-cover (no black bars)
 
     // 12 Exercises Configuration
     const exerciseConfig = {
@@ -1106,6 +1106,7 @@
     // Camera Switcher
     function flipCamera() {
         currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+        canvasElement.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
         if (camera) {
             camera.stop();
             initCamera();
@@ -1113,6 +1114,7 @@
     }
 
     function initCamera() {
+        canvasElement.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
         camera = new Camera(videoElement, {
             onFrame: async () => {
                 await pose.send({image: videoElement});
