@@ -54,22 +54,46 @@
     </div>
 
     <!-- Quick Metric Cards / Social Proof Ribbon -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-        <div class="athletic-card p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm text-center transition-transform hover:-translate-y-1">
-            <span class="block text-3xl lg:text-4xl font-extrabold text-white tracking-tight font-heading">{{ total_exercises }}+</span>
-            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mt-1">Ekipmansız Egzersiz</span>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
+        <!-- Card 1 -->
+        <div class="athletic-card h-28 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-sm flex flex-col items-center justify-center text-center transition-all hover:border-zinc-700">
+            <div class="text-3xl lg:text-4xl font-black text-white font-heading tracking-tight leading-none">
+                {{ total_exercises }}+
+            </div>
+            <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-2.5 whitespace-nowrap">
+                Ekipmansız Egzersiz
+            </div>
         </div>
-        <div class="athletic-card p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm text-center transition-transform hover:-translate-y-1">
-            <span class="block text-3xl lg:text-4xl font-extrabold text-orange-400 tracking-tight font-heading">{{ total_programs }} Program</span>
-            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mt-1">Hedefe Yönelik Kamp</span>
+
+        <!-- Card 2 -->
+        <div class="athletic-card h-28 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-sm flex flex-col items-center justify-center text-center transition-all hover:border-zinc-700">
+            <div class="text-3xl lg:text-4xl font-black text-orange-400 font-heading tracking-tight leading-none flex items-baseline justify-center gap-1.5">
+                <span>{{ total_programs }}</span>
+                <span class="text-lg lg:text-xl font-extrabold text-orange-400/90 tracking-tight">Program</span>
+            </div>
+            <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-2.5 whitespace-nowrap">
+                Hedefe Yönelik Kamp
+            </div>
         </div>
-        <div class="athletic-card p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm text-center transition-transform hover:-translate-y-1">
-            <span class="block text-3xl lg:text-4xl font-extrabold text-emerald-400 tracking-tight font-heading">%100</span>
-            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mt-1">Ücretsiz & Ekipmansız</span>
+
+        <!-- Card 3 -->
+        <div class="athletic-card h-28 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-sm flex flex-col items-center justify-center text-center transition-all hover:border-zinc-700">
+            <div class="text-3xl lg:text-4xl font-black text-emerald-400 font-heading tracking-tight leading-none">
+                %100
+            </div>
+            <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-2.5 whitespace-nowrap">
+                Ücretsiz & Evde
+            </div>
         </div>
-        <div class="athletic-card p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-sm text-center transition-transform hover:-translate-y-1">
-            <span class="block text-3xl lg:text-4xl font-extrabold text-amber-400 tracking-tight font-heading">MediaPipe</span>
-            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mt-1">AI Hareket Sayacı</span>
+
+        <!-- Card 4 -->
+        <div class="athletic-card h-28 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-sm flex flex-col items-center justify-center text-center transition-all hover:border-zinc-700">
+            <div class="text-2xl lg:text-3xl font-black text-amber-400 font-heading tracking-tight leading-none whitespace-nowrap">
+                AI Koç
+            </div>
+            <div class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-2.5 whitespace-nowrap">
+                MediaPipe Hareket Sayacı
+            </div>
         </div>
     </div>
 </section>
