@@ -83,9 +83,28 @@ def create_app():
         # In Vercel / AWS Lambda environment, the root is read-only. Copy to /tmp for read/write support
         if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
             tmp_db = '/tmp/site.db'
+            version_file = '/tmp/db_version.txt'
+            CURRENT_DB_VERSION = '20261014_v3'
             try:
-                if not os.path.exists(tmp_db) and os.path.exists(local_db_path):
+                needs_copy = not os.path.exists(tmp_db)
+                if not needs_copy:
+                    if os.path.exists(version_file):
+                        try:
+                            with open(version_file, 'r') as vf:
+                                if vf.read().strip() != CURRENT_DB_VERSION:
+                                    needs_copy = True
+                        except Exception:
+                            needs_copy = True
+                    else:
+                        needs_copy = True
+
+                if needs_copy and os.path.exists(local_db_path):
                     shutil.copy2(local_db_path, tmp_db)
+                    try:
+                        with open(version_file, 'w') as vf:
+                            vf.write(CURRENT_DB_VERSION)
+                    except Exception:
+                        pass
                 db_url = f'sqlite:///{tmp_db}'
             except Exception as e:
                 print(f"[DB] Error preparing /tmp/site.db: {e}")
