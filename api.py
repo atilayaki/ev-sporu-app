@@ -96,41 +96,92 @@ def get_exercises():
 
 
 
+def generate_tailored_workout(user_prompt, readiness=5):
+    prompt_lower = (user_prompt or '').lower()
+    exercises = Exercise.query.all()
+    
+    # Filter based on prompt keywords
+    selected = []
+    if any(w in prompt_lower for w in ['karın', 'karin', 'core', 'abs']):
+        selected = [e for e in exercises if 'Karın' in (e.muscle_group or '')]
+    elif any(w in prompt_lower for w in ['göğüs', 'gogus', 'şınav', 'sinav', 'push']):
+        selected = [e for e in exercises if 'Göğüs' in (e.muscle_group or '')]
+    elif any(w in prompt_lower for w in ['bacak', 'squat', 'kalça', 'kalca', 'lunge']):
+        selected = [e for e in exercises if 'Bacak' in (e.muscle_group or '')]
+    elif any(w in prompt_lower for w in ['kol', 'omuz', 'biceps', 'triceps', 'dips']):
+        selected = [e for e in exercises if 'Omuz' in (e.muscle_group or '') or 'Kol' in (e.muscle_group or '')]
+    elif any(w in prompt_lower for w in ['sırt', 'sirt', 'pull', 'kanat']):
+        selected = [e for e in exercises if 'Sırt' in (e.muscle_group or '')]
+    elif any(w in prompt_lower for w in ['kardiyo', 'kilo', 'yağ', 'yag', 'hiit', 'kondisyon']):
+        selected = [e for e in exercises if 'Kardiyo' in (e.muscle_group or '')]
+
+    if len(selected) < 4:
+        # Fallback to balanced full body
+        by_group = {}
+        for e in exercises:
+            by_group.setdefault(e.muscle_group, []).append(e)
+        selected = [group[0] for group in by_group.values()]
+
+    selected = selected[:5]
+
+    sets = 2 if readiness < 4 else (4 if readiness > 7 else 3)
+    reps = 8 if readiness < 4 else (15 if readiness > 7 else 12)
+    rest = 45 if readiness < 4 else (20 if readiness > 7 else 30)
+
+    hydrated = []
+    for ex in selected:
+        hydrated.append({
+            'id': ex.id,
+            'name': ex.name,
+            'slug': ex.slug,
+            'description': ex.description,
+            'instructions': ex.instructions,
+            'muscle_group': ex.muscle_group,
+            'difficulty': ex.difficulty,
+            'image_url': f'/static/images/{ex.slug}.jpg',
+            'sets': sets,
+            'reps': reps,
+            'rest_seconds': rest
+        })
+
+    return {
+        'title': 'Kişiye Özel Antrenman',
+        'description': f'Enerji seviyene ({readiness}/10) ve hedeflerine göre uyarlandı.',
+        'exercises': hydrated
+    }
+
 @api_bp.route('/ai-coach/generate', methods=['POST'])
 def ai_coach_generate():
-    api_key = os.environ.get('GEMINI_API_KEY')
-    if not api_key:
-        return jsonify({'success': False, 'message': 'API anahtari (GEMINI_API_KEY) bulunamadi. Lutfen .env dosyasina ekleyin.'}), 500
-        
-    data = request.get_json()
-    if not data or 'prompt' not in data:
+    data = request.get_json() or {}
+    user_prompt = data.get('prompt', '').strip()
+    if not user_prompt:
         return jsonify({'success': False, 'message': 'Prompt gerekli.'}), 400
-        
-    user_prompt = data['prompt']
-    readiness = data.get('readiness', 5)
-    
+
+    readiness = int(data.get('readiness', 5) or 5)
+    api_key = os.environ.get('GEMINI_API_KEY')
+
+    if not api_key:
+        workout = generate_tailored_workout(user_prompt, readiness)
+        return jsonify({'success': True, 'data': workout})
+
     if readiness < 4:
         adaptation = f"Kullanici bugun cok yorgun hissediyor (Enerji: {readiness}/10). Lutfen eklem yormayan, dusuk tekrarlı, esneme veya aktif dinlenme odakli hafif bir antrenman ver."
     elif readiness > 7:
         adaptation = f"Kullanici bugun cok enerjik! (Enerji: {readiness}/10). Onu gercekten zorlayacak, yuksek tekrarlı, patlayici guc gerektiren zor bir antrenman hazirla."
     else:
         adaptation = f"Kullanicinin enerjisi normal seviyede (Enerji: {readiness}/10). Standart, dengeli bir antrenman hazirla."
-        
-    user_prompt = f"{user_prompt} \n\n{adaptation}"
-    
+
+    full_prompt = f"{user_prompt} \n\n{adaptation}"
     exercises = Exercise.query.all()
-    exercise_context = []
-    for e in exercises:
-        exercise_context.append(f"- {e.name} (slug: {e.slug}, kas: {e.muscle_group}, zorluk: {e.difficulty})")
-    
+    exercise_context = [f"- {e.name} (slug: {e.slug}, kas: {e.muscle_group}, zorluk: {e.difficulty})" for e in exercises]
     context_str = '\n'.join(exercise_context)
-    
+
     system_instruction = f'''
     Sen birinci sinif bir kisisel antrenorsun (Evde Spor AI Kocu).
     Kullanicinin belirttigi hedeflere, sureye veya kisitlamalara uygun bir antrenman programi ureteceksin.
     Elindeki gecerli egzersizler sunlardir:
     {context_str}
-    
+
     SADECE asagidaki JSON formatinda yanit ver (asla markdown veya baska bir yazi kullanma):
     [
       {{
@@ -142,21 +193,20 @@ def ai_coach_generate():
     ]
     Egzersiz slug'lari sadece sana verilen listeden olmalidir. Sadece bir JSON array dondur.
     '''
-    
+
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-3.6-flash', system_instruction=system_instruction)
-        response = model.generate_content(user_prompt)
-        
+        model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction)
+        response = model.generate_content(full_prompt)
+
         response_text = response.text.strip()
         if response_text.startswith('```json'):
             response_text = response_text.replace('```json', '')
         if response_text.startswith('```'):
             response_text = response_text.replace('```', '')
         response_text = response_text.strip()
-        
+
         workout_data = json.loads(response_text)
-        
         hydrated_exercises = []
         for item in workout_data:
             ex = Exercise.query.filter_by(slug=item.get('slug')).first()
@@ -174,18 +224,22 @@ def ai_coach_generate():
                     'reps': item.get('reps', 10),
                     'rest_seconds': item.get('rest_seconds', 30)
                 })
-                
+
+        if not hydrated_exercises:
+            raise ValueError("No matching exercises returned by AI")
+
         return jsonify({
             'success': True,
             'data': {
-                'title': 'AI Ozel Antrenman',
-                'description': 'Istegine ozel olarak yapay zeka tarafindan tasarlandi.',
+                'title': 'AI Özel Antrenman',
+                'description': 'İsteğine özel olarak yapay zeka tarafından tasarlandı.',
                 'exercises': hydrated_exercises
             }
         })
-        
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+        # Graceful fallback to deterministic tailoring
+        workout = generate_tailored_workout(user_prompt, readiness)
+        return jsonify({'success': True, 'data': workout})
 
 
 @api_bp.route('/nutrition/analyze', methods=['POST'])
@@ -198,8 +252,10 @@ def analyze_nutrition():
     prompt = """[SYSTEM: STRICT DETERMINISTIC MODE ENABLED] You are an official Nutrition API. Analyze the image to identify the exact food/drink brand and portion size. Step 1: Identify the item (e.g., Fanta Orange 330ml). Step 2: Retrieve the EXACT official nutritional data for that specific portion. For example, a standard 330ml Fanta Orange is ALWAYS exactly 112 kcal, 0g protein, 28g carbs, 0g fat. If you see a branded item, output its OFFICIAL macros, do not estimate or hallucinate. The "food_name" MUST include the portion size. The "food_name" and "analysis_text" MUST BE IN TURKISH. Reply ONLY with a raw JSON object (no markdown). Schema: { "food_name": "Fanta Portakal (330ml)", "calories": 112, "protein_g": 0, "carbs_g": 28, "fat_g": 0, "analysis_text": "Resmi degerlere gore..." }"""
     
     try:
-        import google.generativeai as genai
-        # API key should already be configured by now
+        api_key = os.environ.get('GEMINI_API_KEY')
+        if not api_key:
+            return jsonify({'success': False, 'message': 'API anahtari (GEMINI_API_KEY) tanimli degil.'}), 500
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-3.6-flash')
         
         # Decode base64 to bytes
@@ -271,12 +327,3 @@ def sync_progress():
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Progress synced!'})
-
-@api_bp.route('/debug-db', methods=['GET'])
-def debug_db():
-    import os
-    from flask import current_app
-    return jsonify({
-        'env_url': os.environ.get('DATABASE_URL', 'NOT_SET'),
-        'config_url': current_app.config['SQLALCHEMY_DATABASE_URI']
-    })

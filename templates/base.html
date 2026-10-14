@@ -68,6 +68,7 @@
                         <a href="/" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Anasayfa</a>
                         <a href="/egzersizler" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Egzersizler</a>
                         <a href="/programlar" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Programlar</a>
+                        <a href="/challenges" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Meydan Okuma</a>
                         <a href="/liderlik" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Liderlik</a>
                         <a href="/breathe" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Nefes</a>
                         <a href="/ai-koc" class="hover:text-white transition-colors px-3 py-2 text-sm font-black text-accent uppercase tracking-wide flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> AI KOÇ</a>
@@ -130,80 +131,87 @@
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                   </span>
               </div>
-{% endif %}
               <span class="text-[10px] uppercase font-black mt-1">AI KOÇ</span>
           </a>
           <a href="/programlar" class="flex flex-col items-center text-zinc-500 hover:text-accent">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
               <span class="text-[10px] uppercase font-bold mt-1">Program</span>
           </a>
+          <a href="{% if current_user.is_authenticated %}/profil{% else %}/giris{% endif %}" class="flex flex-col items-center text-zinc-500 hover:text-accent">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              <span class="text-[10px] uppercase font-bold mt-1">{% if current_user.is_authenticated %}Profil{% else %}Giriş{% endif %}</span>
+          </a>
       </div>
+      {% endif %}
 
 
     {% if not hide_nav %}
-<!-- AI Coach Widget -->
-    <div x-data="{ open: false, messages: [{sender: 'ai', text: 'Merhaba! Ben Evde Spor AI Koçun. Sana nasıl yardımcı olabilirim? (Örn: Karın kası nasıl yapılır?, Karnım ağrıyor)'}], input: '' }" 
-         class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-         
+<!-- Koç Asistan Widget -->
+    <div x-data="coachChat()" class="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end">
         <!-- Chat Box -->
-        <div x-show="open" x-transition.opacity.scale.origin.bottom.right style="display: none;" 
+        <div x-show="open" x-transition.opacity.scale.origin.bottom.right style="display: none;"
              class="bg-zinc-900 border border-zinc-700 rounded-2xl w-80 sm:w-96 mb-4 shadow-2xl overflow-hidden flex flex-col">
-            <!-- Header -->
             <div class="bg-gradient-to-r from-zinc-800 to-zinc-900 p-4 border-b border-zinc-700 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black">AI</div>
                     <span class="font-bold text-white uppercase tracking-widest text-sm">Koç Asistan</span>
                 </div>
-                <button @click="open = false" class="text-zinc-400 hover:text-white transition-colors">
+                <button @click="open = false" aria-label="Kapat" class="text-zinc-400 hover:text-white transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-{% endif %}
-            
-            <!-- Messages -->
-            <div class="p-4 h-64 overflow-y-auto flex flex-col gap-3 bg-zinc-900/50" id="chat-messages">
+            <div class="p-4 h-64 overflow-y-auto flex flex-col gap-3 bg-zinc-900/50" x-ref="box">
                 <template x-for="(msg, index) in messages" :key="index">
                     <div :class="msg.sender === 'user' ? 'self-end bg-accent text-white' : 'self-start bg-zinc-800 text-zinc-300'" class="px-4 py-2 rounded-2xl max-w-[85%] text-sm">
                         <span x-text="msg.text"></span>
+                        <template x-if="msg.link"><a :href="msg.link.href" class="block mt-1 text-accent font-bold underline" x-text="msg.link.label"></a></template>
                     </div>
                 </template>
             </div>
-            
-            <!-- Input -->
-            <div class="p-3 bg-zinc-900 border-t border-zinc-800 flex gap-2">
-                <input type="text" x-model="input" @keydown.enter="
-                    if(input.trim() !== '') {
-                        messages.push({sender: 'user', text: input});
-                        const query = input.toLowerCase();
-                        let reply = 'Şu anda sistemim güncelleniyor, detaylı bilgi için antrenmanlara göz atabilirsin!';
-                        if(query.includes('ağrı')) reply = 'Kas ağrısı yaşıyorsan bugün dinlenmeni veya sadece esneme/nefes egzersizi yapmanı öneririm.';
-                        if(query.includes('karın')) reply = 'Karın kası için 21 Günlük Karın Kası meydan okumasına katılabilirsin!';
-                        if(query.includes('kilo')) reply = 'Kilo vermek için kalori açığı oluşturmalı ve kardiyo ağırlıklı antrenmanlar (Jumping Jack vb.) yapmalısın.';
-                        
-                        input = '';
-                        setTimeout(() => {
-                            messages.push({sender: 'ai', text: reply});
-                            const box = document.getElementById('chat-messages');
-                            box.scrollTop = box.scrollHeight;
-                        }, 600);
-                        setTimeout(() => {
-                            const box = document.getElementById('chat-messages');
-                            box.scrollTop = box.scrollHeight;
-                        }, 50);
-                    }
-                " placeholder="Koç'a soru sor..." class="flex-grow bg-zinc-800 border-none rounded-xl px-4 py-2 text-sm text-white focus:ring-1 focus:ring-accent outline-none">
-                <button @click=".input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}))" class="bg-accent text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-orange-500 transition-colors">
+            <form @submit.prevent="send()" class="p-3 bg-zinc-900 border-t border-zinc-800 flex gap-2">
+                <input type="text" x-model="input" placeholder="Koç'a soru sor..." class="flex-grow bg-zinc-800 border-none rounded-xl px-4 py-2 text-sm text-white focus:ring-1 focus:ring-accent outline-none">
+                <button type="submit" aria-label="Gönder" class="bg-accent text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-orange-500 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 </button>
-            </div>
+            </form>
         </div>
-        
         <!-- Floating Button -->
-        <button @click="open = !open" :class="open ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-accent text-white shadow-[0_0_20px_rgba(234,88,12,0.5)] animate-bounce'" class="w-14 h-14 rounded-full flex items-center justify-center transition-all">
+        <button @click="open = !open" aria-label="Koç Asistanı aç" :class="open ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-accent text-white shadow-[0_0_20px_rgba(234,88,12,0.5)]'" class="w-14 h-14 rounded-full flex items-center justify-center transition-all">
             <svg x-show="!open" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
             <svg x-show="open" style="display:none;" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
+    <script>
+    function coachChat() {
+        const rules = [
+            { k: ['ağrı', 'agri', 'sakat', 'acı'], t: 'Kas ağrısı varsa bugün dinlen ya da hafif esneme/nefes çalış. Keskin veya eklem ağrısında bir uzmana danış.', link: { href: '/breathe', label: 'Nefes egzersizine git →' } },
+            { k: ['karın', 'karin', 'core', 'abs'], t: 'Karın için 21 Günlük Karın ve Core programını öneririm.', link: { href: '/programlar/21-gunluk-karin-ve-core', label: 'Programı aç →' } },
+            { k: ['kilo', 'yağ', 'yag', 'zayıf', 'zayif'], t: 'Yağ yakımı için kalori açığı + HIIT kombinasyonu en etkilisi.', link: { href: '/programlar/14-gunluk-hiit-yag-yakimi', label: 'HIIT programını aç →' } },
+            { k: ['yeni', 'başla', 'basla', 'acemi'], t: 'Yeni başlıyorsan 7 Günlük Başlangıç programı tam sana göre.', link: { href: '/programlar/7-gunluk-baslangic', label: 'Başlangıç programı →' } },
+            { k: ['göğüs', 'gogus', 'şınav', 'sinav', 'kol', 'omuz'], t: 'Üst vücut için şınav varyasyonlarıyla başla.', link: { href: '/egzersizler?q=push', label: 'Şınav egzersizleri →' } },
+            { k: ['bacak', 'squat', 'kalça', 'kalca'], t: 'Bacak ve kalça için squat, lunge ve glute bridge temel hareketler.', link: { href: '/egzersizler?q=squat', label: 'Squat egzersizleri →' } },
+            { k: ['program', 'plan', 'antrenman'], t: 'Sana özel antrenman için AI Koç sayfasını dene.', link: { href: '/ai-koc', label: 'AI Koç →' } },
+        ];
+        return {
+            open: false, input: '',
+            messages: [{ sender: 'ai', text: 'Merhaba! Ben Koç Asistanın. Hedefini yaz (örn: "karın", "kilo vermek", "yeni başlıyorum").' }],
+            send() {
+                const text = this.input.trim();
+                if (!text) return;
+                this.messages.push({ sender: 'user', text });
+                this.input = '';
+                const q = text.toLocaleLowerCase('tr-TR');
+                const hit = rules.find(r => r.k.some(k => q.includes(k)));
+                const reply = hit ? { sender: 'ai', text: hit.t, link: hit.link }
+                    : { sender: 'ai', text: 'Bunu tam anlayamadım. Kişisel program için AI Koç\'u deneyebilirsin.', link: { href: '/ai-koc', label: 'AI Koç →' } };
+                this.scroll();
+                setTimeout(() => { this.messages.push(reply); this.scroll(); }, 500);
+            },
+            scroll() { this.$nextTick(() => { this.$refs.box.scrollTop = this.$refs.box.scrollHeight; }); }
+        };
+    }
+    </script>
+    {% endif %}
 
 </body>
 </html>

@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% block title %}{{ challenge.title }} - Evde Spor{% endblock %}
 
 {% block content %}
@@ -85,8 +85,9 @@
                                 </a>
                             {% endfor %}
                             {% if is_current %}
-                                <!-- Basit bir simüle buton, normalde bu arka planda user_challenge tablosunu güncellemeli -->
-                                <button class="mt-2 bg-accent hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-lg text-sm uppercase tracking-widest transition-colors w-full">Günü Tamamla</button>
+                                <form action="/challenges/{{ challenge.slug }}/tamamla" method="POST">
+                                    <button type="submit" class="mt-2 bg-accent hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-lg text-sm uppercase tracking-widest transition-colors w-full">Günü Tamamla</button>
+                                </form>
                             {% endif %}
                         </div>
                     {% else %}

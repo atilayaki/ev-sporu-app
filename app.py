@@ -14,6 +14,39 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import shutil
 from datetime import datetime, date
+from urllib.parse import urlparse
+
+
+def update_streak(user):
+    """Update the user's daily streak; call when a workout is completed."""
+    if (datetime.utcnow().hour + 3) % 24 >= 22:  # Türkiye saati (UTC+3)
+        award_badge(user, 'Gece Kuşu')
+    today = date.today()
+    if user.last_active_date == today:
+        return
+    if user.last_active_date and (today - user.last_active_date).days == 1:
+        user.current_streak = (user.current_streak or 0) + 1
+    else:
+        user.current_streak = 1
+    if user.current_streak > (user.longest_streak or 0):
+        user.longest_streak = user.current_streak
+    user.last_active_date = today
+    if user.current_streak >= 7:
+        award_badge(user, 'Disiplin Abidesi')
+
+
+def award_badge(user, badge_name):
+    badge = Badge.query.filter_by(name=badge_name).first()
+    if badge and not UserBadge.query.filter_by(user_id=user.id, badge_id=badge.id).first():
+        db.session.add(UserBadge(user_id=user.id, badge_id=badge.id))
+
+
+def is_safe_next(target):
+    """Only allow relative redirects (prevents open-redirect via ?next=)."""
+    if not target:
+        return False
+    parsed = urlparse(target)
+    return not parsed.netloc and not parsed.scheme and target.startswith('/')
 
 def create_app():
     app = Flask(__name__)
@@ -153,9 +186,12 @@ def create_app():
     def program_detail(slug):
         program = Program.query.filter_by(slug=slug).first_or_404()
         user_program = None
+        is_rest_day = False
         if current_user.is_authenticated:
             user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first()
-        return render_template('program_detail.html', program=program, user_program=user_program)
+            if user_program and user_program.current_day <= program.duration_days:
+                is_rest_day = not any(pe.day_number == user_program.current_day for pe in program.exercises)
+        return render_template('program_detail.html', program=program, user_program=user_program, is_rest_day=is_rest_day)
 
     @app.route('/programlar/<slug>/katil', methods=['POST'])
     @login_required
@@ -175,13 +211,29 @@ def create_app():
         program = Program.query.filter_by(slug=slug).first_or_404()
         user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
         
+        if user_program.current_day > program.duration_days:
+            flash('Bu programı zaten tamamladın!', 'success')
+            return redirect(url_for('program_detail', slug=slug))
+        
         # Get exercises for current day
         day_exercises = [pe for pe in program.exercises if pe.day_number == user_program.current_day]
         if not day_exercises:
-            flash('Bu gün için egzersiz bulunamadı!', 'error')
+            flash('Bugün dinlenme günü. Kaslarının toparlanmasına izin ver!', 'info')
             return redirect(url_for('program_detail', slug=slug))
             
         return render_template('workout_player.html', program=program, user_program=user_program, exercises=day_exercises)
+
+    @app.route('/programlar/<slug>/dinlenme', methods=['POST'])
+    @login_required
+    def complete_rest_day(slug):
+        program = Program.query.filter_by(slug=slug).first_or_404()
+        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
+        has_exercises = any(pe.day_number == user_program.current_day for pe in program.exercises)
+        if not has_exercises and user_program.current_day <= program.duration_days:
+            user_program.current_day += 1
+            db.session.commit()
+            flash('Dinlenme günü tamamlandı. Yarın devam!', 'success')
+        return redirect(url_for('program_detail', slug=slug))
 
     @app.route('/programlar/<slug>/tamamla', methods=['POST'])
     @login_required
@@ -190,8 +242,8 @@ def create_app():
         user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
         
         data = request.get_json() or {}
-        total_duration = data.get('duration_spent', 0)
-        total_calories = data.get('calories_burned', 0)
+        total_duration = int(data.get('duration_spent', 0) or 0)
+        total_calories = int(data.get('calories_burned', 0) or 0)
         
         progress = UserProgress(
             user_id=current_user.id,
@@ -207,13 +259,12 @@ def create_app():
             log = DailyLog(user_id=current_user.id, log_date=today, calories_consumed=0, water_ml=0)
             db.session.add(log)
         
-        if user_program.current_day < program.duration_days:
+        # Allow current_day to pass duration_days so the program can be marked completed
+        if user_program.current_day <= program.duration_days:
             user_program.current_day += 1
-            
-        first_badge = Badge.query.filter_by(name='İlk Adım').first()
-        if first_badge and not UserBadge.query.filter_by(user_id=current_user.id, badge_id=first_badge.id).first():
-            ub = UserBadge(user_id=current_user.id, badge_id=first_badge.id)
-            db.session.add(ub)
+        
+        update_streak(current_user)
+        award_badge(current_user, 'İlk Adım')
             
         db.session.commit()
         return jsonify({'success': True, 'redirect': url_for('program_detail', slug=slug)})
@@ -260,7 +311,7 @@ def create_app():
                 login_user(user, remember=True)
                 next_page = request.args.get('next')
                 flash('Başarıyla giriş yaptınız!', 'success')
-                return redirect(next_page) if next_page else redirect(url_for('index'))
+                return redirect(next_page) if is_safe_next(next_page) else redirect(url_for('index'))
             else:
                 flash('Giriş başarısız. Lütfen e-posta ve şifrenizi kontrol edin.', 'danger')
         return render_template('login.html', form=form)
@@ -321,21 +372,8 @@ def create_app():
             calories_burned=exercise.calories_estimate or 10
         )
         
-        today = date.today()
-        if current_user.last_active_date != today:
-            if current_user.last_active_date:
-                diff = (today - current_user.last_active_date).days
-                if diff == 1:
-                    current_user.current_streak += 1
-                else:
-                    current_user.current_streak = 1
-            else:
-                current_user.current_streak = 1
-            
-            if current_user.current_streak > current_user.longest_streak:
-                current_user.longest_streak = current_user.current_streak
-                
-            current_user.last_active_date = today
+        update_streak(current_user)
+        award_badge(current_user, 'İlk Kan')
 
         db.session.add(progress)
         db.session.commit()
@@ -383,6 +421,29 @@ def create_app():
             
         days = ChallengeDay.query.filter_by(challenge_id=challenge.id).order_by(ChallengeDay.day_number).all()
         return render_template('challenge_detail.html', challenge=challenge, user_challenge=user_challenge, days=days)
+
+    @app.route('/challenges/<slug>/tamamla', methods=['POST'])
+    @login_required
+    def complete_challenge_day(slug):
+        challenge = Challenge.query.filter_by(slug=slug).first_or_404()
+        user_challenge = UserChallenge.query.filter_by(user_id=current_user.id, challenge_id=challenge.id).first_or_404()
+        if user_challenge.current_day <= challenge.duration_days:
+            day = ChallengeDay.query.filter_by(challenge_id=challenge.id, day_number=user_challenge.current_day).first()
+            duration = 0
+            calories = 0
+            if day:
+                for ce in day.exercises:
+                    duration += (ce.exercise.duration_seconds or 45) * (ce.sets or 1)
+                    calories += (ce.exercise.calories_estimate or 5) * (ce.sets or 1)
+            db.session.add(UserProgress(user_id=current_user.id, duration_spent=duration, calories_burned=calories))
+            user_challenge.current_day += 1
+            update_streak(current_user)
+            db.session.commit()
+            if user_challenge.current_day > challenge.duration_days:
+                flash(f'Tebrikler! {challenge.title} meydan okumasını tamamladın! 🏆', 'success')
+            else:
+                flash(f'Gün {user_challenge.current_day - 1} tamamlandı! Yarın görüşürüz.', 'success')
+        return redirect(url_for('challenge_detail', slug=slug))
 
     @app.route('/api/calories', methods=['POST'])
     @login_required
