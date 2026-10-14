@@ -33,9 +33,12 @@
         <div id="camera-viewfinder-container" 
              class="relative w-full h-full max-w-[420px] mx-auto rounded-[32px] sm:rounded-[40px] overflow-hidden bg-zinc-950 border border-white/15 shadow-2xl flex items-center justify-center aspect-[9/16]">
             
-            <!-- Video & Canvas (True 9:16 Full Bleed, Zero Black Bars) -->
+            <!-- Ambient Glow / Blur Video Background (Eliminates harsh black bars in 0.5x Ultra-Wide mode) -->
+            <canvas id="ambient_canvas" class="absolute inset-0 w-full h-full object-cover filter blur-3xl opacity-50 scale-110 pointer-events-none transition-opacity duration-300"></canvas>
+
+            <!-- Video & Canvas (iPhone 15 Pro Max True Ultra-Wide & 9:16 Display) -->
             <video id="webcam" class="hidden" autoplay playsinline muted></video>
-            <canvas id="output_canvas" class="w-full h-full object-cover transition-all duration-300"></canvas>
+            <canvas id="output_canvas" class="w-full h-full object-contain transition-all duration-300 relative z-10"></canvas>
 
             <!-- Loading & Start Overlay -->
             <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-6 text-center backdrop-blur-md">
@@ -110,14 +113,33 @@
                     </div>
                 </div>
 
-                <!-- Bottom Center: Angle & Real-time Form Feedback Pill -->
-                <div class="flex items-center justify-center gap-2 pb-1" id="feedback-dock">
-                    <div id="angle-pill" class="px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-lg">
-                        <span class="w-2 h-2 rounded-full bg-orange-400"></span>
-                        <span id="angle-text">Açı: --°</span>
+                <!-- Bottom Center: iPhone 15 Pro Max Zoom Dial & Feedback Pills -->
+                <div class="flex flex-col items-center justify-center gap-2 pb-1" id="feedback-dock">
+                    
+                    <!-- iPhone 15 Pro Max Focal Length / Zoom Dial (0.5x Ultra-Wide • 1x Standart • 2x Telephoto) -->
+                    <div class="flex items-center p-1 rounded-full bg-black/70 backdrop-blur-xl border border-white/20 shadow-2xl pointer-events-auto">
+                        <button onclick="setZoomMode(0.5)" id="zoom-btn-05" title="0.5x Ultra Geniş Açı (Tüm Vücut Fitness Açısı)"
+                                class="px-3 py-1 rounded-full text-xs font-black transition-all bg-amber-400 text-black shadow-lg">
+                            0.5×
+                        </button>
+                        <button onclick="setZoomMode(1)" id="zoom-btn-1" title="1x Standart Kadraj"
+                                class="px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all">
+                            1×
+                        </button>
+                        <button onclick="setZoomMode(2)" id="zoom-btn-2" title="2x Yakın Plan"
+                                class="px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all">
+                            2×
+                        </button>
                     </div>
-                    <div id="form-pill" class="px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                        <span id="form-feedback">Pozisyon bekleniyor</span>
+
+                    <div class="flex items-center justify-center gap-2">
+                        <div id="angle-pill" class="px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-lg">
+                            <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+                            <span id="angle-text">Açı: --°</span>
+                        </div>
+                        <div id="form-pill" class="px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                            <span id="form-feedback">Pozisyon bekleniyor</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -305,6 +327,9 @@
     const startBtn = document.getElementById('start-btn');
     const container = document.getElementById('camera-viewfinder-container');
 
+    const ambientCanvas = document.getElementById('ambient_canvas');
+    const ambientCanvasCtx = ambientCanvas ? ambientCanvas.getContext('2d') : null;
+
     let currentExercise = 'squat';
     let reps = 0;
     let holdSeconds = 0;
@@ -316,8 +341,9 @@
     let currentFacingMode = 'user';
     let timerInterval = null;
     let audioCtx = null;
-    let camera = null;
-    let isFitContain = false; // default false = 9:16 full screen object-cover (no black bars)
+    let currentStream = null;
+    let cameraAnimationId = null;
+    let currentZoomMode = 0.5; // Default 0.5x Ultra-Wide for whole body fitness view
 
     // 12 Exercises Configuration
     const exerciseConfig = {
@@ -497,37 +523,73 @@
         });
     }
 
-    // Toggle Fit Mode (Geniş Kadraj / Kesilme Yok vs Doldur)
-    function toggleFitMode() {
-        isFitContain = !isFitContain;
-        const btn = document.getElementById('fit-mode-btn');
-        if (isFitContain) {
-            canvasElement.className = "w-full h-full object-contain transition-all duration-300";
-            btn.innerHTML = "🔍";
-            btn.title = "Geniş Kadraj (Kesilme Yok)";
-            btn.classList.add('text-orange-400');
-            speakText("Geniş kadraj.");
-        } else {
-            canvasElement.className = "w-full h-full object-cover transition-all duration-300";
-            btn.innerHTML = "🔲";
-            btn.title = "Ekranı Doldur";
-            btn.classList.remove('text-orange-400');
-            speakText("Doldurma modu.");
+    // iPhone 15 Pro Max Zoom Controller (0.5x Ultra-Wide, 1x Standard, 2x Telephoto)
+    function setZoomMode(zoom) {
+        currentZoomMode = zoom;
+        const btn05 = document.getElementById('zoom-btn-05');
+        const btn1 = document.getElementById('zoom-btn-1');
+        const btn2 = document.getElementById('zoom-btn-2');
+        const fitBtn = document.getElementById('fit-mode-btn');
+
+        if (btn05) btn05.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all";
+        if (btn1) btn1.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all";
+        if (btn2) btn2.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all";
+
+        if (zoom === 0.5) {
+            if (btn05) btn05.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-amber-400 text-black shadow-lg scale-105";
+            canvasElement.className = "w-full h-full object-contain transition-all duration-300 relative z-10";
+            if (ambientCanvas) ambientCanvas.style.opacity = "0.5";
+            if (fitBtn) {
+                fitBtn.innerHTML = "0.5×";
+                fitBtn.classList.add('text-amber-400');
+            }
+            speakText("0.5x Ultra geniş açı.");
+        } else if (zoom === 1) {
+            if (btn1) btn1.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-white text-black shadow-lg scale-105";
+            canvasElement.className = "w-full h-full object-cover transition-all duration-300 relative z-10";
+            if (ambientCanvas) ambientCanvas.style.opacity = "0";
+            if (fitBtn) {
+                fitBtn.innerHTML = "1×";
+                fitBtn.classList.remove('text-amber-400');
+            }
+            speakText("1x Standart kadraj.");
+        } else if (zoom === 2) {
+            if (btn2) btn2.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-white text-black shadow-lg scale-105";
+            canvasElement.className = "w-full h-full object-cover scale-125 transition-all duration-300 relative z-10";
+            if (ambientCanvas) ambientCanvas.style.opacity = "0";
+            if (fitBtn) {
+                fitBtn.innerHTML = "2×";
+                fitBtn.classList.remove('text-amber-400');
+            }
+            speakText("2x Yakın plan.");
         }
+
+        applyHardwareZoom(zoom);
     }
 
-    // Force Ultra-Wide or Minimum Zoom on Hardware Camera
-    function applyMinZoom() {
+    function toggleFitMode() {
+        if (currentZoomMode === 0.5) setZoomMode(1);
+        else if (currentZoomMode === 1) setZoomMode(2);
+        else setZoomMode(0.5);
+    }
+
+    // Hardware Zoom via MediaStream Track Constraints (Supported on iPhone 15 Pro Max & Android)
+    function applyHardwareZoom(zoomVal) {
         try {
-            if (videoElement.srcObject) {
-                const tracks = videoElement.srcObject.getVideoTracks();
+            if (currentStream) {
+                const tracks = currentStream.getVideoTracks();
                 if (tracks && tracks.length > 0) {
                     const track = tracks[0];
                     if (track.getCapabilities) {
                         const caps = track.getCapabilities();
                         if (caps.zoom) {
+                            let target = 1.0;
+                            if (zoomVal === 0.5) target = caps.zoom.min || 1.0;
+                            else if (zoomVal === 1) target = Math.max(caps.zoom.min || 1.0, 1.0);
+                            else if (zoomVal === 2) target = Math.min(caps.zoom.max || 2.0, 2.0);
+
                             track.applyConstraints({
-                                advanced: [{ zoom: caps.zoom.min || 1.0 }]
+                                advanced: [{ zoom: target }]
                             }).catch(() => {});
                         }
                     }
@@ -754,6 +816,16 @@
                 canvasElement.height = videoElement.videoHeight;
             }
         }
+
+        // Draw ambient glow for 0.5x Ultra-Wide mode (eliminates dark voids seamlessly)
+        if (ambientCanvas && currentZoomMode === 0.5 && ambientCanvasCtx) {
+            if (ambientCanvas.width !== 160 || ambientCanvas.height !== 284) {
+                ambientCanvas.width = 160;
+                ambientCanvas.height = 284;
+            }
+            ambientCanvasCtx.drawImage(results.image, 0, 0, ambientCanvas.width, ambientCanvas.height);
+        }
+
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
@@ -1103,29 +1175,80 @@
         }
     }
 
-    // Camera Switcher
+    // Camera Controller (iPhone 15 Pro Max Pro Specs & High Resolution)
     function flipCamera() {
         currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
         canvasElement.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
-        if (camera) {
-            camera.stop();
-            initCamera();
+        if (ambientCanvas) {
+            ambientCanvas.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
         }
+        initCamera();
     }
 
-    function initCamera() {
+    async function initCamera() {
         canvasElement.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
-        camera = new Camera(videoElement, {
-            onFrame: async () => {
-                await pose.send({image: videoElement});
-            },
-            width: 720,
-            height: 1280,
-            facingMode: currentFacingMode
-        });
-        camera.start().then(() => {
-            setTimeout(applyMinZoom, 1000);
-        });
+        if (ambientCanvas) {
+            ambientCanvas.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+
+        if (currentStream) {
+            try {
+                currentStream.getTracks().forEach(t => t.stop());
+            } catch(e) {}
+            currentStream = null;
+        }
+        if (cameraAnimationId) {
+            cancelAnimationFrame(cameraAnimationId);
+            cameraAnimationId = null;
+        }
+
+        // iPhone 15 Pro Max Ultra-Wide High Definition Constraints (Up to 1080p/4K 60fps)
+        const constraints = {
+            audio: false,
+            video: {
+                facingMode: currentFacingMode,
+                width: { ideal: 1920, min: 1280 },
+                height: { ideal: 1080, min: 720 },
+                frameRate: { ideal: 60, min: 30 }
+            }
+        };
+
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (err) {
+            console.warn("High-res stream unavailable, falling back to basic:", err);
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: currentFacingMode }
+                });
+            } catch (fatal) {
+                alert("Kamera erişimi sağlanamadı: " + fatal.message);
+                return;
+            }
+        }
+
+        videoElement.srcObject = currentStream;
+        await videoElement.play();
+
+        // Apply hardware zoom setting
+        applyHardwareZoom(currentZoomMode);
+
+        // Active MediaPipe rendering loop with frame rate throttling guard
+        let isProcessing = false;
+        async function renderLoop() {
+            if (!videoElement.paused && !videoElement.ended && videoElement.readyState >= 2) {
+                if (!isProcessing) {
+                    isProcessing = true;
+                    try {
+                        await pose.send({ image: videoElement });
+                    } catch(e) {}
+                    isProcessing = false;
+                }
+            }
+            cameraAnimationId = requestAnimationFrame(renderLoop);
+        }
+        renderLoop();
     }
 
     // Celebration Modal
@@ -1205,6 +1328,7 @@
     startBtn.addEventListener('click', () => {
         loadingOverlay.classList.add('hidden');
         initCamera();
+        setZoomMode(0.5);
         speakText("Yapay zeka antrenörü hazır. İstediğin hareketi seç ve başla!");
     });
 </script>
