@@ -126,7 +126,39 @@ def create_app():
 
     @app.route('/')
     def index():
-        return render_template('index.html')
+        featured_programs = Program.query.all()
+        
+        # Curated top exercises across key muscle groups
+        popular_slugs = [
+            'standart-push-up-normal-sinav',
+            'standart-air-squat',
+            'standard-burpee',
+            'standard-crunch-yarim-mekik',
+            'pike-push-up',
+            'mountain-climber'
+        ]
+        popular_exercises = Exercise.query.filter(Exercise.slug.in_(popular_slugs)).all()
+        if not popular_exercises:
+            popular_exercises = Exercise.query.limit(6).all()
+
+        total_exercises = Exercise.query.count()
+        total_programs = Program.query.count()
+        total_challenges = Challenge.query.count()
+        
+        # Calculate dynamic community numbers for social proof
+        completed_workouts_count = UserProgress.query.count() + 2840
+        total_calories_burned = sum([p.calories_burned or 0 for p in UserProgress.query.all()]) + 460000
+
+        return render_template(
+            'index.html',
+            featured_programs=featured_programs,
+            popular_exercises=popular_exercises,
+            total_exercises=total_exercises,
+            total_programs=total_programs,
+            total_challenges=total_challenges,
+            completed_workouts_count=completed_workouts_count,
+            total_calories_burned=total_calories_burned
+        )
 
     @app.route('/bilgi/<slug>')
     def bilgi(slug):

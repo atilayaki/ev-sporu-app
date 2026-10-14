@@ -65,40 +65,52 @@
 </head>
 <body class="font-sans min-h-screen flex flex-col antialiased pb-16 md:pb-0">
     
-    {% if not hide_nav %}
+{% if not hide_nav %}
 <nav class="glass-nav sticky top-0 z-50 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center">
-                    <a href="/" class="flex-shrink-0 text-2xl font-black tracking-tighter uppercase text-white">
-                        EVDE <span class="text-accent">SPOR</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <!-- Left: Logo & Nav Links -->
+            <div class="flex items-center space-x-6 xl:space-x-10">
+                <a href="/" class="flex-shrink-0 text-xl md:text-2xl font-black tracking-tighter uppercase text-white flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+                    <span>EVDE</span><span class="text-accent">SPOR</span>
+                </a>
+                
+                <!-- Desktop Nav Links -->
+                <div class="hidden lg:flex items-center space-x-1 xl:space-x-2">
+                    <a href="/" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Anasayfa</a>
+                    <a href="/egzersizler" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Egzersizler</a>
+                    <a href="/programlar" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Programlar</a>
+                    <a href="/challenges" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide whitespace-nowrap">Meydan Okuma</a>
+                    <a href="/liderlik" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Liderlik</a>
+                    <a href="/breathe" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Nefes</a>
+                    <a href="/ai-koc" class="bg-gradient-to-r from-orange-500/15 to-amber-500/15 hover:from-orange-500 hover:to-amber-500 border border-orange-500/40 text-orange-400 hover:text-white transition-all px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-[0_0_15px_-3px_rgba(234,88,12,0.4)] ml-1">
+                        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+                        <span>AI KOÇ</span>
                     </a>
-                    <div class="hidden md:ml-12 md:flex md:space-x-4">
-                        <a href="/" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Anasayfa</a>
-                        <a href="/egzersizler" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Egzersizler</a>
-                        <a href="/programlar" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Programlar</a>
-                        <a href="/challenges" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Meydan Okuma</a>
-                        <a href="/liderlik" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Liderlik</a>
-                        <a href="/breathe" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-400 uppercase tracking-wide">Nefes</a>
-                        <a href="/ai-koc" class="hover:text-white transition-colors px-3 py-2 text-sm font-black text-accent uppercase tracking-wide flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg> AI KOÇ</a>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <form action="/egzersizler" method="GET" class="hidden sm:block relative">
-                        <input type="text" name="q" placeholder="Egzersiz ara..." class="bg-zinc-900 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-1 focus:ring-accent placeholder-zinc-500 border border-zinc-800 text-sm">
-                    </form>
-                    
-                    {% if current_user.is_authenticated %}
-                        <a href="/profil" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-300">Profilim</a>
-                        <a href="/cikis" class="hover:text-red-500 transition-colors px-3 py-2 text-sm font-semibold text-zinc-500">Çıkış</a>
-                    {% else %}
-                        <a href="/giris" class="hover:text-accent transition-colors px-3 py-2 text-sm font-semibold text-zinc-300">Giriş</a>
-                        <a href="/kayit" class="bg-accent hover:bg-accentHover text-white px-5 py-2 rounded-md text-sm font-bold transition-colors">Kayıt Ol</a>
-                    {% endif %}
                 </div>
             </div>
+
+            <!-- Right: Search & User Auth -->
+            <div class="flex items-center space-x-3">
+                <form action="/egzersizler" method="GET" class="hidden xl:block relative">
+                    <input type="text" name="q" placeholder="Egzersiz ara..." class="bg-zinc-900/90 text-white pl-8 pr-3 py-1.5 rounded-full focus:outline-none focus:ring-1 focus:ring-accent placeholder-zinc-500 border border-zinc-800 text-xs w-32 xl:w-44 focus:w-52 transition-all">
+                    <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </form>
+                
+                {% if current_user.is_authenticated %}
+                    <a href="/profil" class="hover:text-accent transition-colors px-3 py-1.5 text-xs md:text-sm font-bold text-zinc-200 uppercase tracking-wide flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-lg">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Profilim</span>
+                    </a>
+                    <a href="/cikis" class="hover:text-red-400 transition-colors px-2.5 py-1.5 text-xs md:text-sm font-semibold text-zinc-500">Çıkış</a>
+                {% else %}
+                    <a href="/giris" class="hover:text-white text-zinc-300 px-3 py-1.5 text-xs md:text-sm font-bold transition-colors">Giriş</a>
+                    <a href="/kayit" class="bg-accent hover:bg-orange-500 text-white px-4 py-2 rounded-xl text-xs md:text-sm font-black uppercase tracking-wider transition-all shadow-md shadow-orange-500/20">Kayıt Ol</a>
+                {% endif %}
+            </div>
         </div>
-    </nav>
+    </div>
+</nav>
 {% endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -223,7 +235,7 @@
     {% endif %}
 
     <!-- PWA Install Banner & Service Worker Registration -->
-    <div x-data="pwaInstall()" x-show="showBanner" x-cloak class="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-6 md:right-auto md:max-w-md z-50 bg-zinc-900/95 border border-orange-500/40 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4 transition-all">
+    <div x-data="pwaInstall()" x-show="showBanner" x-cloak class="fixed bottom-24 md:bottom-6 right-4 md:right-6 left-4 md:left-auto md:max-w-sm z-50 bg-zinc-950/95 border border-orange-500/40 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 transition-all">
         <div class="flex items-center space-x-3">
             <img src="/static/images/icon-192.png" alt="Evde Spor" class="w-12 h-12 rounded-xl object-cover border border-orange-500/50 shadow-md">
             <div>
