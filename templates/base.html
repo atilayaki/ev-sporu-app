@@ -236,15 +236,11 @@
       {% endif %}
     {% endwith %}
 
-    {% if hide_nav %}
-    <main class="w-full min-h-screen p-0 m-0 relative">
-        {% block content %}{% endblock %}
-    </main>
-    {% else %}
-    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+    <main class="{% if hide_nav %}w-full min-h-screen p-0 m-0 relative{% else %}flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10{% endif %}">
         {% block content %}{% endblock %}
     </main>
 
+    {% if not hide_nav %}
     <footer class="bg-darkbg mt-auto py-8 text-center text-zinc-600 border-t border-zinc-900 relative z-10 text-sm">
         <p>&copy; 2026 Evde Spor. Bahanelere yer yok.</p>
     </footer>
