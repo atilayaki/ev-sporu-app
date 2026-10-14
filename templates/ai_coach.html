@@ -1,314 +1,293 @@
 {% extends "base.html" %}
 
-{% block title %}Yapay Zeka Canlı Kamera Koçu - Evde Spor{% endblock %}
+{% block title %}AI Hareket Koçu - Instagram Kamera Deneyimi{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto py-3 md:py-6 px-2 sm:px-4 space-y-4 md:space-y-6 pb-28 sm:pb-12">
-    <!-- Header with Breadcrumb and Mode Toggles -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
-        <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-orange-500/10 border border-orange-500/30 text-orange-400 mb-1">
-                <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
-                MediaPipe Canlı Form & Tekrar Sayacı
+<!-- FULL-BLEED INSTAGRAM CAMERA INTERFACE -->
+<div class="fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden select-none font-sans text-white">
+
+    <!-- TOP BAR (Instagram Stories Camera Header) -->
+    <header class="relative z-40 w-full px-4 pt-3 pb-2 flex items-center justify-between">
+        <!-- Close (Exit to Home) -->
+        <button onclick="window.location.href='/'" title="Kapat"
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-2xl font-light">
+            ✕
+        </button>
+
+        <!-- Center Audio / Sesli Koç Pill -->
+        <button onclick="toggleVoice()" id="voice-btn" 
+                class="px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md">
+            <span id="voice-icon">🔊</span>
+            <span id="voice-text">Sesli Koç</span>
+        </button>
+
+        <!-- Right Settings / Guidelines Toggle -->
+        <button onclick="toggleGuideModal()" title="Form Kuralları & İpuçları"
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl">
+            ⚙️
+        </button>
+    </header>
+
+    <!-- MAIN VIEWFINDER SCREEN (Instagram Rounded Viewport) -->
+    <main class="relative flex-1 w-full mx-auto px-2 sm:px-4 py-0 flex items-center justify-center min-h-0">
+        <div id="camera-viewfinder-container" 
+             class="relative w-full h-full max-w-md sm:max-w-xl mx-auto rounded-[32px] sm:rounded-[40px] overflow-hidden bg-zinc-950 border border-white/15 shadow-2xl flex items-center justify-center">
+            
+            <!-- Video & Canvas (True Uncropped Fit) -->
+            <video id="webcam" class="hidden" autoplay playsinline muted></video>
+            <canvas id="output_canvas" class="w-full h-full object-contain transition-all duration-300"></canvas>
+
+            <!-- Loading & Start Overlay -->
+            <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-6 text-center backdrop-blur-md">
+                <div class="relative w-20 h-20 mb-5">
+                    <div class="absolute inset-0 rounded-full border-4 border-orange-500/20"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-3xl">📸</div>
+                </div>
+                <h2 class="text-2xl font-black text-white font-heading uppercase tracking-tight mb-2" id="loading-title">
+                    MediaPipe AI Hazırlanıyor...
+                </h2>
+                <p class="text-zinc-400 text-xs sm:text-sm max-w-sm mx-auto leading-relaxed mb-6" id="loading-desc">
+                    Instagram stili tam kadraj yapay zeka kamera koçu. Filtrelerden hareketini seç ve başla!
+                </p>
+                <button id="start-btn" 
+                        class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm uppercase tracking-wider py-4 px-10 rounded-full shadow-2xl shadow-orange-500/40 transition-all transform hover:scale-105 active:scale-95 cursor-pointer hidden flex items-center gap-2">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
+                    Kamerayı Başlat
+                </button>
             </div>
-            <h1 class="text-2xl sm:text-4xl font-black text-white font-heading uppercase tracking-tight">
-                AI <span class="text-orange-500">HAREKET KOÇU</span>
-            </h1>
+
+            <!-- LEFT TOOL STRIP (Instagram Floating Vertical Tools: Aa, ∞, ◫, ⚙) -->
+            <div class="absolute left-3 sm:left-4 top-4 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
+                <!-- Skeleton Lines Toggle -->
+                <button onclick="toggleSkeleton()" id="skeleton-btn" title="İskelet Çizgileri"
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm">
+                    🦴
+                </button>
+                <!-- Live Angle Pill Toggle -->
+                <button onclick="toggleAnglePill()" id="angle-toggle-btn" title="Açı Göstergesi"
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black">
+                    📐
+                </button>
+                <!-- Wide FOV / Fit Toggle -->
+                <button onclick="toggleFitMode()" id="fit-mode-btn" title="Geniş Kadraj / Doldur"
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black">
+                    🔍
+                </button>
+                <!-- Reset Counter -->
+                <button onclick="resetCounter()" title="Sayacı Sıfırla"
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs">
+                    🔄
+                </button>
+                <!-- Fullscreen API -->
+                <button onclick="toggleFullscreen()" title="Tam Ekran"
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs">
+                    ⛶
+                </button>
+            </div>
+
+            <!-- FLOATING HUD OVERLAYS (Floating on top of video) -->
+            <div class="absolute inset-0 p-4 pointer-events-none flex flex-col justify-between z-20">
+                <!-- Top Center: Rep Counter Badge & Framing Guide -->
+                <div class="flex flex-col items-center gap-2 pt-1">
+                    <div class="flex flex-col items-center bg-black/65 backdrop-blur-xl border border-orange-500/40 px-6 py-2 rounded-2xl shadow-2xl shadow-orange-500/15 pointer-events-auto">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="active-ex-name" class="text-[11px] font-black uppercase tracking-wider text-orange-400">SQUAT</span>
+                        </div>
+                        <span id="rep-counter" class="text-4xl sm:text-5xl font-black text-white font-heading tracking-tight leading-none my-0.5">0</span>
+                        <div class="flex items-center gap-2 text-[10px] text-zinc-400 font-bold">
+                            <span id="counter-label" class="uppercase">Tekrar</span>
+                            <span>•</span>
+                            <span id="cal-counter" class="text-amber-400 font-mono">0.0 kcal</span>
+                        </div>
+                    </div>
+
+                    <!-- Smart Framing Guide Banner -->
+                    <div id="framing-guide-banner" class="pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-black/65 border-white/10 text-zinc-300">
+                        <span id="framing-icon">📐</span>
+                        <span id="framing-msg">Vücudunuzu kadraja yerleştirin</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Center: Angle & Real-time Form Feedback Pill -->
+                <div class="flex items-center justify-center gap-2 pb-1" id="feedback-dock">
+                    <div id="angle-pill" class="px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-lg">
+                        <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+                        <span id="angle-text">Açı: --°</span>
+                    </div>
+                    <div id="form-pill" class="px-4 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                        <span id="form-feedback">Pozisyon bekleniyor</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </main>
 
-        <div class="flex items-center gap-2">
-            <button onclick="toggleOrientationMode()" id="orientation-toggle-btn" 
-                    class="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-700/80 hover:border-zinc-500 text-xs font-bold text-zinc-300 flex items-center gap-2 transition-all shadow-md">
-                <span>📱</span>
-                <span id="orientation-text">Portre Modu (Instagram)</span>
-            </button>
-            <button onclick="toggleFullscreen()" 
-                    class="px-3.5 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-xs font-bold text-orange-400 flex items-center gap-1.5 transition-all shadow-md">
-                <span>⛶</span>
-                <span class="hidden sm:inline">Tam Ekran</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Category Filter Tabs -->
-    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar px-2" id="category-filter-tabs">
-        <button onclick="filterCategory('all')" class="cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-orange-500 text-white shadow-md">Tümü (12)</button>
-        <button onclick="filterCategory('leg')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">Bacak & Kalça</button>
-        <button onclick="filterCategory('upper')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">Üst Vücut & Kol</button>
-        <button onclick="filterCategory('core')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">Karın & Core</button>
-        <button onclick="filterCategory('cardio')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">Kardiyo & Yağ Yakımı</button>
-    </div>
-
-    <!-- Instagram Stories-Style Horizontal Exercise Carousel -->
-    <div class="relative overflow-hidden px-1">
-        <div class="flex items-center gap-2.5 overflow-x-auto py-2 no-scrollbar" id="exercise-carousel">
+    <!-- BOTTOM INSTAGRAM FILTER WHEEL & SHUTTER CONTROLS -->
+    <footer class="relative z-40 w-full pt-1 pb-4 flex flex-col items-center gap-2">
+        
+        <!-- Instagram Story Filter Wheel (Snap Carousel) -->
+        <div class="w-full max-w-lg overflow-x-auto no-scrollbar py-2 px-6 flex items-center justify-center gap-3.5" id="instagram-filter-wheel">
             <!-- 1. Squat -->
-            <button onclick="switchExercise('squat')" id="tab-squat" data-category="leg" 
-                    class="ex-item active shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all border border-orange-400">
-                <span class="text-base">🏋️</span>
-                <span>Squat</span>
+            <button onclick="switchExercise('squat')" id="filter-squat" data-category="leg" 
+                    class="filter-circle active shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-2xl shadow-xl transition-all transform scale-110">
+                🏋️
             </button>
             <!-- 2. Pushup -->
-            <button onclick="switchExercise('pushup')" id="tab-pushup" data-category="upper" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">💪</span>
-                <span>Şınav</span>
+            <button onclick="switchExercise('pushup')" id="filter-pushup" data-category="upper" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                💪
             </button>
             <!-- 3. Plank -->
-            <button onclick="switchExercise('plank')" id="tab-plank" data-category="core" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">⏱️</span>
-                <span>Plank</span>
+            <button onclick="switchExercise('plank')" id="filter-plank" data-category="core" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                ⏱️
             </button>
             <!-- 4. Jumping Jack -->
-            <button onclick="switchExercise('jumping_jack')" id="tab-jumping_jack" data-category="cardio" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">⭐</span>
-                <span>Jumping Jack</span>
+            <button onclick="switchExercise('jumping_jack')" id="filter-jumping_jack" data-category="cardio" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                ⭐
             </button>
             <!-- 5. Lunge -->
-            <button onclick="switchExercise('lunge')" id="tab-lunge" data-category="leg" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🦵</span>
-                <span>Lunge (Hamle)</span>
+            <button onclick="switchExercise('lunge')" id="filter-lunge" data-category="leg" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🦵
             </button>
             <!-- 6. Crunch -->
-            <button onclick="switchExercise('crunch')" id="tab-crunch" data-category="core" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🍫</span>
-                <span>Mekik (Crunch)</span>
+            <button onclick="switchExercise('crunch')" id="filter-crunch" data-category="core" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🍫
             </button>
             <!-- 7. Glute Bridge -->
-            <button onclick="switchExercise('glute_bridge')" id="tab-glute_bridge" data-category="leg" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🍑</span>
-                <span>Glute Bridge</span>
+            <button onclick="switchExercise('glute_bridge')" id="filter-glute_bridge" data-category="leg" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🍑
             </button>
             <!-- 8. Biceps Curl -->
-            <button onclick="switchExercise('biceps_curl')" id="tab-biceps_curl" data-category="upper" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🦾</span>
-                <span>Biceps Curl</span>
+            <button onclick="switchExercise('biceps_curl')" id="filter-biceps_curl" data-category="upper" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🦾
             </button>
             <!-- 9. High Knees -->
-            <button onclick="switchExercise('high_knees')" id="tab-high_knees" data-category="cardio" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🏃</span>
-                <span>Diz Çekme</span>
+            <button onclick="switchExercise('high_knees')" id="filter-high_knees" data-category="cardio" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🏃
             </button>
             <!-- 10. Mountain Climber -->
-            <button onclick="switchExercise('mountain_climber')" id="tab-mountain_climber" data-category="core" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🧗</span>
-                <span>Mountain Climber</span>
+            <button onclick="switchExercise('mountain_climber')" id="filter-mountain_climber" data-category="core" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🧗
             </button>
             <!-- 11. Wall Sit -->
-            <button onclick="switchExercise('wall_sit')" id="tab-wall_sit" data-category="leg" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🧱</span>
-                <span>Duvar Oturuşu</span>
+            <button onclick="switchExercise('wall_sit')" id="filter-wall_sit" data-category="leg" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🧱
             </button>
             <!-- 12. Burpee -->
-            <button onclick="switchExercise('burpee')" id="tab-burpee" data-category="cardio" 
-                    class="ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800">
-                <span class="text-base">🔥</span>
-                <span>Burpee</span>
+            <button onclick="switchExercise('burpee')" id="filter-burpee" data-category="cardio" 
+                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                🔥
             </button>
         </div>
-    </div>
 
-    <!-- MAIN INSTAGRAM-STYLE CAMERA VIEWFINDER CONTAINER -->
-    <div id="camera-viewfinder-container" 
-         class="relative w-full mx-auto rounded-3xl overflow-hidden bg-black border border-zinc-800 shadow-2xl transition-all duration-300 flex items-center justify-center aspect-[9/13] sm:aspect-[3/4] md:aspect-[16/10] max-h-[60vh] sm:max-h-[80vh]">
+        <!-- Mode Slider & Action Bar (GÖNDERİ - HİKAYE - REELS style) -->
+        <div class="w-full max-w-md px-6 flex items-center justify-between text-white text-xs font-bold pt-1">
+            <!-- Left: Save / Summary Button (Instagram Gallery Thumbnail Style) -->
+            <button onclick="saveAiWorkout()" id="save-workout-btn" title="Antrenmanı Tamamla & Kaydet"
+                    class="w-10 h-10 rounded-xl bg-zinc-900 border border-white/20 hover:border-orange-500 flex items-center justify-center text-white active:scale-90 transition-all shadow-lg overflow-hidden group">
+                <span class="text-base group-hover:scale-110 transition-transform">💾</span>
+            </button>
+
+            <!-- Center Category Slider (TÜMÜ, BACAK, ÜST, CORE, KARDİYO) -->
+            <div class="flex items-center gap-3.5 uppercase tracking-wider text-[11px]" id="bottom-categories">
+                <button onclick="filterCategory('all')" class="cat-link active text-white font-black transition-all">Tümü</button>
+                <button onclick="filterCategory('leg')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Bacak</button>
+                <button onclick="filterCategory('upper')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Üst</button>
+                <button onclick="filterCategory('core')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Core</button>
+                <button onclick="filterCategory('cardio')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Kardiyo</button>
+            </div>
+
+            <!-- Right: Flip Camera Button (Instagram Flip Style) -->
+            <button onclick="flipCamera()" title="Kamerayı Çevir (Ön/Arka)"
+                    class="w-10 h-10 rounded-full bg-zinc-900 border border-white/20 hover:border-white flex items-center justify-center text-white active:rotate-180 transition-transform duration-300 shadow-lg">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
+            </button>
+        </div>
+    </footer>
+
+</div>
+
+<!-- WORKOUT COMPLETION CELEBRATION MODAL (Frosted Glass Instagram Style) -->
+<div id="workout-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-sm rounded-[32px] bg-zinc-900 border border-zinc-700/80 p-6 text-center shadow-2xl space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
+            🏆
+        </div>
+        <div>
+            <h3 class="text-2xl font-black text-white font-heading uppercase tracking-tight">Tebrikler!</h3>
+            <p class="text-xs text-zinc-400 mt-1" id="modal-subtitle">Antrenmanını başarıyla tamamladın</p>
+        </div>
         
-        <!-- Camera Video and Canvas Overlay (Uncropped object-contain by default) -->
-        <video id="webcam" class="hidden" autoplay playsinline muted></video>
-        <canvas id="output_canvas" class="w-full h-full object-contain transition-all duration-300"></canvas>
-
-        <!-- Initial Start & Permission Loading Screen -->
-        <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-4 sm:p-6 text-center backdrop-blur-md">
-            <div class="relative w-16 h-16 sm:w-20 sm:h-20 mb-3 sm:mb-5">
-                <div class="absolute inset-0 rounded-full border-4 border-orange-500/20"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
-                <div class="absolute inset-0 flex items-center justify-center text-2xl sm:text-3xl">📸</div>
+        <div class="grid grid-cols-3 gap-2 py-2">
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+                <div class="text-[10px] text-zinc-500 uppercase font-black">Tekrar/Süre</div>
+                <div class="text-lg font-black text-white" id="modal-reps">0</div>
             </div>
-            
-            <h2 class="text-xl sm:text-3xl font-black text-white font-heading uppercase tracking-tight mb-2" id="loading-title">
-                MediaPipe AI Hazırlanıyor...
-            </h2>
-            <p class="text-zinc-400 text-xs sm:text-sm max-w-sm sm:max-w-md mx-auto leading-relaxed mb-4 sm:mb-6" id="loading-desc">
-                Kameranızı açıp yapay zeka ile hareketlerinizi tam kadrajda, kesilme olmadan canlı sayacağız. Görüntüleriniz cihazınızda güvenle işlenir.
-            </p>
-            
-            <button id="start-btn" 
-                    class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs sm:text-sm uppercase tracking-wider py-3.5 sm:py-4 px-8 sm:px-10 rounded-2xl shadow-xl shadow-orange-500/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer hidden flex items-center gap-2">
-                <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
-                Kamerayı Aç ve Başla
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+                <div class="text-[10px] text-zinc-500 uppercase font-black">Kalori</div>
+                <div class="text-lg font-black text-orange-400" id="modal-cals">0 kcal</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+                <div class="text-[10px] text-zinc-500 uppercase font-black">Form Skoru</div>
+                <div class="text-lg font-black text-emerald-400" id="modal-score">%96</div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+            <button onclick="closeModalAndReset()" class="flex-1 py-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider transition-all">
+                Sıfırla
             </button>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- INSTAGRAM HUD OVERLAYS (Floating on top of video) -->
-        <!-- ============================================== -->
-        <div id="camera-hud" class="absolute inset-0 p-3 sm:p-5 pointer-events-none flex flex-col justify-between z-30">
-            
-            <!-- TOP BAR HUD -->
-            <div class="flex items-start justify-between gap-2 pointer-events-auto">
-                <!-- Status & Active Exercise -->
-                <div class="flex flex-col gap-1.5">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 text-white text-xs font-bold shadow-lg">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span id="active-ex-name" class="uppercase font-black text-orange-400">Squat</span>
-                        <span class="text-white/40">|</span>
-                        <span id="status-text" class="text-zinc-300 truncate max-w-[120px] sm:max-w-xs">Kamera Bekleniyor...</span>
-                    </div>
-
-                    <!-- Voice Coach Pill -->
-                    <button onclick="toggleVoice()" id="voice-pill" 
-                            class="self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[11px] font-bold text-emerald-400 hover:bg-black/90 transition-all">
-                        <span id="voice-icon">🔊</span>
-                        <span id="voice-status">Sesli Koç</span>
-                    </button>
-                </div>
-
-                <!-- Centered Translucent Floating Counter -->
-                <div class="flex flex-col items-center bg-black/75 backdrop-blur-xl border border-orange-500/40 px-4 sm:px-6 py-2 rounded-2xl shadow-2xl shadow-orange-500/10">
-                    <span id="counter-label" class="text-[9px] font-black uppercase tracking-widest text-orange-400">Tekrar</span>
-                    <span id="rep-counter" class="text-3xl sm:text-5xl font-black text-white font-heading tracking-tight leading-none my-0.5">0</span>
-                    <span id="cal-counter" class="text-[10px] sm:text-[11px] font-bold text-zinc-400 font-mono">0.0 kcal</span>
-                </div>
-
-                <!-- Right Quick Camera Controls (Stacked for Clean Ergonomics) -->
-                <div class="flex flex-col items-end gap-1.5">
-                    <button onclick="flipCamera()" title="Kamerayı Çevir (Ön/Arka)" 
-                            class="w-9 h-9 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm">
-                        🔄
-                    </button>
-                    <button onclick="toggleFitMode()" id="fit-mode-btn" title="Geniş Kadraj (Kesilme Yok) / Doldur"
-                            class="w-9 h-9 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/15 text-orange-400 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black">
-                        🔍
-                    </button>
-                    <button onclick="toggleSkeleton()" title="İskelet Çizgilerini Aç/Kapat" id="skeleton-btn"
-                            class="w-9 h-9 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/15 text-orange-400 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm">
-                        🦴
-                    </button>
-                    <button onclick="toggleFullscreen()" title="Tam Ekran" 
-                            class="w-9 h-9 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/15 text-white flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm">
-                        ⛶
-                    </button>
-                </div>
-            </div>
-
-            <!-- SMART FRAMING & DISTANCE GUIDE BANNER (CENTER) -->
-            <div id="framing-guide-banner" class="pointer-events-auto transition-all duration-300 mx-auto px-4 py-2 rounded-2xl text-xs font-bold shadow-xl border backdrop-blur-md flex items-center gap-2 bg-black/70 border-white/10 text-zinc-300">
-                <span id="framing-icon">📐</span>
-                <span id="framing-msg">Vücudunuzu kadraja yerleştirin</span>
-            </div>
-
-            <!-- BOTTOM BAR HUD -->
-            <div class="flex flex-col gap-2 pointer-events-auto">
-                <!-- Live Angle & Real-time Form Feedback Pill -->
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <div id="angle-pill" class="px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-zinc-700/80 text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-lg">
-                            <span class="w-2 h-2 rounded-full bg-orange-400"></span>
-                            <span id="angle-text">Açı: --°</span>
-                        </div>
-                        <div id="form-pill" class="px-3.5 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center gap-1.5 shadow-lg truncate max-w-[180px] sm:max-w-none">
-                            <span id="form-feedback">Pozisyon bekleniyor</span>
-                        </div>
-                    </div>
-
-                    <!-- Target / Set Info -->
-                    <div class="px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 text-zinc-300 text-xs font-bold hidden sm:block">
-                        🎯 Hedef: <span class="text-orange-400" id="ex-target-desc">15 Tekrar</span>
-                    </div>
-                </div>
-
-                <!-- Bottom Action Controls -->
-                <div class="flex items-center justify-between gap-2.5 pt-1">
-                    <button onclick="resetCounter()" 
-                            class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 backdrop-blur-md border border-zinc-700/80 text-zinc-300 text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-md">
-                        🔄 Sıfırla
-                    </button>
-
-                    <button onclick="saveAiWorkout()" id="save-workout-btn" 
-                            class="flex-grow sm:flex-grow-0 px-6 sm:px-8 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-orange-500/30 transition-all transform hover:scale-[1.02] active:scale-98 flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                        Antrenmanı Kaydet
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- WORKOUT COMPLETION CELEBRATION MODAL -->
-    <div id="workout-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div class="relative w-full max-w-sm rounded-3xl bg-zinc-900 border border-zinc-700/80 p-6 text-center shadow-2xl space-y-4">
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
-                🏆
-            </div>
-            <div>
-                <h3 class="text-2xl font-black text-white font-heading uppercase tracking-tight">Tebrikler!</h3>
-                <p class="text-xs text-zinc-400 mt-1" id="modal-subtitle">Antrenmanını başarıyla tamamladın</p>
-            </div>
-            
-            <div class="grid grid-cols-3 gap-2 py-2">
-                <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                    <div class="text-[10px] text-zinc-500 uppercase font-black">Tekrar/Süre</div>
-                    <div class="text-lg font-black text-white" id="modal-reps">0</div>
-                </div>
-                <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                    <div class="text-[10px] text-zinc-500 uppercase font-black">Kalori</div>
-                    <div class="text-lg font-black text-orange-400" id="modal-cals">0 kcal</div>
-                </div>
-                <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                    <div class="text-[10px] text-zinc-500 uppercase font-black">Form Skoru</div>
-                    <div class="text-lg font-black text-emerald-400" id="modal-score">%96</div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 pt-2">
-                <button onclick="closeModalAndReset()" class="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase transition-all">
-                    Sıfırla
-                </button>
-                <button onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase shadow-lg shadow-orange-500/20 transition-all">
-                    Tamam
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Movement Form Guidelines Card -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-        <div class="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 backdrop-blur-md">
-            <h3 class="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2 mb-3">
-                <span class="text-orange-400">💡</span> Kamera Yerleşimi & Öneriler
-            </h3>
-            <ul class="text-xs text-zinc-400 space-y-2">
-                <li>• Telefonunuzu dik bir yere yaslayın veya sehpaya bel hizasında koyun.</li>
-                <li>• Cihazdan yaklaşık 2–3 metre geriye giderek tüm vücudunuzun kadraja girmesini sağlayın.</li>
-                <li>• Işığın arkanızdan değil, yüzünüze doğru gelmesi algılama hassasiyetini artırır.</li>
-            </ul>
-        </div>
-
-        <div class="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 backdrop-blur-md">
-            <h3 class="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2 mb-3" id="rules-title">
-                <span class="text-orange-400">📐</span> Squat Doğru Form Kuralları
-            </h3>
-            <ul class="text-xs text-zinc-400 space-y-2" id="rules-list">
-                <li>• Dizleriniz 90 derecenin altına indiğinde tekrar sayılır.</li>
-                <li>• Tam doğrularak (160°+) ayağa kalktığınızda tekrar tamamlanır.</li>
-                <li>• Göğsünüzü dik tutun ve topuklarınızı yerden kaldırmayın.</li>
-            </ul>
+            <button onclick="closeModal()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all">
+                Tamam
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Load MediaPipe Pose Scripts -->
+<!-- FORM RULES & GUIDE MODAL -->
+<div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-md rounded-[32px] bg-zinc-900 border border-zinc-700/80 p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                <span>💡</span> Form Rehberi & Kamera İpuçları
+            </h3>
+            <button onclick="toggleGuideModal()" class="text-zinc-400 hover:text-white text-xl">✕</button>
+        </div>
+        
+        <div class="space-y-3 text-xs text-zinc-300">
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+                <div class="font-bold text-orange-400 mb-1">📸 Kamera Konumu</div>
+                <p class="text-zinc-400">Telefonunuzu bel hizasında sabit tutun ve 2-3 metre geriye çekilerek tüm vücudunuzun kadraja girmesini sağlayın.</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+                <div class="font-bold text-emerald-400 mb-1" id="rules-title">📐 Egzersiz Kuralları</div>
+                <ul class="text-zinc-400 space-y-1 list-disc list-inside" id="rules-list">
+                    <li>Dizler 90 derecenin altına indiğinde tekrar sayılır.</li>
+                    <li>Tam doğrularak ayağa kalktığınızda tekrar tamamlanır.</li>
+                </ul>
+            </div>
+        </div>
+
+        <button onclick="toggleGuideModal()" class="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase transition-all">
+            Anladım
+        </button>
+    </div>
+</div>
+
+<!-- MEDIAPIPE LIBRARIES -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 
@@ -316,34 +295,31 @@
     const videoElement = document.getElementById('webcam');
     const canvasElement = document.getElementById('output_canvas');
     const canvasCtx = canvasElement.getContext('2d');
-    const container = document.getElementById('camera-viewfinder-container');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const startBtn = document.getElementById('start-btn');
-    const statusText = document.getElementById('status-text');
-    const activeExName = document.getElementById('active-ex-name');
     const repCounter = document.getElementById('rep-counter');
     const calCounter = document.getElementById('cal-counter');
     const counterLabel = document.getElementById('counter-label');
-    const formFeedback = document.getElementById('form-feedback');
+    const activeExName = document.getElementById('active-ex-name');
     const angleText = document.getElementById('angle-text');
-    const exTargetDesc = document.getElementById('ex-target-desc');
-    const rulesTitle = document.getElementById('rules-title');
-    const rulesList = document.getElementById('rules-list');
+    const formFeedback = document.getElementById('form-feedback');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const startBtn = document.getElementById('start-btn');
+    const container = document.getElementById('camera-viewfinder-container');
 
     let currentExercise = 'squat';
     let reps = 0;
     let holdSeconds = 0;
     let isDown = false;
-    let isStageTwo = false; // For multi-phase moves like burpees
-    let camera = null;
-    let currentFacingMode = 'user';
-    let voiceEnabled = true;
+    let isStageTwo = false;
     let showSkeleton = true;
+    let showAngle = true;
+    let voiceEnabled = true;
+    let currentFacingMode = 'user';
     let timerInterval = null;
     let audioCtx = null;
-    let isPortraitView = true;
+    let camera = null;
+    let isFitContain = true;
 
-    // Movement Registry (12 Core Movements)
+    // 12 Exercises Configuration
     const exerciseConfig = {
         squat: {
             name: "Squat",
@@ -356,10 +332,10 @@
                 "Tam doğrularak (160°+) ayağa kalktığınızda tekrar tamamlanır.",
                 "Göğsünüzü dik tutun ve topuklarınızı yerden kaldırmayın."
             ],
-            voicePrompt: "Squat moduna geçildi. Bacaklarını omuz hizasında aç ve başla!"
+            voicePrompt: "Squat modu. Bacaklarını omuz hizasında aç ve başla!"
         },
         pushup: {
-            name: "Şınav (Push-up)",
+            name: "Şınav",
             target: "3 Set × 12 Tekrar",
             type: "reps",
             calPerUnit: 0.55,
@@ -382,7 +358,7 @@
                 "Kalçanızı aşağı düşürmeyin veya tepe gibi yukarı kaldırmayın.",
                 "Düz duruş sağlandığında saniye otomatik sayılır."
             ],
-            voicePrompt: "Plank moduna geçildi. Düz pozisyon al ve karnını sık."
+            voicePrompt: "Plank modu. Düz pozisyon al ve karnını sık."
         },
         jumping_jack: {
             name: "Jumping Jack",
@@ -398,7 +374,7 @@
             voicePrompt: "Jumping Jack modu. Zıplamaya hazırlan!"
         },
         lunge: {
-            name: "Lunge (Ön Hamle)",
+            name: "Lunge (Hamle)",
             target: "Her bacak 12 Tekrar",
             type: "reps",
             calPerUnit: 0.40,
@@ -408,7 +384,7 @@
                 "Arka diziniz yere birkaç santim yaklaşmalıdır.",
                 "Gövdenizi dik tutun, öne doğru kapanmayın."
             ],
-            voicePrompt: "Lunge moduna geçildi. Ön bacağını 90 derece büküp doğrul."
+            voicePrompt: "Lunge modu. Ön bacağını 90 derece büküp doğrul."
         },
         crunch: {
             name: "Mekik (Crunch)",
@@ -421,62 +397,62 @@
                 "Kürek kemiklerinizi yerden kaldırıp karın kaslarınızı sıkıştırın.",
                 "Boynunuzu çekmeyin, bakışlarınızı tavana sabitleyin."
             ],
-            voicePrompt: "Mekik moduna geçildi. Karın kaslarını sıkarak yüksel."
+            voicePrompt: "Mekik modu. Karın kaslarını sıkarak yüksel."
         },
         glute_bridge: {
-            name: "Glute Bridge (Köprü)",
+            name: "Glute Bridge",
             target: "3 Set × 15 Tekrar",
             type: "reps",
-            calPerUnit: 0.35,
+            calPerUnit: 0.30,
             rulesTitle: "Glute Bridge Kuralları",
             rules: [
-                "Sırt üstü uzanın, kalçanızı yukarı iterek omuz ve dizlerinizle düz çizgi yapın.",
-                "Tepe noktada kalçanızı 1 saniye sıkın.",
-                "Kontrollüce yere yaklaşın ve tekrar kaldırın."
+                "Sırt üstü yatın, dizleri büküp ayak tabanlarını yere basın.",
+                "Kalçayı yukarı kaldırarak omuz-diz hattını düzleştirin (170°+).",
+                "Tepe noktada kalçayı 1 saniye sıkın ve kontrollü inin."
             ],
-            voicePrompt: "Glute bridge moduna geçildi. Kalçanı yukarı itip sık."
+            voicePrompt: "Glute Bridge modu. Kalçanı güçlüce yukarı kaldır."
         },
         biceps_curl: {
-            name: "Biceps Curl (Kol)",
+            name: "Biceps Curl",
             target: "3 Set × 12 Tekrar",
             type: "reps",
-            calPerUnit: 0.30,
+            calPerUnit: 0.28,
             rulesTitle: "Biceps Curl Kuralları",
             rules: [
-                "Dirseklerinizi vücudunuzun yanına sabitleyin.",
-                "Ellerinizi omzunuza doğru büküp (açı <60°) kası sıkıştırın.",
-                "Kollarınızı yavaşça tam açın (açı >150°)."
+                "Kollarınızı gövdenize sabitleyin.",
+                "Dirseğinizi bükerek eli omza doğru çekin (<60°).",
+                "Aşağı inerken kolu neredeyse tamamen açın (150°+)."
             ],
-            voicePrompt: "Biceps curl modu. Dirseklerini sabitleyip kollarını bük."
+            voicePrompt: "Biceps Curl modu. Kollarını sabit tut ve bük."
         },
         high_knees: {
-            name: "High Knees (Diz Çekme)",
-            target: "40 Tekrar / 30sn",
+            name: "Diz Çekme",
+            target: "40 - 60 Adım",
             type: "reps",
-            calPerUnit: 0.30,
-            rulesTitle: "Diz Çekme Kuralları",
+            calPerUnit: 0.32,
+            rulesTitle: "Diz Çekme (High Knees) Kuralları",
             rules: [
-                "Olduğunuz yerde dizlerinizi sırayla kalça hizasına kadar çekin.",
-                "Parmak uçlarında esnek ve tempolu koşun.",
-                "Kollarınızı koşu ritminde aktif sallayın."
+                "Dizlerinizi sırayla göğüs ve kalça hizasına kadar çekin.",
+                "Kolları koşu temposunda sallayın.",
+                "Parmak uçlarında yaylanarak seri tempo tutun."
             ],
-            voicePrompt: "Diz çekme modu. Dizlerini olabildiğince yukarı çek!"
+            voicePrompt: "Diz Çekme modu! Dizleri kalça seviyesine çekerek koş!"
         },
         mountain_climber: {
             name: "Mountain Climber",
-            target: "30 Tekrar",
+            target: "30 - 45 Tekrar",
             type: "reps",
-            calPerUnit: 0.35,
+            calPerUnit: 0.45,
             rulesTitle: "Mountain Climber Kuralları",
             rules: [
-                "Şınav pozisyonunda başlayın.",
-                "Dizlerinizi sırayla göğsünüze doğru seri şekilde çekin.",
-                "Kalçanızı çok yukarı kaldırmadan düz bir hat koruyun."
+                "Şınav / Plank pozisyonu alın.",
+                "Dizlerinizi sırayla seri şekilde göğsünüze çekin.",
+                "Kalçanızı havaya kaldırmadan sabit hatta tutun."
             ],
-            voicePrompt: "Mountain climber moduna geçildi. Plank pozisyonunda dizlerini göğsüne çek."
+            voicePrompt: "Mountain Climber modu. Plankta dizlerini seri çek!"
         },
         wall_sit: {
-            name: "Duvar Oturuşu (Wall Sit)",
+            name: "Duvar Oturuşu",
             target: "30 - 45 Saniye",
             type: "time",
             calPerUnit: 0.18,
@@ -486,7 +462,7 @@
                 "Uyluklarınız yere paralel olmalıdır.",
                 "Pozisyon bozulmadan süre otomatik olarak sayılır."
             ],
-            voicePrompt: "Duvar oturuşu moduna geçildi. Sırtını duvara daya ve 90 derece otur."
+            voicePrompt: "Duvar oturuşu modu. Sırtını duvara daya ve 90 derece otur."
         },
         burpee: {
             name: "Burpee",
@@ -496,7 +472,7 @@
             rulesTitle: "Burpee Kuralları",
             rules: [
                 "Squat pozisyonuna inip ellerinizi yere koyun.",
-                "Ayaklarınızı geriye atarak plank/şınav pozisyonu alın.",
+                "Ayaklarınızı geriye atarak plank pozisyonu alın.",
                 "Ayakları geri çekip yukarı sıçrayarak ellerinizi havaya kaldırın."
             ],
             voicePrompt: "Burpee modu! İn, plank pozisyonu al ve zıpla!"
@@ -505,12 +481,14 @@
 
     // Category Filter Function
     function filterCategory(cat) {
-        document.querySelectorAll('.cat-pill').forEach(b => {
-            b.className = "cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800";
+        document.querySelectorAll('.cat-link').forEach(b => {
+            b.className = "cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all";
         });
-        event.target.className = "cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-orange-500 text-white shadow-md";
+        if (event && event.target) {
+            event.target.className = "cat-link active text-white font-black transition-all";
+        }
 
-        document.querySelectorAll('.ex-item').forEach(el => {
+        document.querySelectorAll('.filter-circle').forEach(el => {
             if (cat === 'all' || el.dataset.category === cat) {
                 el.style.display = 'inline-flex';
             } else {
@@ -519,48 +497,22 @@
         });
     }
 
-    // Toggle Instagram Portrait View vs Landscape View
-    function toggleOrientationMode() {
-        isPortraitView = !isPortraitView;
-        const btnText = document.getElementById('orientation-text');
-        if (isPortraitView) {
-            container.className = "relative w-full mx-auto rounded-3xl overflow-hidden bg-black border border-zinc-800 shadow-2xl transition-all duration-300 flex items-center justify-center aspect-[9/14] sm:aspect-[3/4] md:aspect-[16/10] max-h-[82vh]";
-            btnText.innerText = "Portre Modu (Instagram)";
-        } else {
-            container.className = "relative w-full mx-auto rounded-3xl overflow-hidden bg-black border border-zinc-800 shadow-2xl transition-all duration-300 flex items-center justify-center aspect-[16/9] max-h-[70vh]";
-            btnText.innerText = "Geniş Ekran (16:9)";
-        }
-    }
-
-    // HTML5 Fullscreen API
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            if (container.requestFullscreen) container.requestFullscreen();
-            else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
-            else if (container.msRequestFullscreen) container.msRequestFullscreen();
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
-    }
-
     // Toggle Fit Mode (Geniş Kadraj / Kesilme Yok vs Doldur)
-    let isFitContain = true;
     function toggleFitMode() {
         isFitContain = !isFitContain;
-        const canvas = document.getElementById('output_canvas');
         const btn = document.getElementById('fit-mode-btn');
         if (isFitContain) {
-            canvas.className = "w-full h-full object-contain transition-all duration-300";
+            canvasElement.className = "w-full h-full object-contain transition-all duration-300";
             btn.innerHTML = "🔍";
             btn.title = "Geniş Kadraj (Kesilme Yok)";
             btn.classList.add('text-orange-400');
-            speakText("Geniş kadraj aktif.");
+            speakText("Geniş kadraj.");
         } else {
-            canvas.className = "w-full h-full object-cover transition-all duration-300";
+            canvasElement.className = "w-full h-full object-cover transition-all duration-300";
             btn.innerHTML = "🔲";
             btn.title = "Ekranı Doldur";
             btn.classList.remove('text-orange-400');
-            speakText("Doldurma modu aktif.");
+            speakText("Doldurma modu.");
         }
     }
 
@@ -595,7 +547,7 @@
     function announceRep(num) {
         if (!voiceEnabled) return;
         if (num % 5 === 0) {
-            speakText(`${num}! Harika gidiyorsun!`);
+            speakText(`${num}! Harika!`);
         } else if (numberWords[num]) {
             speakText(numberWords[num]);
         } else {
@@ -611,13 +563,13 @@
         if (!guideEl || !iconEl || !msgEl) return;
 
         const hip = lm[23], knee = lm[25], ankle = lm[27];
-        const shoulder = lm[11], elbow = lm[13], wrist = lm[15];
+        const shoulder = lm[11];
 
         if (['squat', 'lunge', 'jumping_jack', 'high_knees', 'wall_sit', 'glute_bridge', 'burpee'].includes(currentExercise)) {
             const ankleVis = (ankle && ankle.visibility) || 0;
             const kneeVis = (knee && knee.visibility) || 0;
-            if (ankleVis < 0.45 || kneeVis < 0.45) {
-                guideEl.className = "pointer-events-auto transition-all duration-300 mx-auto px-4 py-2 rounded-2xl text-xs font-bold shadow-xl border backdrop-blur-md flex items-center gap-2 bg-amber-500/25 border-amber-500/50 text-amber-300 animate-pulse";
+            if (ankleVis < 0.4 || kneeVis < 0.4) {
+                guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-amber-500/25 border-amber-500/50 text-amber-300 animate-pulse";
                 iconEl.innerText = "⚠️";
                 msgEl.innerText = "Alt vücut görünmüyor! 2-3 adım geriye çekilin.";
                 return;
@@ -626,16 +578,16 @@
             const shoulderVis = (shoulder && shoulder.visibility) || 0;
             const hipVis = (hip && hip.visibility) || 0;
             if (shoulderVis < 0.4 || hipVis < 0.4) {
-                guideEl.className = "pointer-events-auto transition-all duration-300 mx-auto px-4 py-2 rounded-2xl text-xs font-bold shadow-xl border backdrop-blur-md flex items-center gap-2 bg-amber-500/25 border-amber-500/50 text-amber-300 animate-pulse";
+                guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-amber-500/25 border-amber-500/50 text-amber-300 animate-pulse";
                 iconEl.innerText = "⚠️";
-                msgEl.innerText = "Vücudunuz tam görünmüyor! Kamerayı yere doğru ayarlayın.";
+                msgEl.innerText = "Vücut kadrajda değil! Kamerayı yere doğru açın.";
                 return;
             }
         }
 
-        guideEl.className = "pointer-events-auto transition-all duration-300 mx-auto px-4 py-2 rounded-2xl text-xs font-bold shadow-xl border backdrop-blur-md flex items-center gap-2 bg-emerald-500/20 border-emerald-500/40 text-emerald-300";
+        guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-emerald-500/20 border-emerald-500/40 text-emerald-300";
         iconEl.innerText = "✓";
-        msgEl.innerText = "Mükemmel Kadraj! Harekete hazırsınız.";
+        msgEl.innerText = "Mükemmel Kadraj!";
     }
 
     // Toggle Skeleton lines
@@ -643,8 +595,32 @@
         showSkeleton = !showSkeleton;
         const btn = document.getElementById('skeleton-btn');
         btn.className = showSkeleton 
-            ? "w-9 h-9 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/15 text-orange-400 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold"
-            : "w-9 h-9 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/15 text-zinc-500 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold";
+            ? "w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold"
+            : "w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-zinc-500 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold";
+    }
+
+    // Toggle Angle Pill
+    function toggleAnglePill() {
+        showAngle = !showAngle;
+        const pill = document.getElementById('angle-pill');
+        const btn = document.getElementById('angle-toggle-btn');
+        if (showAngle) {
+            pill.style.display = 'flex';
+            btn.classList.add('text-orange-400');
+        } else {
+            pill.style.display = 'none';
+            btn.classList.remove('text-orange-400');
+        }
+    }
+
+    // HTML5 Fullscreen API
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
     }
 
     // Sound Synthesizer
@@ -684,19 +660,29 @@
 
     function toggleVoice() {
         voiceEnabled = !voiceEnabled;
-        const statusEl = document.getElementById('voice-status');
         const iconEl = document.getElementById('voice-icon');
-        const pill = document.getElementById('voice-pill');
+        const textEl = document.getElementById('voice-text');
+        const btn = document.getElementById('voice-btn');
         if (voiceEnabled) {
-            statusEl.innerText = "Sesli Koç Açık";
-            pill.className = "self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-bold text-emerald-400 hover:bg-black/80 transition-all";
+            textEl.innerText = "Sesli Koç";
             iconEl.innerText = "🔊";
+            btn.className = "px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md";
             speakText("Sesli koç aktif.");
         } else {
-            statusEl.innerText = "Ses Kapalı";
-            pill.className = "self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-bold text-zinc-400 hover:bg-black/80 transition-all";
+            textEl.innerText = "Sessiz";
             iconEl.innerText = "🔇";
+            btn.className = "px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:bg-black/80 active:scale-95 transition-all shadow-md";
         }
+    }
+
+    // Guide Modal Toggle
+    function toggleGuideModal() {
+        const modal = document.getElementById('guide-modal');
+        const conf = exerciseConfig[currentExercise];
+        document.getElementById('rules-title').innerText = `📐 ${conf.name} Kuralları`;
+        const list = document.getElementById('rules-list');
+        list.innerHTML = conf.rules.map(r => `<li>${r}</li>`).join('');
+        modal.classList.toggle('hidden');
     }
 
     // Mathematical Angle Calculator
@@ -707,7 +693,7 @@
         return angle;
     }
 
-    // Switch Exercise Mode
+    // Switch Exercise Mode (Instagram Filter Selection)
     function switchExercise(exKey) {
         if (!exerciseConfig[exKey]) return;
         currentExercise = exKey;
@@ -718,28 +704,26 @@
         clearInterval(timerInterval);
         timerInterval = null;
 
-        // Update carousel styles
-        document.querySelectorAll('.ex-item').forEach(b => {
-            b.className = "ex-item shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-zinc-900 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-zinc-800";
+        // Update Instagram Filter Wheel Styling
+        document.querySelectorAll('.filter-circle').forEach(b => {
+            b.className = "filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md";
         });
-        const activeTab = document.getElementById(`tab-${exKey}`);
-        if (activeTab) {
-            activeTab.className = "ex-item active shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all border border-orange-400";
-            activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+
+        const activeCircle = document.getElementById(`filter-${exKey}`);
+        if (activeCircle) {
+            activeCircle.className = "filter-circle active shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-2xl shadow-xl transition-all transform scale-110";
+            activeCircle.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
 
         const conf = exerciseConfig[exKey];
-        activeExName.innerText = conf.name;
+        activeExName.innerText = conf.name.toUpperCase();
         counterLabel.innerText = conf.type === 'time' ? "Süre" : "Tekrar";
         repCounter.innerText = conf.type === 'time' ? "0s" : "0";
-        exTargetDesc.innerText = conf.target;
-        rulesTitle.innerHTML = `<span class="text-orange-400">📐</span> ${conf.rulesTitle}`;
-        rulesList.innerHTML = conf.rules.map(r => `<li>• ${r}</li>`).join('');
-        formFeedback.innerText = "Pozisyon bekleniyor...";
+        updateCalories();
+        formFeedback.innerText = "Pozisyon bekleniyor";
         formFeedback.className = "text-zinc-400 font-bold";
 
         speakText(conf.voicePrompt);
-        updateCalories();
     }
 
     function updateCalories() {
@@ -757,7 +741,7 @@
         const conf = exerciseConfig[currentExercise];
         repCounter.innerText = conf.type === 'time' ? "0s" : "0";
         updateCalories();
-        formFeedback.innerText = "Sayaç sıfırlandı.";
+        formFeedback.innerText = "Sıfırlandı";
         formFeedback.className = "text-zinc-400 font-bold";
         playBeep(450, 0.1);
     }
@@ -783,7 +767,7 @@
             const lm = results.poseLandmarks;
             updateFramingGuide(lm);
 
-            // Route to specific exercise handler
+            // Route to exercise handler
             switch(currentExercise) {
                 case 'squat': handleSquat(lm); break;
                 case 'pushup': handlePushup(lm); break;
@@ -799,13 +783,11 @@
                 case 'burpee': handleBurpee(lm); break;
             }
         } else {
-            statusText.innerText = "Kişi algılanamadı";
-            statusText.className = "text-zinc-400 text-xs";
             const guideEl = document.getElementById('framing-guide-banner');
             if (guideEl) {
-                guideEl.className = "pointer-events-auto transition-all duration-300 mx-auto px-4 py-2 rounded-2xl text-xs font-bold shadow-xl border backdrop-blur-md flex items-center gap-2 bg-black/75 border-zinc-700 text-zinc-400";
+                guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-black/65 border-white/10 text-zinc-400";
                 document.getElementById('framing-icon').innerText = "🔍";
-                document.getElementById('framing-msg').innerText = "Kamera kadrajına geçin";
+                document.getElementById('framing-msg').innerText = "Kadraja geçin";
             }
         }
         canvasCtx.restore();
@@ -814,15 +796,9 @@
     // 1. Squat
     function handleSquat(lm) {
         const hip = lm[23], knee = lm[25], ankle = lm[27];
-        if (!hip || !knee || !ankle || hip.visibility < 0.45 || knee.visibility < 0.45 || ankle.visibility < 0.35) {
-            statusText.innerText = "Bacaklar bekleniyor";
-            statusText.className = "text-amber-400 font-bold text-xs";
-            return;
-        }
+        if (!hip || !knee || !ankle || hip.visibility < 0.45 || knee.visibility < 0.45 || ankle.visibility < 0.35) return;
         const angle = Math.round(calculateAngle(hip, knee, ankle));
         angleText.innerText = `Diz: ${angle}°`;
-        statusText.innerText = "Squat yapılıyor";
-        statusText.className = "text-emerald-400 font-bold text-xs";
 
         if (angle < 95) {
             if (!isDown) {
@@ -846,15 +822,9 @@
     // 2. Push-up
     function handlePushup(lm) {
         const shoulder = lm[11], elbow = lm[13], wrist = lm[15];
-        if (!shoulder || !elbow || !wrist || shoulder.visibility < 0.4 || elbow.visibility < 0.4 || wrist.visibility < 0.4) {
-            statusText.innerText = "Kollar bekleniyor";
-            statusText.className = "text-amber-400 font-bold text-xs";
-            return;
-        }
+        if (!shoulder || !elbow || !wrist || shoulder.visibility < 0.4 || elbow.visibility < 0.4 || wrist.visibility < 0.4) return;
         const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
         angleText.innerText = `Dirsek: ${angle}°`;
-        statusText.innerText = "Şınav yapılıyor";
-        statusText.className = "text-emerald-400 font-bold text-xs";
 
         if (angle < 92) {
             if (!isDown) {
@@ -878,17 +848,11 @@
     // 3. Plank
     function handlePlank(lm) {
         const shoulder = lm[11], hip = lm[23], ankle = lm[27];
-        if (!shoulder || !hip || !ankle || shoulder.visibility < 0.4 || hip.visibility < 0.4 || ankle.visibility < 0.35) {
-            statusText.innerText = "Vücut pozisyonu bekleniyor";
-            statusText.className = "text-amber-400 font-bold text-xs";
-            return;
-        }
+        if (!shoulder || !hip || !ankle || shoulder.visibility < 0.4 || hip.visibility < 0.4 || ankle.visibility < 0.35) return;
         const bodyAngle = Math.round(calculateAngle(shoulder, hip, ankle));
         angleText.innerText = `Omurga: ${bodyAngle}°`;
 
         if (bodyAngle >= 150 && bodyAngle <= 195) {
-            statusText.innerText = "Plank süresi sayılıyor...";
-            statusText.className = "text-emerald-400 font-bold text-xs";
             formFeedback.innerText = "Mükemmel duruş!";
             formFeedback.className = "text-emerald-400 font-bold";
 
@@ -906,9 +870,7 @@
         } else {
             clearInterval(timerInterval);
             timerInterval = null;
-            statusText.innerText = "Duruş bozuldu";
-            statusText.className = "text-red-400 font-bold text-xs";
-            formFeedback.innerText = bodyAngle < 150 ? "Kalçanı yukarı kaldır!" : "Kalçanı düzleştir!";
+            formFeedback.innerText = bodyAngle < 150 ? "Kalçanı kaldır!" : "Kalçanı düzleştir!";
             formFeedback.className = "text-red-400 font-bold";
         }
     }
@@ -925,8 +887,6 @@
             const feetApart = ankleDist > (shoulderDist * 1.25);
 
             angleText.innerText = `Açıklık: ${(ankleDist / shoulderDist).toFixed(1)}x`;
-            statusText.innerText = "Zıplama algılanıyor";
-            statusText.className = "text-emerald-400 font-bold text-xs";
 
             if (handsUp && feetApart) isDown = true;
             if (!handsUp && !feetApart && isDown) {
@@ -976,7 +936,7 @@
 
             if (angle < 115) {
                 isDown = true;
-                formFeedback.innerText = "Karnı sık! Şimdi kontrollü in.";
+                formFeedback.innerText = "Karnı sık! Şimdi in.";
                 formFeedback.className = "text-orange-400 font-bold";
             }
             if (angle > 145 && isDown) {
@@ -1026,7 +986,7 @@
 
             if (angle < 60) {
                 isDown = true;
-                formFeedback.innerText = "Pazuyu sık! Şimdi yavaşça aç.";
+                formFeedback.innerText = "Pazuyu sık! Şimdi aç.";
                 formFeedback.className = "text-orange-400 font-bold";
             }
             if (angle > 150 && isDown) {
@@ -1095,8 +1055,6 @@
             angleText.innerText = `Diz: ${angle}°`;
 
             if (angle >= 80 && angle <= 105) {
-                statusText.innerText = "Duvar oturuşu süresi sayılıyor...";
-                statusText.className = "text-emerald-400 font-bold text-xs";
                 formFeedback.innerText = "Pozisyonu bozma!";
                 formFeedback.className = "text-emerald-400 font-bold";
 
@@ -1114,8 +1072,8 @@
             } else {
                 clearInterval(timerInterval);
                 timerInterval = null;
-                statusText.innerText = "90 derece açıda otur";
-                statusText.className = "text-orange-400 font-bold text-xs";
+                formFeedback.innerText = "90 derecede otur";
+                formFeedback.className = "text-orange-400 font-bold";
             }
         }
     }
@@ -1159,8 +1117,8 @@
             onFrame: async () => {
                 await pose.send({image: videoElement});
             },
-            width: isPortraitView ? 720 : 1280,
-            height: isPortraitView ? 1280 : 720,
+            width: 720,
+            height: 1280,
             facingMode: currentFacingMode
         });
         camera.start().then(() => {
@@ -1201,7 +1159,6 @@
 
         const btn = document.getElementById('save-workout-btn');
         btn.disabled = true;
-        btn.innerText = "Kaydediliyor...";
 
         const cal = Math.round(totalAmount * conf.calPerUnit);
 
@@ -1219,11 +1176,10 @@
         } catch(e) {}
 
         btn.disabled = false;
-        btn.innerHTML = `<svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> Antrenmanı Kaydet`;
         showWorkoutModal(totalAmount, cal, conf.type);
     }
 
-    // Init Pose
+    // Init MediaPipe Pose
     const pose = new Pose({locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
     }});
@@ -1246,8 +1202,6 @@
 
     startBtn.addEventListener('click', () => {
         loadingOverlay.classList.add('hidden');
-        canvasElement.width = isPortraitView ? 720 : 1280;
-        canvasElement.height = isPortraitView ? 1280 : 720;
         initCamera();
         speakText("Yapay zeka antrenörü hazır. İstediğin hareketi seç ve başla!");
     });

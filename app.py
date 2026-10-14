@@ -628,7 +628,7 @@ def create_app():
 
     @app.route('/ai-koc')
     def ai_coach():
-        hide_nav = request.args.get('hide_nav', 'false').lower() == 'true'
+        hide_nav = request.args.get('hide_nav', 'true').lower() == 'true'
         return render_template('ai_coach.html', hide_nav=hide_nav)
 
     return app
