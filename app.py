@@ -213,12 +213,31 @@ def create_app():
 
     @app.route('/egzersizler')
     def exercises():
-        query = request.args.get('q', '')
+        query = request.args.get('q', '').strip()
+        muscle = request.args.get('muscle', '').strip()
+        difficulty = request.args.get('difficulty', '').strip()
+
+        q = Exercise.query
         if query:
-            all_exercises = Exercise.query.filter(Exercise.name.ilike(f'%{query}%')).all()
-        else:
-            all_exercises = Exercise.query.all()
-        return render_template('exercises.html', exercises=all_exercises, query=query)
+            q = q.filter(Exercise.name.ilike(f'%{query}%'))
+        if muscle and muscle != 'Tümü':
+            q = q.filter(Exercise.muscle_group.ilike(f'%{muscle}%'))
+        if difficulty and difficulty != 'Tümü':
+            q = q.filter(Exercise.difficulty == difficulty)
+
+        all_exercises = q.all()
+        muscle_groups = ['Tümü', 'Göğüs', 'Karın, Core', 'Ön Bacak, Kalça', 'Arka Bacak, Baldır', 'Sırt', 'Omuz, Kol', 'Kardiyo, Kondisyon']
+        total_count = Exercise.query.count()
+
+        return render_template(
+            'exercises.html',
+            exercises=all_exercises,
+            query=query,
+            selected_muscle=muscle,
+            selected_difficulty=difficulty,
+            muscle_groups=muscle_groups,
+            total_count=total_count
+        )
 
     @app.route('/egzersizler/<slug>')
     def exercise_detail(slug):
@@ -321,6 +340,7 @@ def create_app():
         return jsonify({'success': True, 'redirect': url_for('program_detail', slug=slug)})
 
     @app.route('/liderlik')
+    @app.route('/liderlik-tablosu')
     def leaderboard():
         users = User.query.all()
         leaderboard_data = []

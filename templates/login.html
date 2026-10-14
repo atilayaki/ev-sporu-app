@@ -2,28 +2,109 @@
 {% block title %}Giriş Yap - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto athletic-card rounded-xl overflow-hidden mt-10">
-    <div class="bg-zinc-900 border-b border-zinc-800 p-6 text-center">
-        <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Giriş <span class="text-accent">Yap</span></h2>
-    </div>
-    <div class="p-8">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <div class="mb-5">
-                {{ form.email.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
-                {{ form.email(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
+<div class="relative max-w-6xl mx-auto md:my-4">
+    <!-- Ambient glows -->
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-orange-600/20 blur-[110px] rounded-full pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500/10 blur-[110px] rounded-full pointer-events-none"></div>
+
+    <div class="relative grid lg:grid-cols-2 rounded-[2rem] overflow-hidden border border-zinc-800/80 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] bg-zinc-950 animate-fade-up">
+
+        <!-- LEFT: Visual panel -->
+        <div class="relative hidden lg:block min-h-[640px]">
+            <img src="/static/images/auth_login_bg.jpg" alt="Evde antrenman yapan sporcu" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-zinc-950/10"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent to-zinc-950/60"></div>
+
+            <div class="absolute top-8 left-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md text-[11px] font-bold uppercase tracking-widest text-zinc-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Tekrar hoş geldin
             </div>
-            <div class="mb-8">
-                {{ form.password.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
-                {{ form.password(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
+
+            <div class="absolute bottom-0 left-0 right-0 p-10 space-y-6">
+                <h2 class="text-4xl xl:text-5xl font-black uppercase tracking-tight leading-[1.05] text-white">
+                    Serini<br><span class="text-gradient">bozma.</span>
+                </h2>
+                <p class="text-zinc-300 max-w-sm leading-relaxed">Kaldığın yerden devam et. Programın, rozetlerin ve gelişim raporun seni bekliyor.</p>
+
+                <div class="grid grid-cols-3 gap-3 max-w-md">
+                    <div class="glass-panel rounded-2xl p-3 text-center">
+                        <div class="text-2xl">🔥</div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mt-1">Günlük Seri</div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-3 text-center">
+                        <div class="text-2xl">🏅</div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mt-1">Rozetler</div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-3 text-center">
+                        <div class="text-2xl">🤖</div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mt-1">AI Koç</div>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-center justify-between">
-                {{ form.submit(class="bg-accent hover:bg-accentHover text-white font-bold py-3 px-4 rounded-md w-full cursor-pointer uppercase tracking-wide text-sm transition-colors") }}
+        </div>
+
+        <!-- RIGHT: Form panel -->
+        <div class="relative p-8 sm:p-12 lg:p-14 flex flex-col justify-center">
+            <div class="absolute inset-0 grid-texture opacity-60 pointer-events-none"></div>
+
+            <div class="relative w-full max-w-md mx-auto">
+                <a href="/" class="inline-flex items-center gap-2 mb-10 text-xl font-black tracking-tighter uppercase">
+                    <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-base shadow-lg shadow-orange-500/30">⚡</span>
+                    <span>EVDE<span class="text-accent">SPOR</span></span>
+                </a>
+
+                <h1 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">Giriş <span class="text-gradient">Yap</span></h1>
+                <p class="text-zinc-400 mt-2 mb-8">Hesabına giriş yap ve antrenmanına kaldığın yerden devam et.</p>
+
+                <form method="POST" action="" class="space-y-5" x-data="{ show: false, loading: false }" @submit="loading = true">
+                    {{ form.hidden_tag() }}
+
+                    <div>
+                        <label for="email" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">E-posta</label>
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            {{ form.email(class="input-field", placeholder="ornek@mail.com", autocomplete="email", autofocus=true) }}
+                        </div>
+                        {% for error in form.email.errors %}
+                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Şifre</label>
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            {{ form.password(class="input-field pr-12", placeholder="••••••••", autocomplete="current-password", **{':type': "show ? 'text' : 'password'"}) }}
+                            <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs font-bold uppercase px-2 py-1" x-text="show ? 'Gizle' : 'Göster'">Göster</button>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full !mt-8" :disabled="loading" :class="loading && 'opacity-80 cursor-wait'">
+                        <svg x-show="loading" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                        <span x-text="loading ? 'Giriş yapılıyor...' : 'Giriş Yap'">Giriş Yap</span>
+                        <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </form>
+
+                <div class="flex items-center gap-4 my-8">
+                    <div class="h-px flex-1 bg-zinc-800"></div>
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-zinc-600">veya</span>
+                    <div class="h-px flex-1 bg-zinc-800"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="/ai-koc" class="flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-orange-500/50 hover:bg-zinc-900 text-sm font-bold text-zinc-300 transition-all">🤖 AI Koç'u Dene</a>
+                    <a href="/egzersizler" class="flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-orange-500/50 hover:bg-zinc-900 text-sm font-bold text-zinc-300 transition-all">💪 Egzersizler</a>
+                </div>
+
+                <p class="text-center text-sm text-zinc-500 mt-8 font-medium">
+                    Hesabın yok mu?
+                    <a href="/kayit" class="text-orange-400 hover:text-orange-300 font-bold transition-colors">Ücretsiz kayıt ol →</a>
+                </p>
             </div>
-        </form>
-        <p class="text-center text-sm text-zinc-500 mt-6 font-medium">
-            Hesabın yok mu? <a href="/kayit" class="text-white hover:text-accent font-bold transition-colors">Kayıt Ol</a>
-        </p>
+        </div>
     </div>
 </div>
 {% endblock %}

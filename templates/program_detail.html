@@ -3,129 +3,266 @@
 {% block title %}{{ program.title }} - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto relative z-10">
-    <div class="mb-6">
-        <a href="/programlar" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-sm uppercase tracking-wider">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-            Programlara Dön
+<div class="max-w-5xl mx-auto relative z-10 space-y-8">
+    <!-- Back Navigation -->
+    <div>
+        <a href="/programlar" class="inline-flex items-center gap-2 text-zinc-400 hover:text-orange-400 transition-colors font-bold text-xs uppercase tracking-wider bg-zinc-900/60 border border-zinc-800/80 px-4 py-2 rounded-xl backdrop-blur-md">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            Tüm Programlara Dön
         </a>
     </div>
 
-    <div class="athletic-card rounded-2xl overflow-hidden">
-        <!-- Header -->
-        <div class="relative p-8 md:p-12 border-b border-zinc-800 bg-gradient-to-br from-zinc-900 to-cardbg overflow-hidden">
-            <!-- Decorative Accent Blob -->
-            <div class="absolute -top-24 -right-24 w-64 h-64 bg-accent/20 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Hero Card -->
+    <div class="relative rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-900/60 shadow-2xl backdrop-blur-xl">
+        <!-- Background Banner -->
+        <div class="relative h-64 md:h-80 w-full overflow-hidden">
+            <img src="/static/images/{{ program.slug }}.jpg" 
+                 onerror="this.src='/static/images/page_hero_bg.jpg'" 
+                 alt="{{ program.title }}" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/40 to-transparent"></div>
             
-            <div class="relative z-10">
-                <h1 class="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tighter">{{ program.title }}</h1>
-                <p class="text-zinc-400 text-lg md:text-xl mb-8 font-medium max-w-2xl">{{ program.description }}</p>
-                
-                <div class="flex flex-wrap gap-4 md:gap-8">
-                    <div class="bg-zinc-900/80 border border-zinc-800 px-5 py-3 rounded-lg flex flex-col justify-center">
-                        <span class="block text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Süre</span>
-                        <span class="font-black text-white text-xl">{{ program.duration_days }} Gün</span>
-                    </div>
-                    <div class="bg-zinc-900/80 border border-zinc-800 px-5 py-3 rounded-lg flex flex-col justify-center">
-                        <span class="block text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Seviye</span>
-                        <span class="font-black text-white text-xl">{{ program.level }}</span>
-                    </div>
-                    <div class="bg-zinc-900/80 border border-zinc-800 px-5 py-3 rounded-lg flex flex-col justify-center">
-                        <span class="block text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">Hedef</span>
-                        <span class="font-black text-accent text-xl">{{ program.goal }}</span>
-                    </div>
-                </div>
-                
-                <div class="mt-8">
-                    {% if current_user.is_authenticated %}
-                        {% if user_program %}
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="inline-flex items-center bg-green-500/10 border border-green-500/50 text-green-400 px-6 py-3 rounded-md font-bold uppercase tracking-wide">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    {% if user_program.current_day > program.duration_days %}Programı Bitirdin{% else %}Programa Katıldın (Gün {{ user_program.current_day }}/{{ program.duration_days }}){% endif %}
-                                </div>
-                                {% if user_program.current_day > program.duration_days %}
-                                <div class="inline-flex items-center bg-zinc-800 border border-zinc-700 text-zinc-300 px-6 py-3 rounded-md font-bold uppercase tracking-wide">
-                                    🏆 Program Tamamlandı!
-                                </div>
-                                {% elif is_rest_day %}
-                                <form action="/programlar/{{ program.slug }}/dinlenme" method="POST" class="inline-block">
-                                    <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white px-8 py-3 rounded-md font-black uppercase tracking-widest transition-colors">
-                                        😴 Dinlenme Gününü Tamamla
-                                    </button>
-                                </form>
-                                {% else %}
-                                <a href="/programlar/{{ program.slug }}/antrenman" class="bg-accent hover:bg-orange-500 text-white px-8 py-3 rounded-md font-black uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20 flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                                    Günün Antrenmanına Başla
-                                </a>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <form action="/programlar/{{ program.slug }}/katil" method="POST" class="inline-block">
-                                <button type="submit" class="bg-accent hover:bg-orange-500 text-white px-8 py-3 rounded-md font-black uppercase tracking-widest transition-colors shadow-lg shadow-orange-500/20">
-                                    Programa Katıl
-                                </button>
-                            </form>
-                        {% endif %}
-                    {% else %}
-                        <a href="/giris" class="inline-block bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-3 rounded-md font-bold uppercase tracking-widest transition-colors">
-                            Katılmak İçin Giriş Yap
-                        </a>
-                    {% endif %}
-                </div>
+            <!-- Floating Badge -->
+            <div class="absolute top-6 left-6 flex flex-wrap gap-2 z-10">
+                <span class="px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-orange-500/90 text-white shadow-lg backdrop-blur-md">
+                    {{ program.level }}
+                </span>
+                <span class="px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-900/80 text-zinc-300 border border-zinc-700/60 backdrop-blur-md">
+                    {{ program.duration_days }} Günlük Plan
+                </span>
             </div>
         </div>
-        
-        <!-- Content -->
-        <div class="p-8 md:p-12">
-            <h3 class="text-2xl font-black text-white mb-8 uppercase tracking-tight flex items-center">
-                <svg class="w-6 h-6 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                Program İçeriği
-            </h3>
-            
-            {% set days_map = {} %}
-            {% for group in program.exercises|groupby('day_number') %}
-                {% set _ = days_map.update({group.grouper: group.list}) %}
-            {% endfor %}
+
+        <!-- Hero Content & Stats -->
+        <div class="p-6 md:p-10 -mt-20 relative z-10">
+            <h1 class="text-3xl md:text-5xl font-black text-white font-heading uppercase tracking-tight mb-3">
+                {{ program.title }}
+            </h1>
+            <p class="text-zinc-300 text-base md:text-lg max-w-3xl leading-relaxed mb-6 font-normal">
+                {{ program.description }}
+            </p>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
+                <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Toplam Süre</div>
+                        <div class="text-lg font-black text-white font-heading">{{ program.duration_days }} Gün</div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Zorluk Derecesi</div>
+                        <div class="text-lg font-black text-white font-heading">{{ program.level }}</div>
+                    </div>
+                </div>
+
+                <div class="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Ana Odak</div>
+                        <div class="text-lg font-black text-orange-400 font-heading truncate">{{ program.goal }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker (if joined) or Join Action -->
+            <div class="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-zinc-900/90 to-zinc-900/50 border border-zinc-800/90">
+                {% if current_user.is_authenticated %}
+                    {% if user_program %}
+                        {% set current_progress = ((user_program.current_day - 1) / program.duration_days * 100)|round|int %}
+                        {% if current_progress > 100 %}{% set current_progress = 100 %}{% endif %}
+                        <div class="space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <div class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Aktif Programındasın
+                                    </div>
+                                    <div class="text-xl font-black text-white font-heading mt-0.5">
+                                        {% if user_program.current_day > program.duration_days %}
+                                            🏆 Tebrikler, Programı Başarıyla Tamamladın!
+                                        {% else %}
+                                            Gün {{ user_program.current_day }} / {{ program.duration_days }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    {% if user_program.current_day > program.duration_days %}
+                                        <div class="px-5 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-sm">
+                                            ✓ Mezun Oldun
+                                        </div>
+                                    {% elif is_rest_day %}
+                                        <form action="/programlar/{{ program.slug }}/dinlenme" method="POST">
+                                            <button type="submit" class="px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm uppercase tracking-wider transition-all border border-zinc-700 hover:border-zinc-500 shadow-lg">
+                                                😴 Dinlenme Gününü Tamamla
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <a href="/programlar/{{ program.slug }}/antrenman" class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all transform hover:-translate-y-0.5">
+                                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                            Günün Antrenmanına Başla
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-zinc-400 mb-1.5">
+                                    <span>Tamamlanma Oranı</span>
+                                    <span class="text-orange-400 font-mono">%{{ current_progress }}</span>
+                                </div>
+                                <div class="w-full bg-zinc-800/80 rounded-full h-2.5 overflow-hidden border border-zinc-700/50">
+                                    <div class="bg-gradient-to-r from-orange-500 to-amber-400 h-2.5 rounded-full transition-all duration-500" style="width: {{ current_progress }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-white font-bold text-base">Bu programa katılmaya hazır mısın?</h3>
+                                <p class="text-zinc-400 text-xs mt-0.5">İlerlemeni kaydet, streak oluştur ve puan toplayarak lider tablosunda yüksel.</p>
+                            </div>
+                            <form action="/programlar/{{ program.slug }}/katil" method="POST">
+                                <button type="submit" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm uppercase tracking-wider shadow-xl shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer">
+                                    Programa Katıl ve Başla →
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-white font-bold text-base">Gelişimini takip etmek için giriş yap</h3>
+                            <p class="text-zinc-400 text-xs mt-0.5">Ücretsiz üye olarak bu programı takvimine ekle ve egzersizlerini kaydet.</p>
+                        </div>
+                        <a href="/giris" class="inline-flex justify-center items-center px-7 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all">
+                            Giriş Yap ve Katıl
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Program Days Section -->
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-black text-white font-heading uppercase tracking-tight flex items-center gap-3">
+                <span class="w-2 h-7 bg-orange-500 rounded-full"></span>
+                Program Takvimi ve Günlük Egzersizler
+            </h2>
+            <span class="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                Toplam {{ program.duration_days }} Gün
+            </span>
+        </div>
+
+        {% set days_map = {} %}
+        {% for group in program.exercises|groupby('day_number') %}
+            {% set _ = days_map.update({group.grouper: group.list}) %}
+        {% endfor %}
+
+        <div class="space-y-6">
             {% for day_no in range(1, program.duration_days + 1) %}
                 {% set is_today = user_program and user_program.current_day == day_no %}
-                <div class="mb-10">
-                    <div class="flex items-center mb-4">
-                        <div class="{% if is_today %}bg-accent text-white{% elif user_program and day_no < user_program.current_day %}bg-green-600/20 text-green-400 border border-green-600/40{% else %}bg-zinc-800 text-zinc-300{% endif %} font-black text-sm px-3 py-1 rounded-sm uppercase tracking-widest">
-                            Gün {{ day_no }}{% if is_today %} · Bugün{% elif user_program and day_no < user_program.current_day %} ✓{% endif %}
-                        </div>
-                        <div class="h-px bg-zinc-800 flex-grow ml-4"></div>
-                    </div>
-                {% if day_no in days_map %}
-                {% for pe in days_map[day_no] %}
-                <a href="/egzersizler/{{ pe.exercise.slug }}" class="block group mb-3">
-                    <div class="bg-zinc-900/50 border border-zinc-800 p-4 md:p-5 rounded-xl flex items-center justify-between transition-all duration-300 group-hover:bg-zinc-900 group-hover:border-accent/50 group-hover:-translate-y-1 group-hover:shadow-[0_10px_20px_-10px_rgba(234,88,12,0.2)]">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden relative">
-                                <img src="https://raw.githubusercontent.com/atilayaki/ev-sporu-app/main/static/images/{{ pe.exercise.slug }}.jpg?v=1791992000" loading="lazy"
-                                     class="absolute inset-0 w-full h-full object-cover mix-blend-lighten" alt="">
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-white text-lg uppercase tracking-tight group-hover:text-accent transition-colors">{{ pe.exercise.name }}</h4>
-                                <p class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">{{ pe.exercise.muscle_group }}</p>
-                            </div>
-                        </div>
-                        <div class="text-right flex flex-col items-end">
-                            <span class="inline-block bg-zinc-800 text-white text-sm font-black px-3 py-1 rounded-md uppercase tracking-wide mb-1">{{ pe.sets }} Set × {{ pe.reps }} Tekrar</span>
-                            <span class="text-xs font-bold text-zinc-500 uppercase flex items-center">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                {{ pe.rest_seconds }}sn Dinlenme
+                {% set is_past = user_program and day_no < user_program.current_day %}
+                <div class="rounded-2xl border {% if is_today %}border-orange-500/50 bg-orange-950/10 shadow-lg shadow-orange-500/5{% elif is_past %}border-zinc-800/60 bg-zinc-900/30 opacity-80{% else %}border-zinc-800/80 bg-zinc-900/50{% endif %} p-5 md:p-6 backdrop-blur-md transition-all">
+                    <!-- Day Header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="px-3.5 py-1.5 rounded-xl font-heading font-black text-xs uppercase tracking-wider {% if is_today %}bg-orange-500 text-white{% elif is_past %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-zinc-800 text-zinc-300{% endif %}">
+                                Gün {{ day_no }}
                             </span>
+                            {% if is_today %}
+                                <span class="text-xs font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-orange-400 animate-ping"></span>
+                                    Bugünün Antrenmanı
+                                </span>
+                            {% elif is_past %}
+                                <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    Tamamlandı
+                                </span>
+                            {% endif %}
                         </div>
+
+                        {% if day_no in days_map %}
+                            <span class="text-xs font-bold text-zinc-400">
+                                {{ days_map[day_no]|length }} Egzersiz
+                            </span>
+                        {% else %}
+                            <span class="text-xs font-bold text-zinc-400">
+                                Dinlenme & Toparlanma
+                            </span>
+                        {% endif %}
                     </div>
-                </a>
-                {% endfor %}
-                {% else %}
-                <div class="bg-zinc-900/30 border border-dashed border-zinc-800 p-5 rounded-xl text-zinc-400 text-sm font-semibold">
-                    😴 Dinlenme günü — hafif yürüyüş, esneme veya <a href="/breathe" class="text-accent hover:underline">nefes egzersizi</a> yapabilirsin.
-                </div>
-                {% endif %}
+
+                    <!-- Day Content -->
+                    {% if day_no in days_map %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {% for pe in days_map[day_no] %}
+                            <a href="/egzersizler/{{ pe.exercise.slug }}" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-950/50 hover:bg-zinc-800/60 border border-zinc-800/80 hover:border-orange-500/40 transition-all">
+                                <div class="flex items-center gap-3.5 min-w-0">
+                                    <div class="w-14 h-14 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0 relative">
+                                        <img src="/static/images/{{ pe.exercise.slug }}.jpg" 
+                                             onerror="this.src='/static/images/home_gym_icon.jpg'" 
+                                             alt="{{ pe.exercise.name }}" 
+                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="text-white font-bold text-sm group-hover:text-orange-400 transition-colors truncate">
+                                            {{ pe.exercise.name }}
+                                        </h4>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider truncate">
+                                                {{ pe.exercise.muscle_group }}
+                                            </span>
+                                            <span class="text-zinc-600">•</span>
+                                            <span class="text-[11px] font-semibold text-zinc-400">
+                                                {{ pe.exercise.level }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-right shrink-0 pl-3">
+                                    <div class="inline-block bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2.5 py-1 rounded-lg text-xs font-black font-heading">
+                                        {{ pe.sets }} × {{ pe.reps }}
+                                    </div>
+                                    <div class="text-[10px] font-semibold text-zinc-400 mt-1 flex items-center justify-end gap-1">
+                                        <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        {{ pe.rest_seconds }}sn
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-4 rounded-xl bg-zinc-950/40 border border-dashed border-zinc-800 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">😴</span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-zinc-300">Vücudunu Dinlendir ve Yenilen</h4>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Kas gelişimi dinlenme günlerinde gerçekleşir. Bol su iç ve hafif esneme yap.</p>
+                                </div>
+                            </div>
+                            <a href="/breathe" class="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 text-xs font-bold transition-colors">
+                                🧘 Nefes Egzersizi
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>

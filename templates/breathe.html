@@ -1,36 +1,168 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="max-w-4xl mx-auto text-center py-12" x-data="breatheApp()">
-    <h1 class="text-4xl font-extrabold mb-4 text-white">4-7-8 Nefes Egzersizi</h1>
-    <p class="text-gray-400 mb-12">Zihninizi boşaltın, kalp ritminizi yavaşlatın ve rahatlayın.</p>
+{% block title %}Nefes Egzersizi & Toparlanma - Evde Spor{% endblock %}
 
-    <div class="relative w-64 h-64 mx-auto mb-12 flex items-center justify-center">
-        <!-- The expanding/shrinking circle -->
-        <div class="absolute inset-0 bg-accent rounded-full opacity-20 transition-all ease-linear"
-             :style="'transform: scale(' + circleScale + '); transition-duration: ' + transitionDuration + 'ms;'"></div>
-        
-        <!-- Inner static circle with text -->
-        <div class="absolute w-40 h-40 bg-cardbg rounded-full border-4 border-accent flex flex-col items-center justify-center z-10 shadow-lg shadow-accent/20">
-            <span class="text-2xl font-bold text-white mb-1" x-text="instructionText">Hazır</span>
-            <span class="text-3xl font-extrabold text-accent" x-text="countdown">0</span>
+{% block content %}
+<div class="max-w-4xl mx-auto relative z-10 space-y-10" x-data="breatheApp()">
+    <!-- Header Hero -->
+    <div class="text-center relative">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-4">
+            🧘 Zihinsel ve Fiziksel Toparlanma
+        </div>
+        <h1 class="text-3xl md:text-5xl font-black text-white font-heading uppercase tracking-tight mb-3">
+            Bilinçli Nefes Alanı
+        </h1>
+        <p class="text-zinc-400 text-sm md:text-base max-w-xl mx-auto font-normal">
+            Kalp ritmini dengele, kortizol seviyeni düşür ve antrenman sonrası toparlanmanı hızlandır.
+        </p>
+    </div>
+
+    <!-- Mode Selector Pills -->
+    <div class="flex flex-wrap items-center justify-center gap-2">
+        <button type="button" @click="setTechnique('478')" 
+                :class="technique === '478' ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-900/80 text-zinc-400 hover:text-white border-zinc-800'"
+                class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all">
+            4-7-8 Derin Rahatlama
+        </button>
+        <button type="button" @click="setTechnique('box')" 
+                :class="technique === 'box' ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-900/80 text-zinc-400 hover:text-white border-zinc-800'"
+                class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all">
+            Kutu Nefesi (Box 4-4-4-4)
+        </button>
+        <button type="button" @click="setTechnique('balance')" 
+                :class="technique === 'balance' ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-900/80 text-zinc-400 hover:text-white border-zinc-800'"
+                class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all">
+            Denge (5-5 Sakinlik)
+        </button>
+    </div>
+
+    <!-- Main Visualizer Area -->
+    <div class="relative rounded-3xl border border-zinc-800/80 bg-zinc-900/40 p-8 md:p-16 backdrop-blur-2xl flex flex-col items-center justify-center overflow-hidden shadow-2xl">
+        <!-- Atmospheric Ambient Glow -->
+        <div class="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none transition-all duration-1000 opacity-20"
+             :class="isActive ? 'bg-orange-500 scale-125' : 'bg-indigo-500/40 scale-90'"></div>
+
+        <!-- Breathing Pulse Waves -->
+        <div class="relative w-72 h-72 md:w-80 md:h-80 flex items-center justify-center my-6">
+            <!-- Outermost Glow Ring -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 opacity-20 transition-transform ease-in-out"
+                 :style="'transform: scale(' + circleScale + '); transition-duration: ' + transitionDuration + 'ms;'"></div>
+            
+            <!-- Secondary Ripple -->
+            <div class="absolute w-60 h-60 rounded-full border border-orange-500/30 transition-transform ease-in-out"
+                 :style="'transform: scale(' + (circleScale * 0.85) + '); transition-duration: ' + transitionDuration + 'ms;'"></div>
+
+            <!-- Central Orb -->
+            <div class="relative z-10 w-48 h-48 md:w-52 md:h-52 rounded-full bg-zinc-950/90 border-2 border-orange-500/50 shadow-2xl shadow-orange-500/20 flex flex-col items-center justify-center p-4">
+                <span class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-1" x-text="phaseText">Hazır</span>
+                <span class="text-5xl md:text-6xl font-black font-mono text-white tracking-tight" x-text="countdown">0</span>
+                <span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider mt-1" x-text="'Döngü: ' + cycleCount"></span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-4 mt-4 z-10">
+            <button @click="toggleBreathing()" 
+                    class="px-8 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wider transition-all transform hover:-translate-y-0.5 shadow-xl cursor-pointer flex items-center gap-2"
+                    :class="isActive ? 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700' : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-orange-500/30'">
+                <template x-if="!isActive">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                        Egzersize Başla
+                    </span>
+                </template>
+                <template x-if="isActive">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        Durdur
+                    </span>
+                </template>
+            </button>
+
+            <!-- Sound Toggle -->
+            <button @click="soundEnabled = !soundEnabled" 
+                    :class="soundEnabled ? 'text-orange-400 bg-orange-500/10 border-orange-500/30' : 'text-zinc-500 bg-zinc-800/80 border-zinc-700/60'"
+                    class="p-3.5 rounded-2xl border transition-all text-sm font-bold" title="Ses Bildirimi">
+                <span x-text="soundEnabled ? '🔔 Açık' : '🔕 Kapalı'"></span>
+            </button>
         </div>
     </div>
 
-    <button @click="toggleBreathing()" class="px-8 py-3 bg-accent text-white font-bold rounded-lg hover:bg-orange-500 transition shadow-lg shadow-orange-500/30">
-        <span x-text="isActive ? 'Durdur' : 'Başla'"></span>
-    </button>
+    <!-- Science & Benefits Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md">
+            <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 mb-3">
+                ❤️
+            </div>
+            <h3 class="text-white font-bold text-sm mb-1">Nabız Düşürme</h3>
+            <p class="text-zinc-400 text-xs leading-relaxed">
+                Vagus sinirini uyararak parasempatik sinir sistemini devreye sokar, kalp atış hızını sakinleştirir.
+            </p>
+        </div>
+
+        <div class="p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3">
+                🧠
+            </div>
+            <h3 class="text-white font-bold text-sm mb-1">Stres & Kortizol</h3>
+            <p class="text-zinc-400 text-xs leading-relaxed">
+                Antrenman sonrası veya gün içindeki zihinsel yorgunluğu ve stres hormonlarını birkaç dakikada dengeler.
+            </p>
+        </div>
+
+        <div class="p-5 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+                ⚡
+            </div>
+            <h3 class="text-white font-bold text-sm mb-1">Daha Hızlı Toparlanma</h3>
+            <p class="text-zinc-400 text-xs leading-relaxed">
+                Kas hücrelerine daha fazla oksijen taşınmasını sağlayarak laktik asit atılımını destekler.
+            </p>
+        </div>
+    </div>
 </div>
 
 <script>
 function breatheApp() {
+    let audioCtx = null;
+    function playBeep(freq = 440, duration = 0.15) {
+        try {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch (e) {}
+    }
+
     return {
         isActive: false,
-        instructionText: 'Başlamak için tıklayın',
+        technique: '478',
+        phaseText: 'Hazır',
         countdown: 4,
         circleScale: 1,
         transitionDuration: 0,
+        cycleCount: 0,
+        soundEnabled: true,
         interval: null,
-        
+
+        setTechnique(t) {
+            if (this.isActive) this.stop();
+            this.technique = t;
+            this.phaseText = 'Hazır';
+            this.countdown = t === '478' ? 4 : (t === 'box' ? 4 : 5);
+        },
+
         toggleBreathing() {
             if (this.isActive) {
                 this.stop();
@@ -42,7 +174,7 @@ function breatheApp() {
         stop() {
             this.isActive = false;
             clearInterval(this.interval);
-            this.instructionText = 'Durduruldu';
+            this.phaseText = 'Durduruldu';
             this.countdown = 0;
             this.circleScale = 1;
             this.transitionDuration = 500;
@@ -50,40 +182,45 @@ function breatheApp() {
 
         start() {
             this.isActive = true;
-            this.breatheIn();
+            this.cycleCount = 1;
+            if (this.soundEnabled) playBeep(520, 0.2);
+            this.runPhase(0);
         },
 
-        breatheIn() {
+        getPhases() {
+            if (this.technique === '478') {
+                return [
+                    { name: 'Nefes Al', duration: 4, scale: 1.6, freq: 440 },
+                    { name: 'Tut', duration: 7, scale: 1.6, freq: 554 },
+                    { name: 'Nefes Ver', duration: 8, scale: 1.0, freq: 330 }
+                ];
+            } else if (this.technique === 'box') {
+                return [
+                    { name: 'Nefes Al', duration: 4, scale: 1.6, freq: 440 },
+                    { name: 'Tut', duration: 4, scale: 1.6, freq: 554 },
+                    { name: 'Nefes Ver', duration: 4, scale: 1.0, freq: 330 },
+                    { name: 'Boşta Tut', duration: 4, scale: 1.0, freq: 277 }
+                ];
+            } else { // balance 5-5
+                return [
+                    { name: 'Nefes Al', duration: 5, scale: 1.5, freq: 440 },
+                    { name: 'Nefes Ver', duration: 5, scale: 1.0, freq: 330 }
+                ];
+            }
+        },
+
+        runPhase(phaseIndex) {
             if (!this.isActive) return;
-            this.instructionText = 'Nefes Al';
-            this.countdown = 4;
-            this.circleScale = 1.8;
-            this.transitionDuration = 4000;
-            
-            this.tickCountdown(() => this.hold());
-        },
+            const phases = this.getPhases();
+            const phase = phases[phaseIndex];
 
-        hold() {
-            if (!this.isActive) return;
-            this.instructionText = 'Tut';
-            this.countdown = 7;
-            this.circleScale = 1.8;
-            this.transitionDuration = 0;
-            
-            this.tickCountdown(() => this.breatheOut());
-        },
+            this.phaseText = phase.name;
+            this.countdown = phase.duration;
+            this.circleScale = phase.scale;
+            this.transitionDuration = phase.duration * 1000;
 
-        breatheOut() {
-            if (!this.isActive) return;
-            this.instructionText = 'Nefes Ver';
-            this.countdown = 8;
-            this.circleScale = 1;
-            this.transitionDuration = 8000;
-            
-            this.tickCountdown(() => this.breatheIn());
-        },
+            if (this.soundEnabled) playBeep(phase.freq, 0.2);
 
-        tickCountdown(nextStepCallback) {
             clearInterval(this.interval);
             this.interval = setInterval(() => {
                 if (!this.isActive) {
@@ -93,11 +230,13 @@ function breatheApp() {
                 this.countdown--;
                 if (this.countdown <= 0) {
                     clearInterval(this.interval);
-                    nextStepCallback();
+                    const nextIndex = (phaseIndex + 1) % phases.length;
+                    if (nextIndex === 0) this.cycleCount++;
+                    this.runPhase(nextIndex);
                 }
             }, 1000);
         }
-    }
+    };
 }
 </script>
 {% endblock %}

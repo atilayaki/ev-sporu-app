@@ -3,111 +3,205 @@
 {% block title %}{{ exercise.name }} - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto relative z-10">
-    <div class="mb-8">
-        <a href="/egzersizler" class="inline-flex items-center text-zinc-400 hover:text-accent font-semibold transition-colors text-sm uppercase tracking-wide">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Egzersizlere Dön
+<div class="max-w-5xl mx-auto relative z-10 animate-fade-up">
+    <!-- Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a href="/egzersizler" class="inline-flex items-center text-zinc-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            Tüm Egzersizlere Dön
         </a>
+
+        <div class="flex items-center space-x-2">
+            <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-orange-500/15 text-orange-400 border border-orange-500/30">
+                {{ exercise.muscle_group }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-zinc-700">
+                {{ exercise.difficulty }}
+            </span>
+        </div>
     </div>
 
-    <div class="athletic-card rounded-xl overflow-hidden relative border border-zinc-800">
-        <div class="h-48 md:h-80 bg-zinc-900 flex items-center justify-center border-b border-zinc-800 relative overflow-hidden">
-            <img src="https://raw.githubusercontent.com/atilayaki/ev-sporu-app/main/static/images/{{ exercise.slug }}.jpg?v=1791992000" 
-                 onerror="this.style.display='none'; document.getElementById('spline-bg').style.display='block'; document.getElementById('emoji-icon').style.display='block';"
-                 class="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-lighten z-20" alt="{{ exercise.name }}">
+    <!-- Main Detail Card -->
+    <div class="athletic-card rounded-3xl overflow-hidden relative border border-zinc-800/80 bg-zinc-950 shadow-2xl">
+        <!-- Cinematic Hero Media Box -->
+        <div class="h-64 sm:h-96 w-full bg-black relative overflow-hidden">
+            <img src="/static/images/{{ exercise.slug }}.jpg" 
+                 alt="{{ exercise.name }}"
+                 class="w-full h-full object-cover opacity-85"
+                 onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
             
-            <spline-viewer id="spline-bg" url="https://prod.spline.design/qBvV-yN8LhJqZpG6/scene.splinecode" class="absolute inset-0 w-full h-full opacity-30" style="display:none;"></spline-viewer>
-            <div id="emoji-icon" class="text-zinc-500 text-6xl relative z-10" style="display:none;">💪</div>
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-zinc-950/70 via-transparent to-transparent"></div>
+
+            <!-- Title Overlay on Hero bottom -->
+            <div class="absolute bottom-6 left-6 right-6">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-xs font-bold text-zinc-300 mb-2">
+                    <span>⚡ Doğru Form & Calisthenics Rehberi</span>
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight">
+                    {{ exercise.name }}
+                </h1>
+            </div>
         </div>
         
-        <div class="p-8 md:p-10 relative z-10">
-            <h1 class="text-3xl md:text-5xl font-black text-white mb-8 tracking-tighter uppercase">{{ exercise.name }}</h1>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
-                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Hedef Kas</span>
-                    <span class="font-bold text-white text-lg">{{ exercise.muscle_group }}</span>
+        <div class="p-6 sm:p-10 space-y-10">
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Hedef Bölge</span>
+                    <span class="font-bold text-white text-base sm:text-lg">{{ exercise.muscle_group }}</span>
                 </div>
-                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
-                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Seviye</span>
-                    <span class="font-bold text-white text-lg">{{ exercise.difficulty }}</span>
+                <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Zorluk</span>
+                    <span class="font-bold text-orange-400 text-base sm:text-lg">{{ exercise.difficulty }}</span>
                 </div>
-                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
-                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Ekipman</span>
-                    <span class="font-bold text-white text-lg">{{ exercise.equipment }}</span>
+                <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Gereken Ekipman</span>
+                    <span class="font-bold text-emerald-400 text-base sm:text-lg">{{ exercise.equipment or 'Vücut Ağırlığı' }}</span>
                 </div>
-                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-4">
-                    <span class="block text-xs text-zinc-500 font-bold uppercase tracking-widest mb-1">Kalori</span>
-                    <span class="font-bold text-white text-lg">~{{ exercise.calories_estimate or '--' }} kcal</span>
+                <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Tahmini Kalori</span>
+                    <span class="font-mono font-bold text-white text-base sm:text-lg">~{{ exercise.calories_estimate or 8 }} kcal</span>
                 </div>
             </div>
 
-            <div class="space-y-8 text-zinc-300">
-                <section>
-                    <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-tight flex items-center">
-                        <span class="text-accent mr-2">/</span> Hakkında
-                    </h3>
-                    <p class="text-lg leading-relaxed text-zinc-400">{{ exercise.description }}</p>
-                </section>
+            <!-- Description -->
+            <div class="space-y-3">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <span class="text-accent font-black">/</span>
+                    <span>Hareket Hakkında</span>
+                </h3>
+                <p class="text-base text-zinc-400 leading-relaxed font-medium">
+                    {{ exercise.description }}
+                </p>
+            </div>
 
-                <section>
-                    <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-tight flex items-center">
-                        <span class="text-accent mr-2">/</span> Nasıl Yapılır?
-                    </h3>
-                    <div class="bg-zinc-900 p-6 rounded-md border border-zinc-800 text-lg leading-relaxed text-zinc-400">
-                        {{ exercise.instructions }}
+            <!-- How to Perform (Instructions) -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <span class="text-accent font-black">/</span>
+                    <span>Nasıl Yapılır? (Doğru Form Adımları)</span>
+                </h3>
+                <div class="bg-zinc-900/70 p-6 sm:p-8 rounded-2xl border border-zinc-800/80 text-zinc-300 text-base leading-relaxed whitespace-pre-line font-medium shadow-inner">
+                    {{ exercise.instructions }}
+                </div>
+            </div>
+            
+            <!-- Interactive Timer & Video Guide Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <!-- Stopwatch / Timer Card -->
+                <div class="bg-gradient-to-br from-zinc-900 via-zinc-900/80 to-zinc-950 p-6 rounded-2xl border border-zinc-800/80 shadow-lg"
+                     x-data="{
+                        time: {{ exercise.duration_seconds or 60 }},
+                        initial: {{ exercise.duration_seconds or 60 }},
+                        timer: null,
+                        running: false,
+                        get formatTime() {
+                            let m = Math.floor(this.time / 60);
+                            let s = this.time % 60;
+                            return (m < 10 ? '0'+m : m) + ':' + (s < 10 ? '0'+s : s);
+                        },
+                        start() {
+                            if(!this.running) {
+                                this.running = true;
+                                this.timer = setInterval(() => {
+                                    if(this.time > 0) {
+                                        this.time--;
+                                    } else {
+                                        clearInterval(this.timer);
+                                        this.running = false;
+                                        try {
+                                            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                                            const osc = ctx.createOscillator();
+                                            osc.connect(ctx.destination);
+                                            osc.frequency.value = 880;
+                                            osc.start();
+                                            osc.stop(ctx.currentTime + 0.3);
+                                        } catch(e){}
+                                    }
+                                }, 1000);
+                            }
+                        },
+                        stop() {
+                            this.running = false;
+                            clearInterval(this.timer);
+                        },
+                        reset() {
+                            this.running = false;
+                            clearInterval(this.timer);
+                            this.time = this.initial;
+                        }
+                     }">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Antrenman Sayacı</span>
+                        <span class="w-2 h-2 rounded-full" :class="running ? 'bg-orange-500 animate-ping' : 'bg-zinc-700'"></span>
                     </div>
-                </section>
-                
-                <!-- Timer -->
-                <section>
-                    <div class="bg-zinc-900 border-l-4 border-accent rounded-r-md p-6 relative overflow-hidden" x-data="{ time: {{ exercise.duration_seconds or 60 }}, timer: null, running: false, get formatTime() { let m = Math.floor(this.time / 60); let s = this.time % 60; return (m < 10 ? '0'+m : m) + ':' + (s < 10 ? '0'+s : s); } }">
-                        <h3 class="text-sm font-bold text-zinc-500 mb-4 uppercase tracking-widest">
-                            Zamanlayıcı
-                        </h3>
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                            <div class="text-6xl font-mono font-black text-white tracking-widest" x-text="formatTime"></div>
-                            <div class="flex flex-wrap gap-2">
-                                <button @click="if(!running) { running=true; timer=setInterval(() => { if(time>0) time--; else { clearInterval(timer); running=false; } }, 1000) }" x-show="!running" class="bg-accent hover:bg-accentHover text-white font-bold py-2 px-6 rounded-sm uppercase tracking-wide text-sm transition-colors">Başlat</button>
-                                <button @click="running=false; clearInterval(timer)" x-show="running" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-sm uppercase tracking-wide text-sm transition-colors">Durdur</button>
-                                <button @click="running=false; clearInterval(timer); time={{ exercise.duration_seconds or 60 }}" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 px-6 rounded-sm uppercase tracking-wide text-sm transition-colors border border-zinc-700">Sıfırla</button>
-                            </div>
-                        </div>
+
+                    <div class="text-5xl font-mono font-black text-white text-center py-4 tracking-wider" x-text="formatTime">
+                        01:00
                     </div>
-                    {% if exercise.video_url %}
-                    <div class="mt-4">
-                        <a href="{{ exercise.video_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-wider bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-4 py-2.5 rounded-lg">
-                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                            Hareket Doğru Form Videosunu İzle ↗
+
+                    <div class="flex items-center justify-center gap-3 pt-2">
+                        <button @click="start()" x-show="!running" class="bg-accent hover:bg-orange-500 text-white font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                            Başlat
+                        </button>
+                        <button @click="stop()" x-show="running" class="bg-red-500 hover:bg-red-600 text-white font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all">
+                            Durdur
+                        </button>
+                        <button @click="reset()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all border border-zinc-700">
+                            Sıfırla
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video & AI Assistant Link Card -->
+                <div class="bg-zinc-900/60 p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-orange-400 uppercase tracking-widest block mb-2">Görsel Destek & AI</span>
+                        <h4 class="text-lg font-black text-white uppercase tracking-tight mb-2">Formunu Kusursuzlaştır</h4>
+                        <p class="text-xs text-zinc-400 leading-relaxed">
+                            Doğru form videosunu izleyebilir veya doğrudan AI Koç kamerasını açarak hareketin tekrar ve açı kontrolünü başlatabilirsin.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3 pt-4">
+                        {% if exercise.video_url %}
+                        <a href="{{ exercise.video_url }}" target="_blank" rel="noopener noreferrer" 
+                           class="w-full inline-flex items-center justify-center gap-2 text-xs font-bold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-600 border border-red-500/30 px-4 py-3 rounded-xl transition-all">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            <span>Doğru Form YouTube Videosu ↗</span>
+                        </a>
+                        {% endif %}
+
+                        <a href="/ai-koc" class="w-full inline-flex items-center justify-center gap-2 text-xs font-black text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-4 py-3 rounded-xl transition-all shadow-md">
+                            <span>🤖 AI Koç ile Bu Hareketi Çalış</span>
                         </a>
                     </div>
-                    {% endif %}
-                </section>
-                
-                <!-- Butonlar -->
-                {% if current_user.is_authenticated %}
-                <div class="flex flex-col sm:flex-row gap-4 border-t border-zinc-800 pt-8 mt-8">
-                    <form action="/favori-ekle/{{ exercise.id }}" method="POST" class="flex-1">
-                        <button type="submit" class="w-full flex items-center justify-center px-6 py-4 rounded-md font-bold uppercase tracking-wide text-sm transition-colors {% if is_favorite %}bg-zinc-800 text-white border border-zinc-700 hover:bg-zinc-700{% else %}bg-transparent text-zinc-400 border border-zinc-800 hover:border-zinc-600 hover:text-white{% endif %}">
-                            <svg class="w-5 h-5 mr-2 {% if is_favorite %}fill-current text-accent{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                            {% if is_favorite %}Favorilerden Çıkar{% else %}Favorilere Ekle{% endif %}
-                        </button>
-                    </form>
-
-                    <form action="/ilerleme-kaydet/{{ exercise.id }}" method="POST" class="flex-[2]">
-                        <button type="submit" class="w-full flex items-center justify-center px-6 py-4 bg-white hover:bg-zinc-200 text-black font-black uppercase tracking-wide text-sm rounded-md transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Antrenmanı Tamamla
-                        </button>
-                    </form>
                 </div>
-                {% else %}
-                <div class="bg-zinc-900 border border-zinc-800 rounded-md p-6 text-zinc-400 text-center mt-8 text-sm">
-                    Favorilere eklemek veya ilerlemenizi kaydetmek için <a href="/giris" class="font-bold text-white underline hover:text-accent transition-colors">giriş yapmalısınız</a>.
-                </div>
-                {% endif %}
             </div>
+            
+            <!-- User Actions (Favorite & Complete) -->
+            {% if current_user.is_authenticated %}
+            <div class="flex flex-col sm:flex-row gap-4 border-t border-zinc-800/80 pt-8 mt-8">
+                <form action="/favori-ekle/{{ exercise.id }}" method="POST" class="flex-1">
+                    <button type="submit" class="w-full flex items-center justify-center px-6 py-4 rounded-xl font-bold uppercase tracking-wider text-xs transition-all {{ 'bg-zinc-800 text-orange-400 border border-orange-500/40 shadow-inner' if is_favorite else 'bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-2 {{ 'fill-current text-accent' if is_favorite else '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                        <span>{{ 'Favorilerden Çıkar' if is_favorite else 'Favorilere Ekle' }}</span>
+                    </button>
+                </form>
+
+                <form action="/ilerleme-kaydet/{{ exercise.id }}" method="POST" class="flex-[2]">
+                    <button type="submit" class="w-full flex items-center justify-center px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Antrenmanı Tamamla & Kaydet</span>
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 text-zinc-400 text-center mt-8 text-sm">
+                Favorilere eklemek ve antrenman ilerlemeni kaydetmek için <a href="/giris" class="font-bold text-orange-400 underline hover:text-orange-300 transition-colors">giriş yapmalısın</a>.
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

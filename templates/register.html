@@ -2,48 +2,126 @@
 {% block title %}Kayıt Ol - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto athletic-card rounded-xl overflow-hidden mt-10">
-    <div class="bg-zinc-900 border-b border-zinc-800 p-6 text-center">
-        <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Hesap <span class="text-accent">Oluştur</span></h2>
-    </div>
-    <div class="p-8">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <div class="mb-5">
-                {{ form.name.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
-                {{ form.name(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
-                {% for error in form.name.errors %}
-                    <span class="text-red-500 text-xs italic mt-1 block">{{ error }}</span>
-                {% endfor %}
+<div class="relative max-w-6xl mx-auto md:my-4">
+    <!-- Ambient glows -->
+    <div class="absolute -top-24 -right-24 w-80 h-80 bg-orange-600/20 blur-[110px] rounded-full pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-amber-500/10 blur-[110px] rounded-full pointer-events-none"></div>
+
+    <div class="relative grid lg:grid-cols-2 rounded-[2rem] overflow-hidden border border-zinc-800/80 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] bg-zinc-950 animate-fade-up">
+
+        <!-- LEFT: Form panel -->
+        <div class="relative p-8 sm:p-12 lg:p-14 flex flex-col justify-center order-2 lg:order-1">
+            <div class="absolute inset-0 grid-texture opacity-60 pointer-events-none"></div>
+
+            <div class="relative w-full max-w-md mx-auto">
+                <a href="/" class="inline-flex items-center gap-2 mb-8 text-xl font-black tracking-tighter uppercase">
+                    <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-base shadow-lg shadow-orange-500/30">⚡</span>
+                    <span>EVDE<span class="text-accent">SPOR</span></span>
+                </a>
+
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-3">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                    <span>%100 Ücretsiz & Ekipmansız</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">Hesap <span class="text-gradient">Oluştur</span></h1>
+                <p class="text-zinc-400 mt-2 mb-6 text-sm">Sporcu profilini aç, yapay zeka antrenörünü başlat ve dönüşümüne bugün başla.</p>
+
+                <form method="POST" action="" class="space-y-4" x-data="{ showPass: false, loading: false }" @submit="loading = true">
+                    {{ form.hidden_tag() }}
+
+                    <div>
+                        <label for="name" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-1.5">Ad Soyad</label>
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            {{ form.name(class="input-field", placeholder="Örn: Ahmet Yılmaz", autofocus=true) }}
+                        </div>
+                        {% for error in form.name.errors %}
+                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-1.5">E-posta</label>
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            {{ form.email(class="input-field", placeholder="ornek@mail.com", autocomplete="email") }}
+                        </div>
+                        {% for error in form.email.errors %}
+                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-1.5">Şifre</label>
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            {{ form.password(class="input-field pr-12", placeholder="En az 6 karakter", autocomplete="new-password", **{':type': "showPass ? 'text' : 'password'"}) }}
+                            <button type="button" @click="showPass = !showPass" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs font-bold uppercase px-2 py-1" x-text="showPass ? 'Gizle' : 'Göster'">Göster</button>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="confirm_password" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-1.5">Şifreyi Onayla</label>
+                        <div class="relative">
+                            <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            {{ form.confirm_password(class="input-field", placeholder="Şifrenizi tekrar girin", autocomplete="new-password", **{':type': "showPass ? 'text' : 'password'"}) }}
+                        </div>
+                        {% for error in form.confirm_password.errors %}
+                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full !mt-6" :disabled="loading" :class="loading && 'opacity-80 cursor-wait'">
+                        <svg x-show="loading" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                        <span x-text="loading ? 'Hesap açılıyor...' : 'Hemen Kayıt Ol & Başla'">Hemen Kayıt Ol & Başla</span>
+                        <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </form>
+
+                <p class="text-center text-sm text-zinc-500 mt-6 font-medium">
+                    Zaten bir hesabın var mı?
+                    <a href="/giris" class="text-orange-400 hover:text-orange-300 font-bold transition-colors">Giriş Yap →</a>
+                </p>
             </div>
-            <div class="mb-5">
-                {{ form.email.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
-                {{ form.email(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
-                {% for error in form.email.errors %}
-                    <span class="text-red-500 text-xs italic mt-1 block">{{ error }}</span>
-                {% endfor %}
+        </div>
+
+        <!-- RIGHT: Visual panel -->
+        <div class="relative hidden lg:block min-h-[680px] order-1 lg:order-2">
+            <img src="/static/images/auth_register_bg.jpg" alt="Evde Squat Yapan Sporcu" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-zinc-950/20"></div>
+            <div class="absolute inset-0 bg-gradient-to-l from-transparent to-zinc-950/60"></div>
+
+            <div class="absolute top-8 right-8 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-orange-500/40 backdrop-blur-md text-[11px] font-black uppercase tracking-widest text-orange-400 shadow-lg">
+                ⚡ Yeni Başlayanlar & İleri Seviye
             </div>
-            <div class="mb-5">
-                {{ form.password.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
-                {{ form.password(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
-                {% for error in form.password.errors %}
-                    <span class="text-red-500 text-xs italic mt-1 block">{{ error }}</span>
-                {% endfor %}
+
+            <div class="absolute bottom-0 left-0 right-0 p-10 space-y-6">
+                <h2 class="text-4xl xl:text-5xl font-black uppercase tracking-tight leading-[1.05] text-white">
+                    İlk adımı <br><span class="text-gradient">şimdi at.</span>
+                </h2>
+                <p class="text-zinc-300 max-w-sm leading-relaxed">Pahalı spor salonlarına servet ödemeden, kendi evinde calisthenics ve yapay zeka ile hayalindeki güce ulaş.</p>
+
+                <div class="space-y-2.5 max-w-md pt-2">
+                    <div class="flex items-center gap-3 text-xs font-bold text-zinc-200">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[11px]">✓</span>
+                        <span>60+ Ekipmansız Egzersiz & Doğru Form Videoları</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-zinc-200">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[11px]">✓</span>
+                        <span>Kamera ile Gerçek Zamanlı AI Tekrar Sayacı</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-zinc-200">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[11px]">✓</span>
+                        <span>PDF İlerleme Raporu & Resmi Sporcu Sertifikası</span>
+                    </div>
+                </div>
             </div>
-            <div class="mb-8">
-                {{ form.confirm_password.label(class="block text-zinc-400 text-xs font-bold uppercase tracking-wide mb-2") }}
-                {{ form.confirm_password(class="bg-zinc-900 border border-zinc-800 rounded-md w-full py-3 px-4 text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-colors") }}
-                {% for error in form.confirm_password.errors %}
-                    <span class="text-red-500 text-xs italic mt-1 block">{{ error }}</span>
-                {% endfor %}
-            </div>
-            <div class="flex items-center justify-between">
-                {{ form.submit(class="bg-accent hover:bg-accentHover text-white font-bold py-3 px-4 rounded-md w-full cursor-pointer uppercase tracking-wide text-sm transition-colors") }}
-            </div>
-        </form>
-        <p class="text-center text-sm text-zinc-500 mt-6 font-medium">
-            Zaten hesabın var mı? <a href="/giris" class="text-white hover:text-accent font-bold transition-colors">Giriş Yap</a>
-        </p>
+        </div>
+
     </div>
 </div>
 {% endblock %}

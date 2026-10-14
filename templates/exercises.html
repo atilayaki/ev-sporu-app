@@ -1,53 +1,140 @@
 {% extends 'base.html' %}
 
-{% block title %}Egzersizler - Evde Spor{% endblock %}
+{% block title %}Egzersiz Kütüphanesi ({{ total_count }}+ Hareket) - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="mb-10 pb-6 relative z-10 flex flex-col md:flex-row md:items-end justify-between">
-    <div>
-        <h1 class="text-4xl font-black text-white uppercase tracking-tighter">Egzersiz <span class="text-accent">Kütüphanesi</span></h1>
-        <p class="text-zinc-400 mt-2 text-lg font-medium">Hedeflediğin kas grubuna uygun hareketleri keşfet.</p>
-    </div>
-    {% if query %}
-    <div class="mt-4 md:mt-0 text-zinc-400 text-sm">
-        "<span class="text-white font-bold">{{ query }}</span>" için arama sonuçları
-    </div>
-    {% endif %}
-</div>
+<div class="relative z-10 max-w-7xl mx-auto">
+    <!-- Header with ambient glow -->
+    <div class="relative mb-10 pb-6 border-b border-zinc-800/80">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-wider mb-3">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                    <span>%100 VÜCUT AĞIRLIĞI & CALISTHENICS</span>
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
+                    Egzersiz <span class="text-gradient">Kütüphanesi</span>
+                </h1>
+                <p class="text-zinc-400 mt-2 text-base max-w-2xl font-medium">
+                    Doğru form, hedef kas grubu ve video anlatımlarıyla donatılmış <span class="text-white font-bold">{{ total_count }}+</span> profesyonel ev egzersizi.
+                </p>
+            </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
-    {% for exercise in exercises %}
-    <div class="athletic-card rounded-xl overflow-hidden flex flex-col h-full relative group">
-        <div class="aspect-video w-full bg-zinc-900 overflow-hidden relative border-b border-zinc-800">
-            <img src="https://raw.githubusercontent.com/atilayaki/ev-sporu-app/main/static/images/{{ exercise.slug }}.jpg?v=1791992000" 
-                 
-                 class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="{{ exercise.name }}">
-            <div class="absolute inset-0 items-center justify-center bg-zinc-900" style="display:none;">
-                <span class="text-4xl opacity-20">💪</span>
+            <!-- Search Form on page -->
+            <form action="/egzersizler" method="GET" class="w-full lg:w-96 flex items-center">
+                {% if selected_muscle %}
+                    <input type="hidden" name="muscle" value="{{ selected_muscle }}">
+                {% endif %}
+                {% if selected_difficulty %}
+                    <input type="hidden" name="difficulty" value="{{ selected_difficulty }}">
+                {% endif %}
+                <div class="relative w-full">
+                    <input type="text" name="q" value="{{ query or '' }}" placeholder="Egzersiz adı veya kas grubu ara..." 
+                           class="w-full bg-zinc-900/90 border border-zinc-700/80 rounded-2xl pl-11 pr-4 py-3 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all shadow-inner">
+                    <svg class="w-5 h-5 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    {% if query %}
+                        <a href="/egzersizler" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs font-bold uppercase">Temizle</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Muscle Group Filter Tabs -->
+        <div class="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {% for mg in muscle_groups %}
+                {% set is_active = (selected_muscle == mg) or (not selected_muscle and mg == 'Tümü') %}
+                <a href="/egzersizler?{% if mg != 'Tümü' %}muscle={{ mg }}{% endif %}{% if query %}&q={{ query }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}" 
+                   class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border {{ 'bg-accent text-white border-accent shadow-md shadow-orange-500/20' if is_active else 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800' }}">
+                    {{ mg }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- Difficulty Pills -->
+        <div class="mt-4 flex items-center gap-2 text-xs">
+            <span class="text-zinc-500 font-bold uppercase tracking-wider text-[11px] mr-1">Seviye:</span>
+            {% for diff in ['Tümü', 'Başlangıç', 'Orta', 'İleri'] %}
+                {% set is_diff_active = (selected_difficulty == diff) or (not selected_difficulty and diff == 'Tümü') %}
+                <a href="/egzersizler?{% if selected_muscle and selected_muscle != 'Tümü' %}muscle={{ selected_muscle }}{% endif %}{% if diff != 'Tümü' %}&difficulty={{ diff }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-3 py-1 rounded-lg font-semibold uppercase tracking-wider transition-all {{ 'bg-zinc-700 text-white font-bold' if is_diff_active else 'text-zinc-400 hover:text-white hover:bg-zinc-900' }}">
+                    {{ diff }}
+                </a>
+            {% endfor %}
+
+            <span class="ml-auto text-xs text-zinc-500 font-mono">
+                <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket listelendi
+            </span>
+        </div>
+    </div>
+
+    <!-- Exercise Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for exercise in exercises %}
+        <div class="athletic-card rounded-2xl overflow-hidden flex flex-col justify-between border border-zinc-800/80 bg-zinc-900/60 group hover:border-orange-500/50 transition-all shadow-xl">
+            <!-- Thumbnail Box -->
+            <div class="relative h-48 w-full bg-black/60 overflow-hidden">
+                <img src="/static/images/{{ exercise.slug }}.jpg" 
+                     alt="{{ exercise.name }}"
+                     class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                     onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/25 to-transparent"></div>
+
+                <!-- Muscle Group Pill -->
+                <div class="absolute top-3 left-3">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/70 text-zinc-300 border border-zinc-700/80 backdrop-blur-md">
+                        {{ exercise.muscle_group }}
+                    </span>
+                </div>
+
+                <!-- Difficulty Badge -->
+                <div class="absolute top-3 right-3">
+                    {% if exercise.difficulty == 'Başlangıç' %}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 backdrop-blur-md">Başlangıç</span>
+                    {% elif exercise.difficulty == 'İleri' %}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/40 backdrop-blur-md">İleri</span>
+                    {% else %}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40 backdrop-blur-md">Orta</span>
+                    {% endif %}
+                </div>
+
+                <!-- Bottom Metrics -->
+                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono font-bold text-zinc-300">
+                    <span class="bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800">⏱️ {{ exercise.duration_seconds or 45 }} sn</span>
+                    <span class="bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800 text-orange-400">🔥 {{ exercise.calories_estimate or 8 }} kcal</span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-5 flex-grow flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-black text-white uppercase tracking-tight group-hover:text-accent transition-colors leading-snug">
+                        {{ exercise.name }}
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-2 line-clamp-2 leading-relaxed">
+                        {{ exercise.description }}
+                    </p>
+                </div>
+
+                <!-- CTA Button -->
+                <div class="pt-5 mt-4 border-t border-zinc-800/80">
+                    <a href="/egzersizler/{{ exercise.slug }}" class="w-full bg-zinc-800 hover:bg-accent text-white font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 border border-zinc-700/80 hover:border-accent">
+                        <span>Hareketi İncele</span>
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="p-6 flex-grow flex flex-col">
-            <h2 class="text-xl font-bold text-white mb-2 group-hover:text-accent transition-colors">{{ exercise.name }}</h2>
-            <p class="text-sm text-zinc-400 mb-6 flex-grow">{{ exercise.description|truncate(80) }}</p>
-            
-            <div class="flex flex-wrap gap-2 mb-6 mt-auto">
-                <span class="bg-zinc-800 text-zinc-300 text-xs font-bold px-2 py-1 rounded-sm uppercase tracking-wide">{{ exercise.muscle_group }}</span>
-                <span class="bg-zinc-800 text-zinc-300 text-xs font-bold px-2 py-1 rounded-sm uppercase tracking-wide">{{ exercise.difficulty }}</span>
-            </div>
-            
-            <a href="/egzersizler/{{ exercise.slug }}" class="mt-auto w-full inline-flex justify-center items-center py-3 px-4 text-sm font-bold rounded-md text-zinc-300 bg-zinc-800 group-hover:bg-accent group-hover:text-white transition-colors duration-300 uppercase tracking-wide">
-                Detayları Gör 
-                <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        {% else %}
+        <div class="col-span-full text-center py-24 athletic-card rounded-2xl border border-zinc-800">
+            <div class="text-zinc-600 text-6xl mb-4">🔍</div>
+            <h3 class="text-2xl font-black text-white uppercase tracking-tight">Egzersiz Bulunamadı</h3>
+            <p class="text-zinc-400 mt-2 text-sm">Seçtiğiniz filtre veya arama terimine uygun egzersiz kaydı bulunamadı.</p>
+            <a href="/egzersizler" class="inline-block mt-6 bg-accent hover:bg-orange-500 text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-widest transition-all">
+                Filtreleri Sıfırla & Tüm Egzersizleri Gör
             </a>
         </div>
+        {% endfor %}
     </div>
-    {% else %}
-    <div class="col-span-full text-center py-24 athletic-card rounded-xl">
-        <div class="text-zinc-600 text-5xl mb-4">🔍</div>
-        <h3 class="text-xl font-bold text-white uppercase tracking-tight">Egzersiz Bulunamadı</h3>
-        <p class="text-zinc-400 mt-2">Arama kriterlerine uygun egzersiz yok.</p>
-        <a href="/egzersizler" class="inline-block mt-6 text-accent font-bold hover:underline uppercase text-sm tracking-wide">Tüm egzersizleri gör</a>
-    </div>
-    {% endfor %}
 </div>
 {% endblock %}
