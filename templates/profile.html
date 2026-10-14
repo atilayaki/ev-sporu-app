@@ -1,35 +1,72 @@
 {% extends 'base.html' %}
-{% block title %}Profilim - Evde Spor{% endblock %}
+{% block title %}Profilim & Antrenman Günlüğüm - Evde Spor{% endblock %}
 
 {% block content %}
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #athletic-report, #athletic-report * {
+        visibility: visible;
+    }
+    #athletic-report {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #000000 !important;
+        padding: 30px !important;
+        box-shadow: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
 
-<div class="mb-12 relative z-10">
-    <div class="athletic-card p-8 rounded-2xl border border-zinc-800 bg-cardbg overflow-hidden relative">
+<div class="mb-10 relative z-10 no-print" x-data="profileManager()">
+    <!-- Top Athlete Profile Card -->
+    <div class="athletic-card p-6 md:p-8 rounded-2xl border border-zinc-800 bg-cardbg overflow-hidden relative shadow-2xl">
         <!-- Glow -->
-        <div class="absolute -right-20 -top-20 w-64 h-64 bg-accent/10 blur-3xl rounded-full pointer-events-none"></div>
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-accent/15 blur-3xl rounded-full pointer-events-none"></div>
         
-        <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
             <!-- Greeting & Goal -->
             <div>
-                <h1 class="text-3xl font-black text-white uppercase tracking-tighter mb-2">Merhaba, {{ current_user.name }}!</h1>
-                {% if current_user.quiz_completed %}
-                    <div class="inline-flex items-center bg-accent/20 border border-accent text-accent px-4 py-1.5 rounded-lg text-sm font-bold uppercase tracking-widest">
-                        🎯 Hedef: {{ current_user.goal }} - {{ current_user.target_area }}
-                    </div>
-                {% else %}
-                    <a href="/quiz" class="inline-flex items-center bg-accent text-white px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-[0_0_15px_rgba(234,88,12,0.4)] animate-pulse">
-                        Özel Planını Oluştur ➔
-                    </a>
-                {% endif %}
+                <div class="flex items-center space-x-3 mb-2">
+                    <h1 class="text-3xl md:text-4xl font-black text-white uppercase tracking-tight">Merhaba, {{ current_user.name }}!</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/40">Sporcu</span>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    {% if current_user.quiz_completed %}
+                        <div class="inline-flex items-center bg-accent/20 border border-accent text-accent px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest">
+                            🎯 Hedef: {{ current_user.goal }} &bull; {{ current_user.target_area }}
+                        </div>
+                    {% else %}
+                        <a href="/quiz" class="inline-flex items-center bg-accent text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-md animate-pulse">
+                            Özel Planını Oluştur ➔
+                        </a>
+                    {% endif %}
+
+                    <!-- PDF Report Download Button -->
+                    <button @click="openReportModal()" class="inline-flex items-center space-x-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+                        <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>📄 Gelişim Raporu (PDF)</span>
+                    </button>
+                </div>
             </div>
             
             <!-- Gamification: Rings & Streak -->
-            <div class="flex items-center gap-8">
+            <div class="flex items-center gap-6">
                 <!-- Streak -->
-                <div class="text-center">
-                    <div class="text-5xl mb-1 filter drop-shadow-[0_0_10px_rgba(234,88,12,0.5)]">🔥</div>
+                <div class="text-center bg-zinc-900/60 border border-zinc-800 px-4 py-2 rounded-xl">
+                    <div class="text-3xl mb-0.5 filter drop-shadow-[0_0_10px_rgba(234,88,12,0.5)]">🔥</div>
                     <div class="text-2xl font-black text-white leading-none">{{ current_user.current_streak }}</div>
-                    <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-1">Gün Seri</div>
+                    <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">Gün Seri</div>
                 </div>
                 
                 <!-- Simplified Activity Rings -->
@@ -47,15 +84,12 @@
                 
                 <div class="relative w-24 h-24">
                     <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
-                        <!-- Egzersiz (Dış Halka - Turuncu) -->
                         <circle cx="50" cy="50" r="40" fill="none" stroke="#27272a" stroke-width="8"></circle>
                         <circle cx="50" cy="50" r="40" fill="none" stroke="#ea580c" stroke-width="8" stroke-dasharray="251" stroke-dashoffset="{{ dur_offset }}" stroke-linecap="round"></circle>
                         
-                        <!-- Kalori (Orta Halka - Mavi) -->
                         <circle cx="50" cy="50" r="30" fill="none" stroke="#27272a" stroke-width="8"></circle>
                         <circle cx="50" cy="50" r="30" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="188" stroke-dashoffset="{{ cal_offset }}" stroke-linecap="round"></circle>
                         
-                        <!-- Su (İç Halka - Yeşil) -->
                         <circle cx="50" cy="50" r="20" fill="none" stroke="#27272a" stroke-width="8"></circle>
                         <circle cx="50" cy="50" r="20" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="125" stroke-dashoffset="{{ water_offset }}" stroke-linecap="round"></circle>
                     </svg>
@@ -65,15 +99,67 @@
     </div>
 </div>
 
-<div class="mb-10 pb-6 relative z-10 flex items-end justify-between">
-    <div>
-        <h1 class="text-4xl font-black text-white uppercase tracking-tighter">Profil<span class="text-accent">im</span></h1>
-        <p class="text-zinc-400 mt-2 text-lg font-medium">İlerlemeni takip et, favori egzersizlerine hızlıca ulaş.</p>
+<!-- Lifetime Stats Bar (Feature 5) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 relative z-10 no-print">
+    <div class="athletic-card p-5 rounded-xl border border-zinc-800 text-center">
+        <span class="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Toplam Antrenman</span>
+        <span class="text-3xl font-black text-white font-mono">{{ total_workouts }}</span>
+        <span class="text-xs text-orange-400 block mt-1 font-semibold">Seans</span>
+    </div>
+    <div class="athletic-card p-5 rounded-xl border border-zinc-800 text-center">
+        <span class="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Yakılan Kalori</span>
+        <span class="text-3xl font-black text-orange-400 font-mono">{{ total_calories }}</span>
+        <span class="text-xs text-zinc-400 block mt-1 font-semibold">kcal</span>
+    </div>
+    <div class="athletic-card p-5 rounded-xl border border-zinc-800 text-center">
+        <span class="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Egzersiz Süresi</span>
+        <span class="text-3xl font-black text-emerald-400 font-mono">{{ total_minutes }}</span>
+        <span class="text-xs text-zinc-400 block mt-1 font-semibold">Dakika</span>
+    </div>
+    <div class="athletic-card p-5 rounded-xl border border-zinc-800 text-center">
+        <span class="text-zinc-500 text-xs font-bold uppercase tracking-widest block mb-1">Rozet Koleksiyonu</span>
+        <span class="text-3xl font-black text-amber-400 font-mono">{{ user_badges|length }}</span>
+        <span class="text-xs text-zinc-400 block mt-1 font-semibold">Kazanıldı</span>
     </div>
 </div>
 
-<!-- Wellness Widgets -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 relative z-10">
+<!-- Feature 4: Water & Fasting Notifications and Reminders -->
+<div class="athletic-card rounded-xl p-6 mb-8 border border-zinc-800 relative z-10 no-print" x-data="notificationsManager()">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-xl">
+                🔔
+            </div>
+            <div>
+                <h3 class="text-white font-bold text-base uppercase tracking-tight flex items-center gap-2">
+                    <span>Akıllı Su & Oruç Bildirimleri</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                          :class="permission === 'granted' ? 'bg-green-500/20 text-green-400 border border-green-500/40' : (permission === 'denied' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40')"
+                          x-text="permission === 'granted' ? 'Bildirimler Açık' : (permission === 'denied' ? 'Bildirimler Engelli' : 'İzin Bekleniyor')"></span>
+                </h3>
+                <p class="text-zinc-400 text-xs mt-0.5">Masaüstü ve mobil tarayıcında su içme ve 16 saatlik oruç tamamlama hatırlatıcıları al.</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <template x-if="permission !== 'granted'">
+                <button @click="requestPermission()" class="bg-accent hover:bg-orange-500 text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all shadow-md">
+                    Bildirim İzni Ver
+                </button>
+            </template>
+            <button @click="testNotification()" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/40 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-xl transition-all flex items-center space-x-1.5">
+                <span>💧 Bildirimi Test Et</span>
+            </button>
+            <button @click="toggleHourlyWater()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-xl transition-all border border-zinc-700"
+                    :class="hourlyEnabled ? 'border-orange-500 text-orange-400' : ''">
+                <span x-text="hourlyEnabled ? '⏰ Saatlik Hatırlatıcı Açık' : '⏰ Saatlik Hatırlatıcı Kapalı'"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Wellness & Tracking Widgets -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 relative z-10 no-print">
     
     <!-- Checklist -->
     <div class="athletic-card rounded-xl p-6" x-data="{
@@ -139,7 +225,6 @@
         </div>
     </div>
 
-    
     <!-- Nutrition / Calories -->
     <div class="athletic-card rounded-xl p-6 text-center" x-data="{
             calories: {{ today_log.calories_consumed if today_log and today_log.calories_consumed else 0 }},
@@ -150,7 +235,7 @@
                     body: JSON.stringify({amount: amount})
                 }).then(res => res.json()).then(data => {
                     this.calories = data.calories;
-                    window.location.reload(); // Reload to update SVG rings
+                    window.location.reload();
                 });
             }
         }">
@@ -186,6 +271,9 @@
                     this.fastingStart = data.fasting_start;
                     if(this.fastingStart) {
                         this.startTimer();
+                        if (Notification.permission === 'granted') {
+                            new Notification('⏱️ Oruç Başlatıldı', { body: '16 saatlik aralıklı oruç sayacı başladı. Bol su ve yeşil çay tüketebilirsin!' });
+                        }
                     } else {
                         clearInterval(this.interval);
                         this.displayTime = '00:00:00';
@@ -199,13 +287,21 @@
             },
             updateDisplay() {
                 if(!this.fastingStart) return;
-                const start = new Date(this.fastingStart + 'Z'); // Z forces UTC which matches python utcnow
+                const start = new Date(this.fastingStart + 'Z');
                 const diff = Math.floor((new Date() - start) / 1000);
                 if(diff < 0) return;
                 const h = String(Math.floor(diff / 3600)).padStart(2, '0');
                 const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
                 const s = String(diff % 60).padStart(2, '0');
                 this.displayTime = `${h}:${m}:${s}`;
+
+                // Fasting completed alert at 16h (57600s)
+                if (diff === 57600 && Notification.permission === 'granted') {
+                    new Notification('🎉 Tebrikler! 16 Saatlik Oruç Tamamlandı', {
+                        body: 'Harika bir disiplin gösterdin. Sağlıklı ve dengeli bir öğünle beslenmeye başlayabilirsin.',
+                        icon: '/static/images/icon-192.png'
+                    });
+                }
             }
         }">
         <h3 class="text-lg font-bold text-white mb-2 uppercase tracking-tight text-green-400">Aralıklı Oruç</h3>
@@ -220,8 +316,84 @@
 
 </div>
 
+<!-- Feature 5: Personal Workout Analytics & 7-Day Chart -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 relative z-10 no-print">
+    
+    <!-- 7-Day Performance Chart -->
+    <div class="athletic-card rounded-xl p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                    <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Haftalık Performans Grafiği</span>
+                </h3>
+                <p class="text-xs text-zinc-400 mt-0.5">Son 7 günde yakılan kalori ve antrenman yoğunluğu</p>
+            </div>
+            <span class="text-xs font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/30 px-2.5 py-1 rounded-lg">Son 7 Gün</span>
+        </div>
+
+        <!-- Bar Chart Container -->
+        <div class="h-48 flex items-end justify-between gap-2 pt-6 pb-2 px-2 border-b border-zinc-800">
+            {% for day in weekly_stats %}
+                {% set height_pct = (day.calories / max_weekly_cal * 100)|round %}
+                <div class="flex-1 flex flex-col items-center h-full justify-end group">
+                    <div class="text-[10px] font-mono font-bold text-zinc-400 group-hover:text-white mb-1 transition-colors" title="{{ day.calories }} kcal">
+                        {{ day.calories if day.calories > 0 else '-' }}
+                    </div>
+                    <div class="w-full max-w-[36px] bg-zinc-800/80 group-hover:bg-orange-500 rounded-t-lg transition-all duration-500 relative flex items-end justify-center"
+                         style="height: {{ [height_pct, 6]|max }}%;">
+                        {% if day.calories > 0 %}
+                            <div class="w-full h-full bg-gradient-to-t from-orange-600 to-amber-400 rounded-t-lg opacity-90 shadow-sm"></div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Day Labels -->
+        <div class="flex justify-between gap-2 pt-2 px-2 text-center">
+            {% for day in weekly_stats %}
+                <div class="flex-1">
+                    <span class="block text-xs font-bold uppercase text-zinc-400">{{ day.day_name }}</span>
+                    <span class="block text-[10px] text-zinc-600 font-mono">{{ day.date_str }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Muscle Group Breakdown -->
+    <div class="athletic-card rounded-xl p-6">
+        <h3 class="text-lg font-bold text-white uppercase tracking-tight mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span>Kas Grubu Dağılımı</span>
+        </h3>
+        
+        {% if muscle_distribution %}
+            <div class="space-y-4">
+                {% for mg, count in muscle_distribution.items() %}
+                    {% set pct = (count / total_workouts * 100)|round %}
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-bold uppercase mb-1">
+                            <span class="text-zinc-300">{{ mg }}</span>
+                            <span class="text-orange-400 font-mono">{{ count }} kez (%{{ pct }})</span>
+                        </div>
+                        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-orange-500 to-amber-400 h-full rounded-full" style="width: {{ pct }}%"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-10 bg-zinc-900 rounded-md border border-zinc-800">
+                <p class="text-zinc-500 text-xs font-medium">Antrenman yaptıkça kas grubu gelişim analizi burada listelenir.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
 <!-- Aktif Programlar -->
-<div class="athletic-card rounded-xl p-8 mb-8 relative z-10">
+<div class="athletic-card rounded-xl p-8 mb-8 relative z-10 no-print">
     <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
         <svg class="w-6 h-6 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
         Aktif Programlarım
@@ -256,7 +428,7 @@
     {% endif %}
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10 no-print">
     <!-- Favori Egzersizler -->
     <div class="athletic-card rounded-xl p-8">
         <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
@@ -286,11 +458,11 @@
         {% endif %}
     </div>
 
-    <!-- İlerleme Takibi -->
+    <!-- İlerleme Takibi / Son Antrenmanlar -->
     <div class="athletic-card rounded-xl p-8">
         <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
             <svg class="w-6 h-6 mr-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Son Antrenmanlar
+            Son Antrenmanlarım
         </h2>
         
         {% if progress %}
@@ -298,7 +470,7 @@
             {% for p in progress %}
                 <li class="bg-zinc-900 border border-zinc-800 p-4 rounded-md transition-colors hover:border-zinc-700">
                     <div class="flex justify-between items-center mb-3">
-                        <span class="font-bold text-white uppercase">{{ p.exercise.name if p.exercise else 'Antrenman' }}</span>
+                        <span class="font-bold text-white uppercase">{{ p.exercise.name if p.exercise else 'Antrenman Seansı' }}</span>
                         <span class="text-xs font-mono font-bold text-zinc-500">{{ p.completed_at.strftime('%d.%m.%Y %H:%M') }}</span>
                     </div>
                     <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-wide">
@@ -320,7 +492,7 @@
     </div>
 
     <!-- Başarı Rozetleri -->
-    <div class="athletic-card rounded-xl p-8 lg:col-span-2">
+    <div class="athletic-card rounded-xl p-8 lg:col-span-2 no-print">
         <h2 class="text-xl font-bold text-white mb-6 flex items-center uppercase tracking-tight">
             <svg class="w-6 h-6 mr-3 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             Kazanılan Rozetler
@@ -347,4 +519,190 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Printable Athlete Certificate & PDF Report Modal (Feature 5) -->
+<div x-data="{ showModal: false }" 
+     @open-report.window="showModal = true" 
+     x-show="showModal" 
+     x-cloak 
+     class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    
+    <div class="relative w-full max-w-2xl bg-zinc-950 border border-orange-500/40 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <!-- Close button (no-print) -->
+        <button @click="showModal = false" class="absolute top-4 right-4 text-zinc-400 hover:text-white no-print">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <!-- Printable Document Section -->
+        <div id="athletic-report" class="space-y-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b-2 border-orange-500 pb-4">
+                <div>
+                    <h2 class="text-2xl font-black text-white uppercase tracking-tight">EVDE SPOR &bull; RESMİ GELİŞİM RAPORU</h2>
+                    <p class="text-xs text-zinc-400 font-bold uppercase tracking-wider mt-1">Doğrulanmış Sporcu Performans Özeti</p>
+                </div>
+                <div class="w-14 h-14 rounded-xl border border-orange-500 flex items-center justify-center text-orange-500 text-2xl font-black">
+                    🏆
+                </div>
+            </div>
+
+            <!-- Athlete Info -->
+            <div class="grid grid-cols-2 gap-4 text-sm bg-zinc-900/60 p-4 rounded-xl border border-zinc-800">
+                <div>
+                    <span class="block text-xs uppercase font-bold text-zinc-500">Sporcu Adı:</span>
+                    <span class="font-bold text-white text-base">{{ current_user.name }}</span>
+                </div>
+                <div>
+                    <span class="block text-xs uppercase font-bold text-zinc-500">Kişisel Hedef:</span>
+                    <span class="font-bold text-orange-400 text-base">{{ current_user.goal or 'Kondisyon & Güç' }}</span>
+                </div>
+                <div>
+                    <span class="block text-xs uppercase font-bold text-zinc-500">Rapor Tarihi:</span>
+                    <span class="font-mono text-zinc-300">{{ weekly_stats[0].date_str }} - {{ weekly_stats[-1].date_str }} (Haftalık)</span>
+                </div>
+                <div>
+                    <span class="block text-xs uppercase font-bold text-zinc-500">Aktif Seri:</span>
+                    <span class="font-bold text-white">🔥 {{ current_user.current_streak }} Gün Kesintisiz</span>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-3 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+                    <span class="block text-[10px] uppercase font-bold text-zinc-500">Toplam Seans</span>
+                    <span class="text-xl font-mono font-black text-white">{{ total_workouts }}</span>
+                </div>
+                <div class="p-3 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+                    <span class="block text-[10px] uppercase font-bold text-zinc-500">Yakılan Kalori</span>
+                    <span class="text-xl font-mono font-black text-orange-400">{{ total_calories }} kcal</span>
+                </div>
+                <div class="p-3 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+                    <span class="block text-[10px] uppercase font-bold text-zinc-500">Antrenman Süresi</span>
+                    <span class="text-xl font-mono font-black text-emerald-400">{{ total_minutes }} Dk</span>
+                </div>
+            </div>
+
+            <!-- Earned Badges -->
+            <div>
+                <h4 class="text-xs uppercase font-bold text-zinc-400 mb-2">Kazanılan Başarı Rozetleri ({{ user_badges|length }})</h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for ub in user_badges %}
+                        <span class="px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-md text-xs font-semibold text-zinc-300 flex items-center gap-1">
+                            🏅 {{ ub.badge.name }}
+                        </span>
+                    {% else %}
+                        <span class="text-xs text-zinc-500 italic">Henüz rozet kaydı bulunmuyor.</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Footer Seal & Certification -->
+            <div class="border-t border-zinc-800 pt-4 flex items-center justify-between text-xs text-zinc-500">
+                <div>
+                    <p class="font-bold text-zinc-400">EVDE SPOR YAZILIM SİSTEMİ</p>
+                    <p>https://ev-sporu-app.vercel.app &bull; Doğrulanmış Kayıt</p>
+                </div>
+                <div class="text-right">
+                    <div class="inline-block border border-green-500/50 bg-green-500/10 text-green-400 px-3 py-1 rounded text-[11px] font-bold uppercase tracking-wider">
+                        ONAYLANDI ✓
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons (no-print) -->
+        <div class="mt-6 flex items-center justify-end space-x-3 border-t border-zinc-800 pt-4 no-print">
+            <button @click="showModal = false" class="px-4 py-2 rounded-xl text-xs font-bold uppercase text-zinc-400 hover:text-white transition-colors">
+                Kapat
+            </button>
+            <button @click="window.print()" class="bg-accent hover:bg-orange-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg shadow-orange-500/30 transition-all flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span>PDF Olarak İndir / Yazdır</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function profileManager() {
+    return {
+        openReportModal() {
+            window.dispatchEvent(new CustomEvent('open-report'));
+        }
+    }
+}
+
+function notificationsManager() {
+    return {
+        permission: ('Notification' in window) ? Notification.permission : 'unsupported',
+        hourlyEnabled: localStorage.getItem('evdeSporWaterAlert') === 'true',
+        alertInterval: null,
+
+        init() {
+            if (this.hourlyEnabled && this.permission === 'granted') {
+                this.startHourlyAlerts();
+            }
+        },
+
+        requestPermission() {
+            if (!('Notification' in window)) {
+                alert('Tarayıcınız bildirim özelliğini desteklemiyor.');
+                return;
+            }
+            Notification.requestPermission().then(perm => {
+                this.permission = perm;
+                if (perm === 'granted') {
+                    new Notification('🎉 Bildirimler Aktif!', {
+                        body: 'Evde Spor günlük su içme ve oruç bildirimleri başarıyla etkinleştirildi.',
+                        icon: '/static/images/icon-192.png'
+                    });
+                }
+            });
+        },
+
+        testNotification() {
+            if (!('Notification' in window)) {
+                alert('Tarayıcınız bildirim özelliğini desteklemiyor.');
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                new Notification('💧 Su İçme Zamanı! - Evde Spor', {
+                    body: '1 bardak taze su içmeyi unutma! Sağlığın ve antrenman performansın için hidrasyon çok önemli.',
+                    icon: '/static/images/icon-192.png'
+                });
+            } else {
+                this.requestPermission();
+            }
+        },
+
+        toggleHourlyWater() {
+            this.hourlyEnabled = !this.hourlyEnabled;
+            localStorage.setItem('evdeSporWaterAlert', this.hourlyEnabled ? 'true' : 'false');
+            if (this.hourlyEnabled) {
+                if (this.permission !== 'granted') {
+                    this.requestPermission();
+                }
+                this.startHourlyAlerts();
+                alert('⏰ Saatlik su hatırlatıcısı açıldı. Her saat başı bir bildirim alacaksınız.');
+            } else {
+                clearInterval(this.alertInterval);
+                alert('Saatlik su hatırlatıcısı kapatıldı.');
+            }
+        },
+
+        startHourlyAlerts() {
+            clearInterval(this.alertInterval);
+            // 3600000ms = 1 hour; for quick safety keep interval registered
+            this.alertInterval = setInterval(() => {
+                if (Notification.permission === 'granted' && localStorage.getItem('evdeSporWaterAlert') === 'true') {
+                    new Notification('💧 Su Zamanı!', {
+                        body: 'Geçen saatte su içtin mi? Şimdi 1 bardak su içerek hedefine yaklaş!',
+                        icon: '/static/images/icon-192.png'
+                    });
+                }
+            }, 3600000);
+        }
+    }
+}
+</script>
 {% endblock %}

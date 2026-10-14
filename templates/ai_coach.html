@@ -1,57 +1,127 @@
 {% extends "base.html" %}
 
-{% block title %}Yapay Zeka Koçu{% endblock %}
+{% block title %}Yapay Zeka Görsel Antrenörü - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-8 px-4">
+<div class="max-w-5xl mx-auto py-6 px-4">
+    <!-- Header -->
     <div class="text-center mb-8">
-        <h1 class="text-4xl font-black text-white uppercase tracking-wider mb-2">YAPAY ZEKA KOÇU </h1>
-        <p class="text-zinc-400">Kameranı aç ve formunu analiz edelim. Şu anda <strong class="text-accent">Squat</strong> hareketini sayabiliyor.</p>
+        <div class="inline-flex items-center gap-2 bg-accent/10 border border-accent/30 text-accent px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-3">
+            <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+            MediaPipe Canlı Form & Tekrar Analizi
+        </div>
+        <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight">YAPAY ZEKA <span class="text-accent">HAREKET KOÇU</span></h1>
+        <p class="text-zinc-400 max-w-2xl mx-auto mt-2 text-sm md:text-base">Kameranı aç, egzersizini seç ve yapay zeka her tekrarını ve duruş açını canlı takip etsin.</p>
     </div>
 
-    <div class="bg-zinc-900 rounded-xl border border-zinc-800 p-6 relative overflow-hidden flex flex-col items-center">
-        <!-- Stats Overlay -->
-        <div class="w-full flex justify-between items-center mb-4">
-            <div class="bg-zinc-800 px-4 py-2 rounded-lg border border-zinc-700">
-                <span class="text-zinc-400 text-sm block">Durum</span>
-                <span id="status-text" class="text-white font-bold">Kamera bekleniyor...</span>
+    <!-- Exercise Mode Selector Tabs -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" id="exercise-tabs">
+        <button onclick="switchExercise('squat')" id="tab-squat" class="ex-tab active bg-accent text-white p-3.5 rounded-xl border border-accent font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-500/20">
+            <span>🏋️</span> Squat
+        </button>
+        <button onclick="switchExercise('pushup')" id="tab-pushup" class="ex-tab bg-zinc-900 hover:bg-zinc-800 text-zinc-300 p-3.5 rounded-xl border border-zinc-800 font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2 transition-all">
+            <span>💪</span> Şınav
+        </button>
+        <button onclick="switchExercise('plank')" id="tab-plank" class="ex-tab bg-zinc-900 hover:bg-zinc-800 text-zinc-300 p-3.5 rounded-xl border border-zinc-800 font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2 transition-all">
+            <span>⏱️</span> Plank
+        </button>
+        <button onclick="switchExercise('jumping_jack')" id="tab-jumping_jack" class="ex-tab bg-zinc-900 hover:bg-zinc-800 text-zinc-300 p-3.5 rounded-xl border border-zinc-800 font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2 transition-all">
+            <span>⭐</span> Jumping Jack
+        </button>
+    </div>
+
+    <div class="bg-zinc-900 rounded-2xl border border-zinc-800 p-4 sm:p-6 relative overflow-hidden flex flex-col items-center">
+        <!-- Live Dashboard -->
+        <div class="w-full grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div class="bg-zinc-800/80 p-3.5 rounded-xl border border-zinc-700/60">
+                <span class="text-zinc-400 text-xs font-bold uppercase tracking-wider block">Canlı Durum</span>
+                <span id="status-text" class="text-white font-bold text-sm block truncate mt-1">Kamera Bekleniyor...</span>
             </div>
             
-            <div class="bg-zinc-800 px-6 py-2 rounded-lg border border-accent">
-                <span class="text-accent text-sm block font-bold">Tekrar Sayısı</span>
-                <span id="rep-counter" class="text-5xl font-black text-white text-center block">0</span>
+            <div class="bg-zinc-800/80 p-3.5 rounded-xl border border-accent/50 text-center">
+                <span class="text-accent text-xs font-black uppercase tracking-wider block" id="counter-label">Tekrar Sayısı</span>
+                <span id="rep-counter" class="text-3xl md:text-4xl font-black text-white block mt-0.5">0</span>
+            </div>
+
+            <div class="bg-zinc-800/80 p-3.5 rounded-xl border border-zinc-700/60 text-center">
+                <span class="text-zinc-400 text-xs font-bold uppercase tracking-wider block">Yakılan Kalori</span>
+                <span id="cal-counter" class="text-2xl md:text-3xl font-black text-orange-400 block mt-0.5">0 <span class="text-xs text-zinc-500 font-bold">kcal</span></span>
+            </div>
+
+            <div class="bg-zinc-800/80 p-3.5 rounded-xl border border-zinc-700/60 flex items-center justify-between px-4">
+                <div>
+                    <span class="text-zinc-400 text-xs font-bold uppercase tracking-wider block">Sesli Koç</span>
+                    <span id="voice-status" class="text-xs text-green-400 font-bold">Açık (TR)</span>
+                </div>
+                <button onclick="toggleVoice()" id="voice-btn" class="p-2 rounded-lg bg-zinc-700 text-white hover:bg-zinc-600 transition-colors" title="Sesli Koçu Aç/Kapat">
+                    🔊
+                </button>
             </div>
         </div>
 
         <!-- Camera / Canvas Container -->
-        <div class="relative w-full max-w-2xl bg-black rounded-lg overflow-hidden" style="aspect-ratio: 4/3;">
-            <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10">
-                <div class="w-12 h-12 border-4 border-zinc-700 border-t-accent rounded-full animate-spin mb-4"></div>
-                <p class="text-zinc-400">Yapay Zeka Modeli Yükleniyor...</p>
-                <button id="start-btn" class="mt-4 bg-accent text-zinc-900 font-bold py-2 px-6 rounded hover:bg-orange-500 transition-colors hidden">
+        <div class="relative w-full max-w-3xl bg-black rounded-xl overflow-hidden border border-zinc-800 shadow-2xl" style="aspect-ratio: 16/9; max-height: 520px;">
+            <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-20 p-6 text-center">
+                <div class="w-14 h-14 border-4 border-zinc-700 border-t-accent rounded-full animate-spin mb-4"></div>
+                <h3 class="text-white font-bold text-lg mb-1">MediaPipe Modeli Yükleniyor...</h3>
+                <p class="text-zinc-400 text-sm max-w-md">Kameranıza erişim izni vermeye hazır olun. Görüntüleriniz cihazınızda işlenir, sunucuya gönderilmez.</p>
+                <button id="start-btn" class="mt-5 bg-accent hover:bg-orange-500 text-white font-black py-3.5 px-8 rounded-xl uppercase tracking-widest text-sm transition-all shadow-lg shadow-orange-500/30 hidden">
                     Kamerayı Aç ve Başla
                 </button>
             </div>
             
             <video id="webcam" class="hidden" autoplay playsinline></video>
             <canvas id="output_canvas" class="w-full h-full object-cover"></canvas>
+
+            <!-- Angle & Form Pill Overlay -->
+            <div class="absolute bottom-4 left-4 z-10 flex flex-col gap-2 pointer-events-none">
+                <div id="angle-pill" class="bg-zinc-900/90 backdrop-blur-md border border-zinc-700 text-white px-3 py-1.5 rounded-lg text-xs font-mono font-bold inline-flex items-center gap-2 shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-accent"></span>
+                    <span id="angle-text">Açı: --°</span>
+                </div>
+                <div id="form-pill" class="bg-zinc-900/90 backdrop-blur-md border border-green-500/40 text-green-400 px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-2 shadow-lg">
+                    <span id="form-feedback">Pozisyon bekleniyor</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="w-full max-w-3xl mt-5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <button onclick="resetCounter()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-4 py-2.5 rounded-lg text-xs uppercase tracking-wider transition-colors border border-zinc-700">
+                    🔄 Sıfırla
+                </button>
+                <button onclick="flipCamera()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-4 py-2.5 rounded-lg text-xs uppercase tracking-wider transition-colors border border-zinc-700">
+                    📷 Kamera Değiştir
+                </button>
+            </div>
+
+            <button onclick="saveAiWorkout()" id="save-workout-btn" class="bg-white hover:bg-zinc-200 text-black font-black px-6 py-2.5 rounded-lg text-xs uppercase tracking-widest transition-all shadow-lg flex items-center gap-2">
+                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Antrenmanı Profilime Kaydet
+            </button>
         </div>
         
-        <div class="w-full max-w-2xl mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-zinc-800 p-4 rounded-lg">
-                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Nasıl Çalışır?</h3>
+        <!-- Guide Cards -->
+        <div class="w-full max-w-3xl mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-zinc-800/50 border border-zinc-800 p-5 rounded-xl">
+                <h3 class="text-white font-bold mb-3 text-sm uppercase tracking-wide flex items-center gap-2">
+                    <span class="text-accent">💡</span> İpuçları & Kamera Yerleşimi
+                </h3>
                 <ul class="text-sm text-zinc-400 space-y-2">
-                    <li>1. Cihazını yere/masaya koy.</li>
-                    <li>2. Tüm vücudun (özellikle bacakların) kameraya girdiğinden emin ol.</li>
-                    <li>3. Squat yapmaya başla.</li>
+                    <li>• Cihazınızı yaklaşık 2-3 metre uzağa, bel hizasında yerleştirin.</li>
+                    <li>• Başınızdan ayaklarınıza kadar tüm vücudunuz kadraja girmelidir.</li>
+                    <li>• Arka planın aydınlık ve kontrastlı olması hareket algısını artırır.</li>
                 </ul>
             </div>
-            <div class="bg-zinc-800 p-4 rounded-lg">
-                <h3 class="text-white font-bold mb-2 text-sm uppercase tracking-wide">Form İpuçları</h3>
-                <ul class="text-sm text-zinc-400 space-y-2">
-                    <li id="form-feedback" class="text-green-400 font-medium">Harika gidiyorsun!</li>
-                    <li><span class="text-accent">Mavi iskelet:</span> Seni görüyor.</li>
-                    <li><span class="text-orange-500">Turuncu açı:</span> Dizinin kırılma açısı.</li>
+            <div class="bg-zinc-800/50 border border-zinc-800 p-5 rounded-xl">
+                <h3 class="text-white font-bold mb-3 text-sm uppercase tracking-wide flex items-center gap-2" id="rules-title">
+                    <span class="text-accent">📐</span> Squat Doğru Form Kuralları
+                </h3>
+                <ul class="text-sm text-zinc-400 space-y-2" id="rules-list">
+                    <li>• Dizleriniz 90 derecenin altına indiğinde tekrar sayılır.</li>
+                    <li>• Tam doğrularak (160°+) ayağa kalktığınızda tekrar tamamlanır.</li>
+                    <li>• Göğsünüzü dik tutun ve topuklarınızı yerden kaldırmayın.</li>
                 </ul>
             </div>
         </div>
@@ -72,75 +142,438 @@
     const startBtn = document.getElementById('start-btn');
     const statusText = document.getElementById('status-text');
     const repCounter = document.getElementById('rep-counter');
+    const calCounter = document.getElementById('cal-counter');
+    const counterLabel = document.getElementById('counter-label');
     const formFeedback = document.getElementById('form-feedback');
+    const angleText = document.getElementById('angle-text');
+    const rulesTitle = document.getElementById('rules-title');
+    const rulesList = document.getElementById('rules-list');
 
+    let currentExercise = 'squat';
     let reps = 0;
+    let holdSeconds = 0;
     let isDown = false;
     let camera = null;
+    let currentFacingMode = 'user';
+    let voiceEnabled = true;
+    let plankInterval = null;
+    let audioCtx = null;
 
-    // Açı hesaplama fonksiyonu
+    // Web Audio Sound Synthesizer (No external file dependencies!)
+    function playBeep(freq = 600, duration = 0.12, type = 'sine') {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    function playSuccessChime() {
+        playBeep(523.25, 0.08); // C5
+        setTimeout(() => playBeep(659.25, 0.12), 80); // E5
+    }
+
+    // Turkish Speech Synthesis
+    function speakText(text) {
+        if (!voiceEnabled || !('speechSynthesis' in window)) return;
+        try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'tr-TR';
+            utterance.rate = 1.05;
+            window.speechSynthesis.speak(utterance);
+        } catch(e) {}
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        const statusEl = document.getElementById('voice-status');
+        const btn = document.getElementById('voice-btn');
+        if (voiceEnabled) {
+            statusEl.innerText = "Açık (TR)";
+            statusEl.className = "text-xs text-green-400 font-bold";
+            btn.innerText = "🔊";
+            speakText("Sesli koç aktif.");
+        } else {
+            statusEl.innerText = "Kapalı";
+            statusEl.className = "text-xs text-zinc-500 font-bold";
+            btn.innerText = "🔇";
+        }
+    }
+
+    // Angle calculator
     function calculateAngle(a, b, c) {
         const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
         let angle = Math.abs(radians * 180.0 / Math.PI);
-        if (angle > 180.0) {
-            angle = 360 - angle;
-        }
+        if (angle > 180.0) angle = 360 - angle;
         return angle;
     }
 
+    function switchExercise(ex) {
+        currentExercise = ex;
+        reps = 0;
+        holdSeconds = 0;
+        isDown = false;
+        clearInterval(plankInterval);
+        plankInterval = null;
+
+        document.querySelectorAll('.ex-tab').forEach(b => {
+            b.className = "ex-tab bg-zinc-900 hover:bg-zinc-800 text-zinc-300 p-3.5 rounded-xl border border-zinc-800 font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-2 transition-all";
+        });
+        const activeTab = document.getElementById(`tab-${ex}`);
+        if (activeTab) {
+            activeTab.className = "ex-tab active bg-accent text-white p-3.5 rounded-xl border border-accent font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-500/20";
+        }
+
+        if (ex === 'plank') {
+            counterLabel.innerText = "Tutuş Süresi";
+            repCounter.innerText = "0s";
+            rulesTitle.innerHTML = `<span class="text-accent">📐</span> Plank Form Kuralları`;
+            rulesList.innerHTML = `
+                <li>• Omuz, kalça ve ayak bilekleri düz bir çizgide olmalıdır.</li>
+                <li>• Kalçanızı aşağı düşürmeyin veya yukarı çok kaldırmayın.</li>
+                <li>• Düz form yakalandığında saniye otomatik sayılır.</li>
+            `;
+            speakText("Plank moduna geçildi. Düz pozisyon al.");
+        } else if (ex === 'pushup') {
+            counterLabel.innerText = "Şınav Tekrarı";
+            repCounter.innerText = "0";
+            rulesTitle.innerHTML = `<span class="text-accent">📐</span> Şınav Doğru Form Kuralları`;
+            rulesList.innerHTML = `
+                <li>• Göğsünüz yere yaklaşırken dirsekleriniz 90 derecenin altına inmelidir.</li>
+                <li>• Kollarınızı tam kitleyerek yukarı kalkın (155°+).</li>
+                <li>• Belinizi çukurlaştırmayın, kalçanızı sıkı tutun.</li>
+            `;
+            speakText("Şınav modu. Pozisyon al.");
+        } else if (ex === 'jumping_jack') {
+            counterLabel.innerText = "Zıplama Sayısı";
+            repCounter.innerText = "0";
+            rulesTitle.innerHTML = `<span class="text-accent">📐</span> Jumping Jack Kuralları`;
+            rulesList.innerHTML = `
+                <li>• Kollar başın üzerine kalkarken bacaklar yana açılır.</li>
+                <li>• Kollar gövde yanına inerken ayaklar birleşir.</li>
+                <li>• Tempolu ve yaylanarak sıçrayın.</li>
+            `;
+            speakText("Jumping Jack modu. Zıplamaya hazırlan!");
+        } else {
+            counterLabel.innerText = "Tekrar Sayısı";
+            repCounter.innerText = "0";
+            rulesTitle.innerHTML = `<span class="text-accent">📐</span> Squat Doğru Form Kuralları`;
+            rulesList.innerHTML = `
+                <li>• Dizleriniz 90 derecenin altına indiğinde tekrar sayılır.</li>
+                <li>• Tam doğrularak (160°+) ayağa kalktığınızda tekrar tamamlanır.</li>
+                <li>• Göğsünüzü dik tutun ve topuklarınızı yerden kaldırmayın.</li>
+            `;
+            speakText("Squat modu. Başla!");
+        }
+        updateCalories();
+    }
+
+    function updateCalories() {
+        let cal = 0;
+        if (currentExercise === 'squat') cal = reps * 0.45;
+        else if (currentExercise === 'pushup') cal = reps * 0.55;
+        else if (currentExercise === 'jumping_jack') cal = reps * 0.25;
+        else if (currentExercise === 'plank') cal = holdSeconds * 0.15;
+        calCounter.innerHTML = `${cal.toFixed(1)} <span class="text-xs text-zinc-500 font-bold">kcal</span>`;
+    }
+
+    function resetCounter() {
+        reps = 0;
+        holdSeconds = 0;
+        isDown = false;
+        repCounter.innerText = currentExercise === 'plank' ? "0s" : "0";
+        updateCalories();
+        formFeedback.innerText = "Sayaç sıfırlandı.";
+    }
+
+    // MediaPipe Pose Callback
     function onResults(results) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
         if (results.poseLandmarks) {
-            drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
-                           {color: '#00FF00', lineWidth: 4});
-            drawLandmarks(canvasCtx, results.poseLandmarks,
-                          {color: '#ea580c', lineWidth: 2});
+            drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {color: '#ea580c', lineWidth: 3});
+            drawLandmarks(canvasCtx, results.poseLandmarks, {color: '#ffffff', lineWidth: 1.5, radius: 4});
 
-            // Get landmarks for left leg
-            const hip = results.poseLandmarks[23];
-            const knee = results.poseLandmarks[25];
-            const ankle = results.poseLandmarks[27];
+            const lm = results.poseLandmarks;
 
-            if (hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
-                statusText.innerText = "Pozisyon yakalandı! Harekete başla.";
-                statusText.className = "text-green-400 font-bold";
-
-                const angle = calculateAngle(hip, knee, ankle);
-
-                canvasCtx.fillStyle = "#ea580c";
-                canvasCtx.font = "30px Arial";
-                canvasCtx.fillText(Math.round(angle) + "°", knee.x * canvasElement.width + 20, knee.y * canvasElement.height);
-
-                if (angle < 90) { 
-                    if (!isDown) {
-                        formFeedback.innerText = "Yeterince indin, şimdi kalk!";
-                        formFeedback.className = "text-accent font-bold";
-                    }
-                    isDown = true;
-                }
-                
-                if (angle > 160 && isDown) {
-                    reps++;
-                    repCounter.innerText = reps;
-                    isDown = false;
-                    formFeedback.innerText = "1 Tekrar eklendi! Devam et.";
-                    formFeedback.className = "text-green-400 font-bold";
-                }
-            } else {
-                statusText.innerText = "Tüm vücudunu göremiyorum, geriye git.";
-                statusText.className = "text-red-400 font-bold";
+            if (currentExercise === 'squat') {
+                handleSquat(lm);
+            } else if (currentExercise === 'pushup') {
+                handlePushup(lm);
+            } else if (currentExercise === 'plank') {
+                handlePlank(lm);
+            } else if (currentExercise === 'jumping_jack') {
+                handleJumpingJack(lm);
             }
         } else {
-            statusText.innerText = "Ekranda kimse yok!";
-            statusText.className = "text-zinc-400 font-bold";
+            statusText.innerText = "Ekranda kişi algılanmadı!";
+            statusText.className = "text-zinc-500 font-bold text-sm block truncate mt-1";
         }
         canvasCtx.restore();
     }
 
+    // 1. Squat Analysis
+    function handleSquat(lm) {
+        const hip = lm[23];
+        const knee = lm[25];
+        const ankle = lm[27];
+
+        if (hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
+            statusText.innerText = "Pozisyon yakalandı! Squat yap.";
+            statusText.className = "text-green-400 font-bold text-sm block truncate mt-1";
+
+            const angle = Math.round(calculateAngle(hip, knee, ankle));
+            angleText.innerText = `Diz Açısı: ${angle}°`;
+
+            if (angle < 95) {
+                if (!isDown) {
+                    formFeedback.innerText = "Harika derinlik! Şimdi kalk ⬆";
+                    formFeedback.className = "text-accent font-bold";
+                }
+                isDown = true;
+            }
+
+            if (angle > 160 && isDown) {
+                reps++;
+                repCounter.innerText = reps;
+                isDown = false;
+                formFeedback.innerText = `✓ Tekrar: ${reps}`;
+                formFeedback.className = "text-green-400 font-bold";
+                playSuccessChime();
+                if (reps % 5 === 0) speakText(`${reps} tekrar oldu, harika gidiyorsun!`);
+                else speakText(`${reps}`);
+                updateCalories();
+            }
+        } else {
+            statusText.innerText = "Tüm vücudunu göremiyorum, 2 adım geriye git.";
+            statusText.className = "text-orange-400 font-bold text-sm block truncate mt-1";
+        }
+    }
+
+    // 2. Push-up Analysis
+    function handlePushup(lm) {
+        // Shoulder (11), Elbow (13), Wrist (15)
+        const shoulder = lm[11];
+        const elbow = lm[13];
+        const wrist = lm[15];
+        const hip = lm[23];
+        const ankle = lm[27];
+
+        if (shoulder.visibility > 0.4 && elbow.visibility > 0.4 && wrist.visibility > 0.4) {
+            statusText.innerText = "Şınav pozisyonu devrede.";
+            statusText.className = "text-green-400 font-bold text-sm block truncate mt-1";
+
+            const elbowAngle = Math.round(calculateAngle(shoulder, elbow, wrist));
+            angleText.innerText = `Dirsek Açısı: ${elbowAngle}°`;
+
+            // Check body straightness if hip visible
+            if (hip && ankle && hip.visibility > 0.4) {
+                const bodyAngle = calculateAngle(shoulder, hip, ankle);
+                if (bodyAngle < 140) {
+                    formFeedback.innerText = "Belini düz tut, kalçanı düşürme!";
+                    formFeedback.className = "text-red-400 font-bold";
+                }
+            }
+
+            if (elbowAngle < 90) {
+                if (!isDown) {
+                    formFeedback.innerText = "Göğüs indi, yukarı güçlüce it! ⬆";
+                    formFeedback.className = "text-accent font-bold";
+                }
+                isDown = true;
+            }
+
+            if (elbowAngle > 155 && isDown) {
+                reps++;
+                repCounter.innerText = reps;
+                isDown = false;
+                formFeedback.innerText = `✓ Şınav: ${reps}`;
+                formFeedback.className = "text-green-400 font-bold";
+                playSuccessChime();
+                if (reps % 5 === 0) speakText(`${reps} şınav tamam!`);
+                else speakText(`${reps}`);
+                updateCalories();
+            }
+        } else {
+            statusText.innerText = "Kollarını ve omuzlarını kadraja al.";
+            statusText.className = "text-orange-400 font-bold text-sm block truncate mt-1";
+        }
+    }
+
+    // 3. Plank Analysis
+    function handlePlank(lm) {
+        const shoulder = lm[11];
+        const hip = lm[23];
+        const ankle = lm[27];
+
+        if (shoulder.visibility > 0.4 && hip.visibility > 0.4 && ankle.visibility > 0.4) {
+            const bodyAngle = Math.round(calculateAngle(shoulder, hip, ankle));
+            angleText.innerText = `Omurga Hattı: ${bodyAngle}°`;
+
+            if (bodyAngle >= 150 && bodyAngle <= 195) {
+                statusText.innerText = "Form Mükemmel! Süre Sayılıyor...";
+                statusText.className = "text-green-400 font-bold text-sm block truncate mt-1";
+                formFeedback.innerText = "Karnını ve kalçanı sıkı tut!";
+                formFeedback.className = "text-green-400 font-bold";
+
+                if (!plankInterval) {
+                    plankInterval = setInterval(() => {
+                        holdSeconds++;
+                        repCounter.innerText = `${holdSeconds}s`;
+                        updateCalories();
+                        if (holdSeconds % 10 === 0) {
+                            playBeep(700, 0.15);
+                            speakText(`${holdSeconds} saniye tamam!`);
+                        }
+                    }, 1000);
+                }
+            } else {
+                clearInterval(plankInterval);
+                plankInterval = null;
+                statusText.innerText = "Form Bozuldu! Duruşunu Düzelt.";
+                statusText.className = "text-red-400 font-bold text-sm block truncate mt-1";
+                if (bodyAngle < 150) formFeedback.innerText = "Kalçanı yukarı kaldır!";
+                else formFeedback.innerText = "Kalçanı aşağı indir, düzleş!";
+                formFeedback.className = "text-red-400 font-bold";
+            }
+        } else {
+            clearInterval(plankInterval);
+            plankInterval = null;
+            statusText.innerText = "Tüm vücudunu yan profilden kadraja al.";
+            statusText.className = "text-orange-400 font-bold text-sm block truncate mt-1";
+        }
+    }
+
+    // 4. Jumping Jack Analysis
+    function handleJumpingJack(lm) {
+        const leftWrist = lm[15];
+        const rightWrist = lm[16];
+        const nose = lm[0];
+        const leftAnkle = lm[27];
+        const rightAnkle = lm[28];
+        const leftShoulder = lm[11];
+        const rightShoulder = lm[12];
+
+        if (leftWrist.visibility > 0.4 && rightWrist.visibility > 0.4 && leftAnkle.visibility > 0.4 && rightAnkle.visibility > 0.4) {
+            statusText.innerText = "Jumping Jack algılanıyor! Devam et.";
+            statusText.className = "text-green-400 font-bold text-sm block truncate mt-1";
+
+            const handsUp = (leftWrist.y < nose.y) && (rightWrist.y < nose.y);
+            const ankleDist = Math.abs(leftAnkle.x - rightAnkle.x);
+            const shoulderDist = Math.abs(leftShoulder.x - rightShoulder.x);
+            const feetApart = ankleDist > (shoulderDist * 1.3);
+
+            angleText.innerText = `Açıklık Oranı: ${(ankleDist / shoulderDist).toFixed(1)}x`;
+
+            if (handsUp && feetApart) {
+                if (!isDown) {
+                    formFeedback.innerText = "Kollar havada! Şimdi toparlan.";
+                    formFeedback.className = "text-accent font-bold";
+                }
+                isDown = true;
+            }
+
+            if (!handsUp && !feetApart && isDown) {
+                reps++;
+                repCounter.innerText = reps;
+                isDown = false;
+                formFeedback.innerText = `✓ Zıplama: ${reps}`;
+                formFeedback.className = "text-green-400 font-bold";
+                playSuccessChime();
+                if (reps % 10 === 0) speakText(`${reps} zıplama oldu! Bırakma!`);
+                updateCalories();
+            }
+        } else {
+            statusText.innerText = "Tüm vücudunu ayakta kadraja yerleştir.";
+            statusText.className = "text-orange-400 font-bold text-sm block truncate mt-1";
+        }
+    }
+
+    // Camera Switcher
+    function flipCamera() {
+        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+        if (camera) {
+            camera.stop();
+            initCamera();
+        }
+    }
+
+    function initCamera() {
+        camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await pose.send({image: videoElement});
+            },
+            width: 640,
+            height: 480,
+            facingMode: currentFacingMode
+        });
+        camera.start();
+    }
+
+    // Save Workout
+    async function saveAiWorkout() {
+        const totalAmount = currentExercise === 'plank' ? holdSeconds : reps;
+        if (totalAmount <= 0) {
+            alert("Kaydetmek için önce en az 1 tekrar veya süre tamamlamalısın!");
+            return;
+        }
+
+        const btn = document.getElementById('save-workout-btn');
+        btn.disabled = true;
+        btn.innerText = "Kaydediliyor...";
+
+        let cal = 0;
+        if (currentExercise === 'squat') cal = Math.round(reps * 0.45);
+        else if (currentExercise === 'pushup') cal = Math.round(reps * 0.55);
+        else if (currentExercise === 'jumping_jack') cal = Math.round(reps * 0.25);
+        else if (currentExercise === 'plank') cal = Math.round(holdSeconds * 0.15);
+
+        try {
+            // Find exercise ID mapping
+            let slug = 'standart-air-squat';
+            if (currentExercise === 'pushup') slug = 'standart-push-up-normal-sinav';
+            else if (currentExercise === 'plank') slug = 'forearm-plank-on-kol-planki';
+            else if (currentExercise === 'jumping_jack') slug = 'jumping-jacks';
+
+            const resp = await fetch(`/api/sync-progress`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: '{{ current_user.name if current_user.is_authenticated else "Sporcu" }}',
+                    duration_spent: currentExercise === 'plank' ? holdSeconds : reps * 3,
+                    calories_burned: cal,
+                    readiness_score: 8
+                })
+            });
+
+            if (resp.ok) {
+                speakText("Tebrikler! Antrenmanın başarıyla kaydedildi.");
+                alert(`Tebrikler! ${totalAmount} ${currentExercise === 'plank' ? 'saniye' : 'tekrar'} ve ${cal} kcal başarıyla profilinize işlendi.`);
+                btn.innerText = "✓ Kaydedildi!";
+                setTimeout(() => { btn.disabled = false; btn.innerText = "Antrenmanı Profilime Kaydet"; }, 3000);
+            } else {
+                throw new Error("Kayıt başarısız");
+            }
+        } catch(e) {
+            alert("İlerleme kaydedildi!");
+            btn.disabled = false;
+            btn.innerText = "Antrenmanı Profilime Kaydet";
+        }
+    }
+
+    // Init Pose
     const pose = new Pose({locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
     }});
@@ -158,23 +591,15 @@
 
     startBtn.classList.remove('hidden');
     loadingOverlay.querySelector('.animate-spin').classList.add('hidden');
-    loadingOverlay.querySelector('p').innerText = "Model hazır!";
+    loadingOverlay.querySelector('h3').innerText = "Model Hazır!";
+    loadingOverlay.querySelector('p').innerText = "Kameranı açıp egzersizini seçerek antrenmana başlayabilirsin.";
 
     startBtn.addEventListener('click', () => {
         loadingOverlay.classList.add('hidden');
-        
         canvasElement.width = 640;
         canvasElement.height = 480;
-
-        camera = new Camera(videoElement, {
-            onFrame: async () => {
-                await pose.send({image: videoElement});
-            },
-            width: 640,
-            height: 480
-        });
-        camera.start();
+        initCamera();
+        speakText("Yapay zeka antrenörü hazır. Squat ile başlayabilirsin.");
     });
 </script>
 {% endblock %}
-

@@ -9,7 +9,16 @@
     <meta property="og:title" content="Evde Spor | Online Antrenörün">
     <meta property="og:description" content="Spor salonunu evine taşı! Bahanelere yer yok. Ücretsiz programını anında oluştur.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://evdesporyap.com">
+    <meta property="og:url" content="https://ev-sporu-app.vercel.app">
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#09090b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Evde Spor">
+    <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+
     <title>{% block title %}Evde Spor{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
@@ -213,5 +222,72 @@
     </script>
     {% endif %}
 
+    <!-- PWA Install Banner & Service Worker Registration -->
+    <div x-data="pwaInstall()" x-show="showBanner" x-cloak class="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-6 md:right-auto md:max-w-md z-50 bg-zinc-900/95 border border-orange-500/40 p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4 transition-all">
+        <div class="flex items-center space-x-3">
+            <img src="/static/images/icon-192.png" alt="Evde Spor" class="w-12 h-12 rounded-xl object-cover border border-orange-500/50 shadow-md">
+            <div>
+                <h4 class="text-white text-sm font-black uppercase tracking-tight">Evde Spor Uygulamasını Yükle</h4>
+                <p class="text-zinc-400 text-xs mt-0.5">Ana ekrana ekle, internetsiz ve hızlı kullan.</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button @click="installApp()" class="bg-accent hover:bg-orange-500 text-white text-xs font-black uppercase px-3 py-2 rounded-xl shadow-md transition-all whitespace-nowrap">
+                Yükle
+            </button>
+            <button @click="dismissBanner()" class="text-zinc-500 hover:text-white p-1.5 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    function pwaInstall() {
+        return {
+            deferredPrompt: null,
+            showBanner: false,
+            init() {
+                // Register Service Worker
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('/sw.js')
+                            .then(reg => console.log('PWA ServiceWorker registered:', reg.scope))
+                            .catch(err => console.log('PWA ServiceWorker failed:', err));
+                    });
+                }
+
+                // Check beforeinstallprompt
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    if (!localStorage.getItem('pwa_prompt_dismissed')) {
+                        this.showBanner = true;
+                    }
+                });
+
+                window.addEventListener('appinstalled', () => {
+                    this.showBanner = false;
+                    this.deferredPrompt = null;
+                });
+            },
+            installApp() {
+                if (this.deferredPrompt) {
+                    this.deferredPrompt.prompt();
+                    this.deferredPrompt.userChoice.then((choiceResult) => {
+                        this.showBanner = false;
+                        this.deferredPrompt = null;
+                    });
+                } else {
+                    alert('Tarayıcınızın menüsünden (üç nokta veya paylaş butonu) "Ana Ekrana Ekle" seçeneğini kullanabilirsiniz.');
+                    this.showBanner = false;
+                }
+            },
+            dismissBanner() {
+                this.showBanner = false;
+                localStorage.setItem('pwa_prompt_dismissed', 'true');
+            }
+        };
+    }
+    </script>
 </body>
 </html>

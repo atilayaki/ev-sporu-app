@@ -13,7 +13,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import shutil
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from urllib.parse import urlparse
 
 
@@ -84,7 +84,7 @@ def create_app():
         if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
             tmp_db = '/tmp/site.db'
             version_file = '/tmp/db_version.txt'
-            CURRENT_DB_VERSION = '20261014_v3'
+            CURRENT_DB_VERSION = '20261014_v4'
             try:
                 needs_copy = not os.path.exists(tmp_db)
                 if not needs_copy:
@@ -346,7 +346,7 @@ def create_app():
     @login_required
     def profile():
         favorites = current_user.favorites
-        progress = UserProgress.query.filter_by(user_id=current_user.id).order_by(UserProgress.completed_at.desc()).limit(10).all()
+        progress = UserProgress.query.filter_by(user_id=current_user.id).order_by(UserProgress.completed_at.desc()).limit(15).all()
         today = date.today()
         today_log = DailyLog.query.filter_by(user_id=current_user.id, log_date=today).first()
         
@@ -356,7 +356,37 @@ def create_app():
         
         active_programs = current_user.active_programs
         user_badges = current_user.badges
-        
+
+        # Rich workout stats & weekly diary calculation
+        all_progress = UserProgress.query.filter_by(user_id=current_user.id).all()
+        total_workouts = len(all_progress)
+        total_calories = sum([p.calories_burned or 0 for p in all_progress])
+        total_minutes = sum([p.duration_spent or 0 for p in all_progress]) // 60
+
+        day_names_tr = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+        weekly_stats = []
+        for i in range(6, -1, -1):
+            d = today - timedelta(days=i)
+            d_start = datetime.combine(d, datetime.min.time())
+            d_end = datetime.combine(d, datetime.max.time())
+            day_entries = [p for p in all_progress if p.completed_at and d_start <= p.completed_at <= d_end]
+            cals = sum([p.calories_burned or 0 for p in day_entries])
+            dur = sum([p.duration_spent or 0 for p in day_entries]) // 60
+            weekly_stats.append({
+                'date_str': d.strftime('%d.%m'),
+                'day_name': day_names_tr[d.weekday()],
+                'calories': cals,
+                'duration_min': dur,
+                'count': len(day_entries)
+            })
+
+        max_weekly_cal = max([w['calories'] for w in weekly_stats] + [150])
+
+        muscle_distribution = {}
+        for p in all_progress:
+            mg = p.exercise.muscle_group if (p.exercise and p.exercise.muscle_group) else 'Tüm Vücut'
+            muscle_distribution[mg] = muscle_distribution.get(mg, 0) + 1
+
         return render_template(
             'profile.html',
             favorites=favorites,
@@ -364,7 +394,13 @@ def create_app():
             today_log=today_log,
             today_duration=today_duration,
             active_programs=active_programs,
-            user_badges=user_badges
+            user_badges=user_badges,
+            weekly_stats=weekly_stats,
+            max_weekly_cal=max_weekly_cal,
+            total_workouts=total_workouts,
+            total_calories=total_calories,
+            total_minutes=total_minutes,
+            muscle_distribution=muscle_distribution
         )
 
     @app.route('/favori-ekle/<int:exercise_id>', methods=['POST'])
@@ -527,6 +563,16 @@ def create_app():
             'is_fasting': is_fasting,
             'fasting_start': start_time_iso
         })
+
+    @app.route('/manifest.json')
+    def serve_manifest():
+        from flask import send_from_directory
+        return send_from_directory(os.path.join(basedir, 'static'), 'manifest.json', mimetype='application/manifest+json')
+
+    @app.route('/sw.js')
+    def serve_sw():
+        from flask import send_from_directory
+        return send_from_directory(os.path.join(basedir, 'static'), 'sw.js', mimetype='application/javascript')
 
     @app.route('/ai-koc')
     def ai_coach():

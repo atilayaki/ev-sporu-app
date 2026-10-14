@@ -1,0 +1,42 @@
+{
+  "name": "Evde Spor - Kişisel Antrenör ve AI Fitness",
+  "short_name": "Evde Spor",
+  "description": "Ekipmansız ev antrenmanları, yapay zeka hareket analizi, sesli koç ve kişisel fitness takibi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#ea580c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["fitness", "health", "sports", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "AI Hareket Koçu",
+      "url": "/ai-koc",
+      "description": "Kamera ile gerçek zamanlı hareket ve tekrar analizi"
+    },
+    {
+      "name": "Antrenman Programları",
+      "url": "/programlar",
+      "description": "Hazır fitness ve kalori yakım programları"
+    },
+    {
+      "name": "Profilim",
+      "url": "/profil",
+      "description": "İlerleme raporları, su takibi ve rozetler"
+    }
+  ]
+}
