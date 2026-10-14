@@ -75,16 +75,16 @@
                     <span>EVDE</span><span class="text-accent">SPOR</span>
                 </a>
                 
-                <!-- Desktop Nav Links -->
-                <div class="hidden lg:flex items-center space-x-1 xl:space-x-2">
-                    <a href="/" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Anasayfa</a>
-                    <a href="/egzersizler" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Egzersizler</a>
-                    <a href="/programlar" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Programlar</a>
-                    <a href="/challenges" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide whitespace-nowrap">Meydan Okuma</a>
-                    <a href="/liderlik" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Liderlik</a>
-                    <a href="/breathe" class="hover:text-accent transition-colors px-2.5 py-1.5 text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Nefes</a>
-                    <a href="/ai-koc" class="bg-gradient-to-r from-orange-500/15 to-amber-500/15 hover:from-orange-500 hover:to-amber-500 border border-orange-500/40 text-orange-400 hover:text-white transition-all px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-[0_0_15px_-3px_rgba(234,88,12,0.4)] ml-1">
-                        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+                <!-- Desktop / Tablet Nav Links -->
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-1.5 xl:space-x-2.5">
+                    <a href="/" class="hover:text-accent transition-colors px-2 py-1 text-[11px] lg:text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Anasayfa</a>
+                    <a href="/egzersizler" class="hover:text-accent transition-colors px-2 py-1 text-[11px] lg:text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Egzersizler</a>
+                    <a href="/programlar" class="hover:text-accent transition-colors px-2 py-1 text-[11px] lg:text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Programlar</a>
+                    <a href="/challenges" class="hover:text-accent transition-colors px-2 py-1 text-[11px] lg:text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide whitespace-nowrap">Meydan Okuma</a>
+                    <a href="/liderlik" class="hover:text-accent transition-colors px-2 py-1 text-[11px] lg:text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Liderlik</a>
+                    <a href="/breathe" class="hover:text-accent transition-colors px-2 py-1 text-[11px] lg:text-xs xl:text-sm font-bold text-zinc-300 uppercase tracking-wide">Nefes</a>
+                    <a href="/ai-koc" class="bg-gradient-to-r from-orange-500/15 to-amber-500/15 hover:from-orange-500 hover:to-amber-500 border border-orange-500/40 text-orange-400 hover:text-white transition-all px-2.5 lg:px-3 py-1 rounded-full text-[11px] lg:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-[0_0_15px_-3px_rgba(234,88,12,0.4)] ml-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span>
                         <span>AI KOÇ</span>
                     </a>
                 </div>
@@ -268,12 +268,14 @@
                     });
                 }
 
-                // Check beforeinstallprompt
+                // Check beforeinstallprompt with polite 5-second delay
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     this.deferredPrompt = e;
                     if (!localStorage.getItem('pwa_prompt_dismissed')) {
-                        this.showBanner = true;
+                        setTimeout(() => {
+                            if (this.deferredPrompt) this.showBanner = true;
+                        }, 5000);
                     }
                 });
 
