@@ -1,46 +1,96 @@
+# -*- coding: utf-8 -*-
 from dotenv import load_dotenv
 load_dotenv()
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from extensions import db, login_manager
-from models import Exercise, Program, ProgramExercise, User, UserProgress, Challenge, UserChallenge, DailyLog, ChallengeDay, ChallengeExercise, UserProgram, Badge, UserBadge
+from models import (
+    Exercise, Program, ProgramExercise, User, UserProgress,
+    Challenge, UserChallenge, DailyLog, ChallengeDay, ChallengeExercise,
+    UserProgram, Badge, UserBadge
+)
 from forms import RegistrationForm, LoginForm
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import shutil
 from datetime import datetime, date
-import os
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'dev-secret-key-for-ev-sporu'
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-for-ev-sporu')
     
-    basedir = os.path.abspath(os.path.dirname(__name__))
-    db_url = 'postgresql://postgres.zfwgxqomsikktyovfktn:2478152Qwd.@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres'
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-    if db_url and db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    
+    # 1. Remote PostgreSQL checking (Supabase, Neon, etc.)
+    env_db_url = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL')
+    db_url = None
+    
+    if env_db_url:
+        if env_db_url.startswith("postgres://"):
+            env_db_url = env_db_url.replace("postgres://", "postgresql://", 1)
         
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'postgresql://postgres.zfwgxqomsikktyovfktn:2478152Qwd.@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres'
+        # Test connection quickly (2s timeout) so serverless cold start does not hang/crash 500
+        try:
+            import psycopg2
+            clean_dsn = env_db_url.replace("postgresql+psycopg2://", "postgresql://")
+            conn = psycopg2.connect(clean_dsn, connect_timeout=2)
+            conn.close()
+            db_url = env_db_url
+            print("[DB] Connected to PostgreSQL successfully.")
+        except Exception as e:
+            print(f"[DB] Remote database connection failed: {e}. Falling back to SQLite.")
+            db_url = None
+
+    # 2. Resilient SQLite fallback
+    if not db_url:
+        local_db_path = os.path.join(basedir, 'instance', 'site.db')
+        if not os.path.exists(local_db_path):
+            local_db_path = os.path.join(basedir, 'site.db')
+            
+        # In Vercel / AWS Lambda environment, the root is read-only. Copy to /tmp for read/write support
+        if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
+            tmp_db = '/tmp/site.db'
+            try:
+                if not os.path.exists(tmp_db) and os.path.exists(local_db_path):
+                    shutil.copy2(local_db_path, tmp_db)
+                db_url = f'sqlite:///{tmp_db}'
+            except Exception as e:
+                print(f"[DB] Error preparing /tmp/site.db: {e}")
+                db_url = f'sqlite:///{local_db_path}'
+        else:
+            db_url = f'sqlite:///{local_db_path}'
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'login'
-    login_manager.login_message = "Bu sayfayÄ± gÃ¶rÃ¼ntÃ¼lemek iÃ§in giriÅŸ yapmalÄ±sÄ±nÄ±z."
+    login_manager.login_message = "Bu sayfayı görüntülemek için giriş yapmalısınız."
     login_manager.login_message_category = "warning"
-
-    # Removed for Vercel read-only filesystem
 
     from api import api_bp
     app.register_blueprint(api_bp)
 
-    # DB initialization removed for production
     @app.route('/')
     def index():
         return render_template('index.html')
 
     @app.route('/bilgi/<slug>')
     def bilgi(slug):
+        surekli_gelisim_content = {
+            'baslik': 'Başarı İçin Sürekli Gelişim & İlerleme Takibi',
+            'ikon': '/static/images/progress_chart_icon.jpg',
+            'metin': [
+                'Sürekli aynı şeyleri yaparak farklı sonuçlar elde edemezsiniz. Sporun altın kuralı "Progresif Aşırı Yükleme"dir (Progressive Overload).',
+                '## Neden Not Almalıyım?',
+                'Eğer geçen hafta 3 set 10 şınav çektiyseniz, bu hafta bunu 11 şınava çıkarmak hedeflerinizden biri olmalıdır. Not almadığınızda gelişiminizi objektif olarak göremezsiniz.',
+                '## Küçük Adımların Gücü',
+                'Her antrenmanda %1 daha iyi olmak, bir yılın sonunda %3700 gelişim demektir.',
+                'Bu uygulama içerisindeki Liderlik, Rozetler ve Seviye sistemi, ilerlemenizi görselleştirerek motivasyonunuzu yüksek tutmak için tasarlanmıştır.'
+            ]
+        }
+        
         icerikler = {
             'evde-spor': {
                 'baslik': 'Neden Evde Spor?',
@@ -70,20 +120,12 @@ def create_app():
                     'Yeni başlayanlar için vücut ağırlığı ustalaşılması gereken ilk adımdır. Kendi ağırlığını kontrol edemeyen biri harici ağırlıklara geçmemelidir.'
                 ]
             },
-            'ilerleme-takibi': {
-                'baslik': 'Başarı İçin İlerleme Takibi',
-                'ikon': '/static/images/progress_chart_icon.jpg',
-                'metin': [
-                    'Sürekli aynı şeyleri yaparak farklı sonuçlar elde edemezsiniz. Sporun altın kuralı "Progresif Aşırı Yükleme"dir (Progressive Overload).',
-                    '## Neden Not Almalıyım?',
-                    'Eğer geçen hafta 3 set 10 şınav çektiyseniz, bu hafta bunu 11 şınava çıkarmak hedeflerinizden biri olmalıdır. Not almadığınızda gelişiminizi objektif olarak göremezsiniz.',
-                    '## Küçük Adımların Gücü',
-                    'Her antrenmanda %1 daha iyi olmak, bir yılın sonunda %3700 gelişim demektir.',
-                    'Bu uygulama içerisindeki Liderlik, Rozetler ve Seviye sistemi, ilerlemenizi görselleştirerek motivasyonunuzu yüksek tutmak için tasarlanmıştır.'
-                ]
-            }
+            'surekli-gelisim': surekli_gelisim_content,
+            'ilerleme-takibi': surekli_gelisim_content
         }
-        return render_template('info.html', icerik=icerikler[slug])
+        
+        icerik = icerikler.get(slug, surekli_gelisim_content)
+        return render_template('info.html', icerik=icerik)
 
     @app.route('/egzersizler')
     def exercises():
@@ -147,8 +189,7 @@ def create_app():
         program = Program.query.filter_by(slug=slug).first_or_404()
         user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
         
-        # Save progress
-        data = request.get_json()
+        data = request.get_json() or {}
         total_duration = data.get('duration_spent', 0)
         total_calories = data.get('calories_burned', 0)
         
@@ -160,21 +201,16 @@ def create_app():
         )
         db.session.add(progress)
         
-        # Update daily log
         today = date.today()
         log = DailyLog.query.filter_by(user_id=current_user.id, log_date=today).first()
         if not log:
             log = DailyLog(user_id=current_user.id, log_date=today, calories_consumed=0, water_ml=0)
             db.session.add(log)
-        # Assuming you burn calories, maybe we track it in daily log or let UserProgress handle it.
-        # Actually DailyLog has calories_consumed, which is food. Let's just rely on UserProgress for burned.
         
-        # Advance current day
         if user_program.current_day < program.duration_days:
             user_program.current_day += 1
             
-        # Check for first workout badge
-        first_badge = Badge.query.filter_by(name='Ã„Â°lk AdÃ„Â±m').first()
+        first_badge = Badge.query.filter_by(name='İlk Adım').first()
         if first_badge and not UserBadge.query.filter_by(user_id=current_user.id, badge_id=first_badge.id).first():
             ub = UserBadge(user_id=current_user.id, badge_id=first_badge.id)
             db.session.add(ub)
@@ -184,7 +220,6 @@ def create_app():
 
     @app.route('/liderlik')
     def leaderboard():
-        # Liderlik tablosu: En ÃƒÂ§ok egzersiz sÃƒÂ¼resi geÃƒÂ§irenler
         users = User.query.all()
         leaderboard_data = []
         for u in users:
@@ -198,7 +233,7 @@ def create_app():
         leaderboard_data = sorted(leaderboard_data, key=lambda x: x['score'], reverse=True)[:10]
         return render_template('leaderboard.html', leaderboard_data=leaderboard_data)
 
-    # --- Kimlik DoÃ„Å¸rulama RotalarÃ„Â± ---
+    # --- Kimlik Doğrulama Rotaları ---
     
     @app.route('/kayit', methods=['GET', 'POST'])
     def register():
@@ -210,7 +245,7 @@ def create_app():
             user = User(name=form.name.data, email=form.email.data, password_hash=hashed_password)
             db.session.add(user)
             db.session.commit()
-            flash('Başarıyla giriş yaptınız!', 'success')
+            flash('Kayıt başarılı! Şimdi giriş yapabilirsiniz.', 'success')
             return redirect(url_for('login'))
         return render_template('register.html', form=form)
 
@@ -235,19 +270,16 @@ def create_app():
         logout_user()
         return redirect(url_for('index'))
 
-    # --- KullanÃ„Â±cÃ„Â± RotalarÃ„Â± ---
+    # --- Kullanıcı Rotaları ---
 
     @app.route('/profil')
     @login_required
     def profile():
-        # KullanÃ„Â±cÃ„Â±nÃ„Â±n favorileri
         favorites = current_user.favorites
-        # KullanÃ„Â±cÃ„Â±nÃ„Â±n ilerlemeleri (son 10)
         progress = UserProgress.query.filter_by(user_id=current_user.id).order_by(UserProgress.completed_at.desc()).limit(10).all()
         today = date.today()
         today_log = DailyLog.query.filter_by(user_id=current_user.id, log_date=today).first()
         
-        # Calculate total exercise duration today
         today_start = datetime.combine(today, datetime.min.time())
         today_progress = UserProgress.query.filter(UserProgress.user_id == current_user.id, UserProgress.completed_at >= today_start).all()
         today_duration = sum([p.duration_spent or 0 for p in today_progress])
@@ -255,7 +287,15 @@ def create_app():
         active_programs = current_user.active_programs
         user_badges = current_user.badges
         
-        return render_template('profile.html', favorites=favorites, progress=progress, today_log=today_log, today_duration=today_duration, active_programs=active_programs, user_badges=user_badges)
+        return render_template(
+            'profile.html',
+            favorites=favorites,
+            progress=progress,
+            today_log=today_log,
+            today_duration=today_duration,
+            active_programs=active_programs,
+            user_badges=user_badges
+        )
 
     @app.route('/favori-ekle/<int:exercise_id>', methods=['POST'])
     @login_required
@@ -281,7 +321,6 @@ def create_app():
             calories_burned=exercise.calories_estimate or 10
         )
         
-        # OyunlaÃ…Å¸tÃ„Â±rma: Seri (Streak) gÃƒÂ¼ncellemesi
         today = date.today()
         if current_user.last_active_date != today:
             if current_user.last_active_date:
@@ -299,7 +338,6 @@ def create_app():
             current_user.last_active_date = today
 
         db.session.add(progress)
-
         db.session.commit()
         flash('Antrenman tamamlandı ve ilerlemeniz kaydedildi! Tebrikler!', 'success')
         return redirect(url_for('exercise_detail', slug=exercise.slug))
@@ -308,36 +346,11 @@ def create_app():
     def breathe():
         return render_template('breathe.html')
 
-    @app.route("/api/water", methods=['POST'])
-    @login_required
-    def update_water():
-        data = request.get_json()
-        action = data.get('action')
-        if action == 'add':
-            current_user.water_intake_ml += 250
-        elif action == 'reset':
-            current_user.water_intake_ml = 0
-        db.session.commit()
-        return jsonify({'water_intake_ml': current_user.water_intake_ml})
-
-    @app.route("/api/fasting", methods=['POST'])
-    @login_required
-    def update_fasting():
-        data = request.get_json()
-        action = data.get('action')
-        if action == 'start':
-            current_user.fasting_start = datetime.utcnow()
-        elif action == 'stop':
-            current_user.fasting_start = None
-        db.session.commit()
-        return jsonify({'fasting_start': current_user.fasting_start.isoformat() if current_user.fasting_start else None})
-
-
     @app.route('/quiz', methods=['GET', 'POST'])
     @login_required
     def quiz():
         if request.method == 'POST':
-            data = request.get_json()
+            data = request.get_json() or {}
             current_user.quiz_completed = True
             current_user.goal = data.get('goal', '')
             current_user.fitness_level = data.get('fitness_level', '')
@@ -368,20 +381,18 @@ def create_app():
                 flash('Meydan okumaya katıldınız!', 'success')
             return redirect(url_for('challenge_detail', slug=slug))
             
-        # Get exercises grouped by day
         days = ChallengeDay.query.filter_by(challenge_id=challenge.id).order_by(ChallengeDay.day_number).all()
-            
         return render_template('challenge_detail.html', challenge=challenge, user_challenge=user_challenge, days=days)
 
     @app.route('/api/calories', methods=['POST'])
     @login_required
     def add_calories():
-        data = request.get_json()
+        data = request.get_json() or {}
         amount = data.get('amount', 0)
         today = date.today()
         log = DailyLog.query.filter_by(user_id=current_user.id, log_date=today).first()
         if not log:
-            log = DailyLog(user_id=current_user.id, log_date=today, calories_consumed=0)
+            log = DailyLog(user_id=current_user.id, log_date=today, calories_consumed=0, water_ml=0)
             db.session.add(log)
         log.calories_consumed += amount
         db.session.commit()
@@ -390,7 +401,7 @@ def create_app():
     @app.route('/api/water', methods=['POST'])
     @login_required
     def add_water():
-        data = request.get_json()
+        data = request.get_json() or {}
         amount = data.get('amount', 250)
         action = data.get('action')
         today = date.today()
@@ -403,12 +414,14 @@ def create_app():
             
         if action == 'reset':
             log.water_ml = 0
+            current_user.water_intake_ml = 0
         else:
             log.water_ml += amount
+            current_user.water_intake_ml = (current_user.water_intake_ml or 0) + amount
             
         # Check for water badge (2000 ml)
         if log.water_ml >= 2000:
-            water_badge = Badge.query.filter_by(name='Su CanavarÃ„Â±').first()
+            water_badge = Badge.query.filter_by(name='Su Canavarı').first()
             if water_badge and not UserBadge.query.filter_by(user_id=current_user.id, badge_id=water_badge.id).first():
                 ub = UserBadge(user_id=current_user.id, badge_id=water_badge.id)
                 db.session.add(ub)
@@ -419,7 +432,7 @@ def create_app():
     @app.route('/api/fasting', methods=['POST'])
     @login_required
     def toggle_fasting():
-        data = request.get_json()
+        data = request.get_json() or {}
         action = data.get('action')
         if action == 'start':
             current_user.fasting_start = datetime.utcnow()
@@ -442,11 +455,6 @@ def create_app():
 
     return app
 
-
-def seed_data():
-    pass
-    # Seed data is obsolete and removed to clean up corrupted text.
-    
 app = create_app()
 
 if __name__ == '__main__':
