@@ -61,7 +61,7 @@
                 </a>
             {% endfor %}
 
-            <span class="ml-auto text-xs text-zinc-500 font-mono">
+            <span class="ml-auto text-xs text-zinc-500">
                 <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket listelendi
             </span>
         </div>
@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Bottom Metrics -->
-                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono font-bold text-zinc-300">
+                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-zinc-300">
                     <span class="bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800">⏱️ {{ exercise.duration_seconds or 45 }} sn</span>
                     <span class="bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800 text-orange-400">🔥 {{ exercise.calories_estimate or 8 }} kcal</span>
                 </div>
