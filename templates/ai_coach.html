@@ -628,28 +628,32 @@
     }
 
     // Smart Framing & Distance Guidance
-    function updateFramingGuide(lm) {
+    function updateFramingGuide(lm, isHumanValid) {
         const guideEl = document.getElementById('framing-guide-banner');
         const iconEl = document.getElementById('framing-icon');
         const msgEl = document.getElementById('framing-msg');
         if (!guideEl || !iconEl || !msgEl) return;
 
-        const hip = lm[23], knee = lm[25], ankle = lm[27];
-        const shoulder = lm[11];
+        if (!isHumanValid || !lm) {
+            guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-black/75 border-white/10 text-zinc-400";
+            iconEl.innerText = "🔍";
+            msgEl.innerText = "İnsan vücudu taranıyor... Kadraja geçin";
+            return;
+        }
 
         if (['squat', 'lunge', 'jumping_jack', 'high_knees', 'wall_sit', 'glute_bridge', 'burpee'].includes(currentExercise)) {
-            const ankleVis = (ankle && ankle.visibility) || 0;
-            const kneeVis = (knee && knee.visibility) || 0;
-            if (ankleVis < 0.4 || kneeVis < 0.4) {
+            const ankleVis = Math.max(lm[27]?.visibility || 0, lm[28]?.visibility || 0);
+            const kneeVis = Math.max(lm[25]?.visibility || 0, lm[26]?.visibility || 0);
+            if (ankleVis < 0.45 || kneeVis < 0.45) {
                 guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-amber-500/25 border-amber-500/50 text-amber-300 animate-pulse";
                 iconEl.innerText = "⚠️";
                 msgEl.innerText = "Alt vücut görünmüyor! 2-3 adım geriye çekilin.";
                 return;
             }
         } else if (['pushup', 'plank', 'mountain_climber'].includes(currentExercise)) {
-            const shoulderVis = (shoulder && shoulder.visibility) || 0;
-            const hipVis = (hip && hip.visibility) || 0;
-            if (shoulderVis < 0.4 || hipVis < 0.4) {
+            const shoulderVis = Math.max(lm[11]?.visibility || 0, lm[12]?.visibility || 0);
+            const hipVis = Math.max(lm[23]?.visibility || 0, lm[24]?.visibility || 0);
+            if (shoulderVis < 0.45 || hipVis < 0.45) {
                 guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-amber-500/25 border-amber-500/50 text-amber-300 animate-pulse";
                 iconEl.innerText = "⚠️";
                 msgEl.innerText = "Vücut kadrajda değil! Kamerayı yere doğru açın.";
@@ -861,7 +865,198 @@
         playBeep(450, 0.1);
     }
 
-    // MediaPipe Pose Callback
+    // Ergonomic Biomechanical AR Kinematic Connections (Clean lines without messy face webs)
+    const AR_KINEMATIC_CONNECTIONS = [
+        // Torso Core Box
+        [11, 12], // Left shoulder to right shoulder
+        [11, 23], // Left shoulder to left hip
+        [12, 24], // Right shoulder to right hip
+        [23, 24], // Left hip to right hip
+        
+        // Left Arm Chain
+        [11, 13], // Left shoulder to left elbow
+        [13, 15], // Left elbow to left wrist
+        
+        // Right Arm Chain
+        [12, 14], // Right shoulder to right elbow
+        [14, 16], // Right elbow to right wrist
+        
+        // Left Leg Chain
+        [23, 25], // Left hip to left knee
+        [25, 27], // Left knee to left ankle
+        [27, 29], // Left ankle to left heel
+        [29, 31], // Left heel to left foot index
+        [27, 31], // Left ankle to foot index
+        
+        // Right Leg Chain
+        [24, 26], // Right hip to right knee
+        [26, 28], // Right knee to right ankle
+        [28, 30], // Right ankle to right heel
+        [30, 32], // Right heel to right foot index
+        [28, 32]  // Right ankle to foot index
+    ];
+
+    function getActiveExerciseJoints(ex) {
+        switch(ex) {
+            case 'squat':
+            case 'wall_sit':
+            case 'lunge':
+                return [23, 24, 25, 26, 27, 28]; // Hips, knees, ankles
+            case 'pushup':
+            case 'biceps_curl':
+                return [11, 12, 13, 14, 15, 16]; // Shoulders, elbows, wrists
+            case 'plank':
+            case 'crunch':
+            case 'glute_bridge':
+                return [11, 12, 23, 24, 25, 26]; // Torso core & knees
+            case 'jumping_jack':
+            case 'high_knees':
+            case 'mountain_climber':
+            case 'burpee':
+                return [15, 16, 25, 26, 27, 28]; // Limbs & joints
+            default:
+                return [];
+        }
+    }
+
+    // Strict Human Body Verification Gate (Rejects furniture, curtains, shadows & random objects)
+    function validateHumanPose(lm) {
+        if (!lm || lm.length < 33) return false;
+
+        const ls = lm[11], rs = lm[12];
+        const lh = lm[23], rh = lm[24];
+        const nose = lm[0];
+
+        const sVisL = (ls && ls.visibility) || 0;
+        const sVisR = (rs && rs.visibility) || 0;
+        const hVisL = (lh && lh.visibility) || 0;
+        const hVisR = (rh && rh.visibility) || 0;
+        const noseVis = (nose && nose.visibility) || 0;
+
+        // 1. Torso Anchor: A genuine human body MUST have detectable shoulders & core
+        const hasShoulders = (sVisL > 0.55 && sVisR > 0.55);
+        const hasTorsoSpan = (sVisL > 0.55 || sVisR > 0.55) && (hVisL > 0.50 || hVisR > 0.50);
+        const hasUpperBody = (sVisL > 0.55 || sVisR > 0.55) && (noseVis > 0.60);
+
+        if (!hasShoulders && !hasTorsoSpan && !hasUpperBody) {
+            return false;
+        }
+
+        // 2. Anatomical Proportions: Shoulder distance must be physically plausible in frame
+        if (ls && rs && sVisL > 0.45 && sVisR > 0.45) {
+            const shoulderSpan = Math.hypot(ls.x - rs.x, ls.y - rs.y);
+            if (shoulderSpan < 0.035 || shoulderSpan > 0.88) {
+                return false;
+            }
+        }
+
+        // 3. Torso Distance: Shoulders to hips vector must be physically plausible
+        if ((sVisL > 0.5 || sVisR > 0.5) && (hVisL > 0.5 || hVisR > 0.5)) {
+            const midSx = (ls.x + rs.x) / 2;
+            const midSy = (ls.y + rs.y) / 2;
+            const midHx = (lh.x + rh.x) / 2;
+            const midHy = (lh.y + rh.y) / 2;
+            const torsoDist = Math.hypot(midSx - midHx, midSy - midHy);
+            if (torsoDist < 0.04 || torsoDist > 0.92) {
+                return false;
+            }
+        }
+
+        // 4. Mean Core Visibility: Average score of major body anchors
+        let coreSum = sVisL + sVisR + hVisL + hVisR;
+        let coreCount = 4;
+        if (noseVis > 0.5) { coreSum += noseVis; coreCount++; }
+        if ((coreSum / coreCount) < 0.50) {
+            return false;
+        }
+
+        // 5. Outlier Rejection: Coordinates must reside within camera field
+        let outliers = 0;
+        for (let i = 0; i < 33; i++) {
+            const p = lm[i];
+            if (p && (p.x < -0.25 || p.x > 1.25 || p.y < -0.25 || p.y > 1.25)) {
+                outliers++;
+            }
+        }
+        if (outliers > 7) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // High-Precision Custom AR Skeleton Renderer (Glowing neon kinematic lines & glowing joint nodes)
+    function drawCustomARSkeleton(ctx, lm, width, height) {
+        const VIS_THRESHOLD = 0.55; // Strictly only render visible, confident joints
+        const activeJoints = getActiveExerciseJoints(currentExercise);
+
+        ctx.save();
+
+        // Glowing Kinematic Lines
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = 'rgba(249, 115, 22, 0.7)';
+        ctx.strokeStyle = '#f97316';
+
+        for (const [i, j] of AR_KINEMATIC_CONNECTIONS) {
+            const p1 = lm[i];
+            const p2 = lm[j];
+            if (p1 && p2 && p1.visibility >= VIS_THRESHOLD && p2.visibility >= VIS_THRESHOLD) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x * width, p1.y * height);
+                ctx.lineTo(p2.x * width, p2.y * height);
+                ctx.stroke();
+            }
+        }
+
+        // Neck anchor line (from mid-shoulder to nose)
+        const nose = lm[0], ls = lm[11], rs = lm[12];
+        if (nose && ls && rs && nose.visibility >= 0.6 && ls.visibility >= VIS_THRESHOLD && rs.visibility >= VIS_THRESHOLD) {
+            const midX = ((ls.x + rs.x) / 2) * width;
+            const midY = ((ls.y + rs.y) / 2) * height;
+            ctx.beginPath();
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(nose.x * width, nose.y * height);
+            ctx.stroke();
+        }
+
+        // Biomechanical Joint Nodes
+        const KEY_JOINTS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+        for (const idx of KEY_JOINTS) {
+            const p = lm[idx];
+            if (p && p.visibility >= VIS_THRESHOLD) {
+                const x = p.x * width;
+                const y = p.y * height;
+                const isActive = activeJoints.includes(idx);
+
+                ctx.shadowBlur = isActive ? 12 : 5;
+                ctx.shadowColor = isActive ? 'rgba(52, 211, 153, 0.95)' : 'rgba(249, 115, 22, 0.8)';
+
+                // Outer Ring
+                ctx.beginPath();
+                ctx.arc(x, y, isActive ? 5.5 : 4, 0, 2 * Math.PI);
+                ctx.fillStyle = isActive ? '#10b981' : '#f97316';
+                ctx.fill();
+
+                // Inner Core
+                ctx.beginPath();
+                ctx.arc(x, y, isActive ? 2.5 : 1.8, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+            }
+        }
+
+        ctx.restore();
+    }
+
+    // Temporal Hysteresis State for False Positive Prevention
+    let humanDetectionStreak = 0;
+    let humanLostStreak = 0;
+    let isHumanConfirmed = false;
+
+    // MediaPipe Pose Main Callback
     function onResults(results) {
         if (videoElement.videoWidth && videoElement.videoHeight) {
             if (canvasElement.width !== videoElement.videoWidth || canvasElement.height !== videoElement.videoHeight) {
@@ -870,7 +1065,7 @@
             }
         }
 
-        // Draw ambient glow for 0.5x Ultra-Wide mode (eliminates dark voids seamlessly)
+        // Draw ambient glow for 0.5x Ultra-Wide mode
         if (ambientCanvas && currentZoomMode === 0.5 && ambientCanvasCtx) {
             if (ambientCanvas.width !== 160 || ambientCanvas.height !== 284) {
                 ambientCanvas.width = 160;
@@ -883,16 +1078,32 @@
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
-        if (results.poseLandmarks) {
+        const hasValidPose = results.poseLandmarks && validateHumanPose(results.poseLandmarks);
+
+        if (hasValidPose) {
+            humanDetectionStreak++;
+            humanLostStreak = 0;
+            if (humanDetectionStreak >= 2) {
+                isHumanConfirmed = true;
+            }
+        } else {
+            humanLostStreak++;
+            humanDetectionStreak = 0;
+            if (humanLostStreak >= 4) {
+                isHumanConfirmed = false;
+            }
+        }
+
+        if (isHumanConfirmed && results.poseLandmarks) {
+            const lm = results.poseLandmarks;
+
             if (showSkeleton) {
-                drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {color: '#f97316', lineWidth: 3});
-                drawLandmarks(canvasCtx, results.poseLandmarks, {color: '#ffffff', lineWidth: 1.5, radius: 4});
+                drawCustomARSkeleton(canvasCtx, lm, canvasElement.width, canvasElement.height);
             }
 
-            const lm = results.poseLandmarks;
-            updateFramingGuide(lm);
+            updateFramingGuide(lm, true);
 
-            // Route to exercise handler
+            // Execute Exercise Motion Analyzer
             switch(currentExercise) {
                 case 'squat': handleSquat(lm); break;
                 case 'pushup': handlePushup(lm); break;
@@ -908,20 +1119,37 @@
                 case 'burpee': handleBurpee(lm); break;
             }
         } else {
-            const guideEl = document.getElementById('framing-guide-banner');
-            if (guideEl) {
-                guideEl.className = "pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-black/65 border-white/10 text-zinc-400";
-                document.getElementById('framing-icon').innerText = "🔍";
-                document.getElementById('framing-msg').innerText = "Kadraja geçin";
+            updateFramingGuide(null, false);
+            angleText.innerText = "İnsan taranıyor...";
+            formFeedback.innerText = "Kadrajda insan aranıyor";
+            formFeedback.className = "text-zinc-500 font-medium";
+
+            // Pause hold timers if human leaves frame
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
             }
         }
+
         canvasCtx.restore();
     }
 
-    // 1. Squat
+    // Helper: Select Profile Side Facing Camera (Bilateral Auto-Detection)
+    function getBestSide(lm, leftIndices, rightIndices) {
+        let leftScore = 0, rightScore = 0;
+        leftIndices.forEach(i => { leftScore += (lm[i]?.visibility || 0); });
+        rightIndices.forEach(i => { rightScore += (lm[i]?.visibility || 0); });
+        return rightScore > leftScore ? 'right' : 'left';
+    }
+
+    // 1. Squat (Bilateral Hip-Knee-Ankle)
     function handleSquat(lm) {
-        const hip = lm[23], knee = lm[25], ankle = lm[27];
-        if (!hip || !knee || !ankle || hip.visibility < 0.45 || knee.visibility < 0.45 || ankle.visibility < 0.35) return;
+        const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const knee = side === 'right' ? lm[26] : lm[25];
+        const ankle = side === 'right' ? lm[28] : lm[27];
+
+        if (!hip || !knee || !ankle || hip.visibility < 0.55 || knee.visibility < 0.55 || ankle.visibility < 0.45) return;
         const angle = Math.round(calculateAngle(hip, knee, ankle));
         angleText.innerText = `Diz: ${angle}°`;
 
@@ -944,10 +1172,14 @@
         }
     }
 
-    // 2. Push-up
+    // 2. Push-up (Bilateral Shoulder-Elbow-Wrist)
     function handlePushup(lm) {
-        const shoulder = lm[11], elbow = lm[13], wrist = lm[15];
-        if (!shoulder || !elbow || !wrist || shoulder.visibility < 0.4 || elbow.visibility < 0.4 || wrist.visibility < 0.4) return;
+        const side = getBestSide(lm, [11, 13, 15], [12, 14, 16]);
+        const shoulder = side === 'right' ? lm[12] : lm[11];
+        const elbow = side === 'right' ? lm[14] : lm[13];
+        const wrist = side === 'right' ? lm[16] : lm[15];
+
+        if (!shoulder || !elbow || !wrist || shoulder.visibility < 0.55 || elbow.visibility < 0.55 || wrist.visibility < 0.45) return;
         const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
         angleText.innerText = `Dirsek: ${angle}°`;
 
@@ -970,10 +1202,14 @@
         }
     }
 
-    // 3. Plank
+    // 3. Plank (Bilateral Shoulder-Hip-Ankle Alignment)
     function handlePlank(lm) {
-        const shoulder = lm[11], hip = lm[23], ankle = lm[27];
-        if (!shoulder || !hip || !ankle || shoulder.visibility < 0.4 || hip.visibility < 0.4 || ankle.visibility < 0.35) return;
+        const side = getBestSide(lm, [11, 23, 27], [12, 24, 28]);
+        const shoulder = side === 'right' ? lm[12] : lm[11];
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const ankle = side === 'right' ? lm[28] : lm[27];
+
+        if (!shoulder || !hip || !ankle || shoulder.visibility < 0.55 || hip.visibility < 0.55 || ankle.visibility < 0.45) return;
         const bodyAngle = Math.round(calculateAngle(shoulder, hip, ankle));
         angleText.innerText = `Omurga: ${bodyAngle}°`;
 
@@ -1000,18 +1236,18 @@
         }
     }
 
-    // 4. Jumping Jack
+    // 4. Jumping Jack (Hands & Feet Extension)
     function handleJumpingJack(lm) {
-        const leftWrist = lm[15], rightWrist = lm[16], nose = lm[0];
-        const leftAnkle = lm[27], rightAnkle = lm[28], leftShoulder = lm[11], rightShoulder = lm[12];
+        const lw = lm[15], rw = lm[16], nose = lm[0];
+        const la = lm[27], ra = lm[28], ls = lm[11], rs = lm[12];
 
-        if (leftWrist && rightWrist && leftAnkle && rightAnkle && leftWrist.visibility > 0.4 && rightWrist.visibility > 0.4 && leftAnkle.visibility > 0.35 && rightAnkle.visibility > 0.35) {
-            const handsUp = (leftWrist.y < nose.y) && (rightWrist.y < nose.y);
-            const ankleDist = Math.abs(leftAnkle.x - rightAnkle.x);
-            const shoulderDist = Math.abs(leftShoulder.x - rightShoulder.x) || 0.2;
+        if (lw && rw && la && ra && lw.visibility > 0.50 && rw.visibility > 0.50 && la.visibility > 0.50 && ra.visibility > 0.50) {
+            const handsUp = (lw.y < (nose ? nose.y : 0.4)) && (rw.y < (nose ? nose.y : 0.4));
+            const ankleDist = Math.abs(la.x - ra.x);
+            const shoulderDist = (ls && rs) ? Math.abs(ls.x - rs.x) : 0.2;
             const feetApart = ankleDist > (shoulderDist * 1.25);
 
-            angleText.innerText = `Açıklık: ${(ankleDist / shoulderDist).toFixed(1)}x`;
+            angleText.innerText = `Açıklık: ${(ankleDist / (shoulderDist || 0.2)).toFixed(1)}x`;
 
             if (handsUp && feetApart) isDown = true;
             if (!handsUp && !feetApart && isDown) {
@@ -1027,10 +1263,14 @@
         }
     }
 
-    // 5. Lunge
+    // 5. Lunge (Bilateral Front Knee Flexion)
     function handleLunge(lm) {
-        const hip = lm[23], knee = lm[25], ankle = lm[27];
-        if (hip && knee && ankle && hip.visibility > 0.4 && knee.visibility > 0.4 && ankle.visibility > 0.35) {
+        const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const knee = side === 'right' ? lm[26] : lm[25];
+        const ankle = side === 'right' ? lm[28] : lm[27];
+
+        if (hip && knee && ankle && hip.visibility > 0.55 && knee.visibility > 0.55 && ankle.visibility > 0.45) {
             const angle = Math.round(calculateAngle(hip, knee, ankle));
             angleText.innerText = `Ön Diz: ${angle}°`;
 
@@ -1052,10 +1292,14 @@
         }
     }
 
-    // 6. Crunch (Mekik)
+    // 6. Crunch (Torso Core Contraction)
     function handleCrunch(lm) {
-        const shoulder = lm[11], hip = lm[23], knee = lm[25];
-        if (shoulder && hip && knee && shoulder.visibility > 0.4 && hip.visibility > 0.4) {
+        const side = getBestSide(lm, [11, 23, 25], [12, 24, 26]);
+        const shoulder = side === 'right' ? lm[12] : lm[11];
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const knee = side === 'right' ? lm[26] : lm[25];
+
+        if (shoulder && hip && knee && shoulder.visibility > 0.55 && hip.visibility > 0.55) {
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
             angleText.innerText = `Karın Açısı: ${angle}°`;
 
@@ -1077,10 +1321,14 @@
         }
     }
 
-    // 7. Glute Bridge
+    // 7. Glute Bridge (Hip Extension)
     function handleGluteBridge(lm) {
-        const shoulder = lm[11], hip = lm[23], knee = lm[25];
-        if (shoulder && hip && knee && shoulder.visibility > 0.4 && hip.visibility > 0.4 && knee.visibility > 0.4) {
+        const side = getBestSide(lm, [11, 23, 25], [12, 24, 26]);
+        const shoulder = side === 'right' ? lm[12] : lm[11];
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const knee = side === 'right' ? lm[26] : lm[25];
+
+        if (shoulder && hip && knee && shoulder.visibility > 0.55 && hip.visibility > 0.55 && knee.visibility > 0.50) {
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
             angleText.innerText = `Köprü: ${angle}°`;
 
@@ -1102,10 +1350,14 @@
         }
     }
 
-    // 8. Biceps Curl
+    // 8. Biceps Curl (Bilateral Forearm Flexion)
     function handleBicepsCurl(lm) {
-        const shoulder = lm[11], elbow = lm[13], wrist = lm[15];
-        if (shoulder && elbow && wrist && shoulder.visibility > 0.4 && elbow.visibility > 0.4 && wrist.visibility > 0.4) {
+        const side = getBestSide(lm, [11, 13, 15], [12, 14, 16]);
+        const shoulder = side === 'right' ? lm[12] : lm[11];
+        const elbow = side === 'right' ? lm[14] : lm[13];
+        const wrist = side === 'right' ? lm[16] : lm[15];
+
+        if (shoulder && elbow && wrist && shoulder.visibility > 0.55 && elbow.visibility > 0.55 && wrist.visibility > 0.50) {
             const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
             angleText.innerText = `Dirsek: ${angle}°`;
 
@@ -1127,12 +1379,12 @@
         }
     }
 
-    // 9. High Knees
+    // 9. High Knees (Knee Drive Elevation)
     function handleHighKnees(lm) {
-        const leftHip = lm[23], rightHip = lm[24], leftKnee = lm[25], rightKnee = lm[26];
-        if (leftHip && rightHip && leftHip.visibility > 0.45 && rightHip.visibility > 0.45) {
-            const leftUp = leftKnee.y < leftHip.y + 0.05;
-            const rightUp = rightKnee.y < rightHip.y + 0.05;
+        const lh = lm[23], rh = lm[24], lk = lm[25], rk = lm[26];
+        if (lh && rh && lh.visibility > 0.50 && rh.visibility > 0.50) {
+            const leftUp = lk && lk.visibility > 0.45 && (lk.y < lh.y + 0.05);
+            const rightUp = rk && rk.visibility > 0.45 && (rk.y < rh.y + 0.05);
 
             if (leftUp || rightUp) {
                 if (!isDown) {
@@ -1151,11 +1403,15 @@
         }
     }
 
-    // 10. Mountain Climber
+    // 10. Mountain Climber (Plank Knee Drive)
     function handleMountainClimber(lm) {
-        const leftWrist = lm[15], leftKnee = lm[25], leftHip = lm[23];
-        if (leftWrist && leftHip && leftWrist.visibility > 0.4 && leftHip.visibility > 0.4) {
-            const kneeToChest = Math.abs(leftKnee.x - leftWrist.x) < 0.25;
+        const side = getBestSide(lm, [15, 23, 25], [16, 24, 26]);
+        const wrist = side === 'right' ? lm[16] : lm[15];
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const knee = side === 'right' ? lm[26] : lm[25];
+
+        if (wrist && hip && knee && wrist.visibility > 0.50 && hip.visibility > 0.50 && knee.visibility > 0.50) {
+            const kneeToChest = Math.abs(knee.x - wrist.x) < 0.25;
 
             if (kneeToChest && !isDown) {
                 reps++;
@@ -1172,10 +1428,14 @@
         }
     }
 
-    // 11. Wall Sit
+    // 11. Wall Sit (Isometric Knee Hold)
     function handleWallSit(lm) {
-        const hip = lm[23], knee = lm[25], ankle = lm[27];
-        if (hip && knee && ankle && hip.visibility > 0.4 && knee.visibility > 0.4 && ankle.visibility > 0.35) {
+        const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const knee = side === 'right' ? lm[26] : lm[25];
+        const ankle = side === 'right' ? lm[28] : lm[27];
+
+        if (hip && knee && ankle && hip.visibility > 0.55 && knee.visibility > 0.55 && ankle.visibility > 0.45) {
             const angle = Math.round(calculateAngle(hip, knee, ankle));
             angleText.innerText = `Diz: ${angle}°`;
 
@@ -1203,12 +1463,17 @@
         }
     }
 
-    // 12. Burpee
+    // 12. Burpee (Plank to Jump Sequence)
     function handleBurpee(lm) {
-        const shoulder = lm[11], hip = lm[23], wrist = lm[15], nose = lm[0];
-        if (shoulder && hip && wrist && shoulder.visibility > 0.4 && hip.visibility > 0.4 && wrist.visibility > 0.4) {
-            const isPlank = Math.abs(shoulder.y - hip.y) < 0.2;
-            const isJump = (wrist.y < nose.y);
+        const side = getBestSide(lm, [11, 23, 15], [12, 24, 16]);
+        const shoulder = side === 'right' ? lm[12] : lm[11];
+        const hip = side === 'right' ? lm[24] : lm[23];
+        const wrist = side === 'right' ? lm[16] : lm[15];
+        const nose = lm[0];
+
+        if (shoulder && hip && wrist && shoulder.visibility > 0.55 && hip.visibility > 0.55 && wrist.visibility > 0.50) {
+            const isPlank = Math.abs(shoulder.y - hip.y) < 0.22;
+            const isJump = nose && (wrist.y < nose.y);
 
             if (isPlank) {
                 isStageTwo = true;
@@ -1367,8 +1632,8 @@
         smoothLandmarks: true,
         enableSegmentation: false,
         smoothSegmentation: false,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minDetectionConfidence: 0.68,
+        minTrackingConfidence: 0.68
     });
     
     pose.onResults(onResults);
