@@ -1,5 +1,13 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
 .env
 .vscode/
+instance/
+screenshot*.png
+dump*.html
+dump*.py
+*.log
+opengym_catalog.json
+

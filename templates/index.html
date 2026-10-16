@@ -99,6 +99,83 @@
 </section>
 
 <!-- ========================================== -->
+<!-- 1.5 OPENGYM WEEKLY ACTIVITY STRIP          -->
+<!-- ========================================== -->
+<section class="relative z-10 -mt-6 mb-16 max-w-5xl mx-auto px-4">
+    <div class="athletic-card rounded-2xl p-5 sm:p-6 border border-zinc-800 bg-zinc-900/80 backdrop-blur-md shadow-2xl">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- Left: Weekly Calendar Strip -->
+            <div class="w-full md:w-auto flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black uppercase tracking-widest text-white">Haftalık Antrenman Takvimi</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/15 text-orange-400 border border-orange-500/30">openGym Modu</span>
+                    </div>
+                    {% if current_user.is_authenticated %}
+                        <span class="text-xs font-bold text-zinc-400 flex items-center gap-1">
+                            <span class="text-orange-400 font-mono font-black">🔥 {{ current_user.current_streak or 0 }} Gün</span> Seri
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- 7 Days Strip -->
+                <div class="grid grid-cols-7 gap-2 sm:gap-3">
+                    {% for day in weekly_calendar %}
+                    <div class="flex flex-col items-center py-2.5 px-1 rounded-xl transition-all border text-center relative
+                                {{ 'bg-orange-500/15 border-orange-500/60 shadow-lg shadow-orange-500/10' if day.is_today else ('bg-zinc-950/60 border-zinc-800/80' if not day.is_completed else 'bg-emerald-500/10 border-emerald-500/30') }}">
+                        <span class="text-[10px] font-black uppercase tracking-wider {{ 'text-orange-400 font-extrabold' if day.is_today else 'text-zinc-500' }}">
+                            {{ day.day_short }}
+                        </span>
+                        <span class="text-base sm:text-lg font-black font-heading mt-0.5 {{ 'text-white' if day.is_today else 'text-zinc-300' }}">
+                            {{ day.day_num }}
+                        </span>
+                        
+                        <!-- Status indicator dot / checkmark -->
+                        <div class="mt-1 flex items-center justify-center">
+                            {% if day.is_completed %}
+                                <span class="w-4 h-4 rounded-full bg-emerald-500 text-[10px] text-black font-black flex items-center justify-center">✓</span>
+                            {% elif day.is_today %}
+                                <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+                            {% elif day.is_past %}
+                                <span class="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
+                            {% else %}
+                                <span class="w-1.5 h-1.5 rounded-full bg-zinc-800"></span>
+                            {% endif %}
+                        </div>
+
+                        {% if day.is_today %}
+                            <span class="absolute -top-2 px-1.5 py-0.2 rounded-full bg-orange-500 text-[8px] font-black text-black uppercase tracking-tighter shadow-sm">
+                                BUGÜN
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right: OpenGym Quick Workout Trigger -->
+            <div class="w-full md:w-72 bg-gradient-to-br from-zinc-950 to-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between shrink-0">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-black uppercase tracking-wider text-orange-400">Günün 3D Antrenmanı</span>
+                    <span class="text-[10px] font-bold text-zinc-500">15 Dk &bull; 120 kcal</span>
+                </div>
+                <h4 class="text-white text-sm font-black uppercase tracking-tight">Tüm Vücut Form Kampı</h4>
+                <p class="text-zinc-400 text-[11px] mt-1 line-clamp-1">3D animasyonlu set sayacı ve Türkçe sesli koç ile evde başla.</p>
+                <div class="mt-3 pt-3 border-t border-zinc-800/80 flex items-center gap-2">
+                    <a href="/programlar/7-gunluk-baslangic/antrenman" class="flex-1 bg-accent hover:bg-orange-500 text-white font-bold text-xs py-2 px-3 rounded-lg text-center uppercase tracking-wider transition-all flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                        <span>Antrenmana Başla</span>
+                    </a>
+                    <a href="/ai-koc" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs py-2 px-3 rounded-lg uppercase tracking-wider transition-all flex items-center gap-1 border border-zinc-700">
+                        <span>AI Koç</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========================================== -->
 <!-- 2. AI KOÇ FEATURE SPOTLIGHT (High Tech)     -->
 <!-- ========================================== -->
 <section class="relative z-10 my-16 max-w-6xl mx-auto px-4">

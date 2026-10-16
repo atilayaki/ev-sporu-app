@@ -23,26 +23,91 @@
 
     <!-- Main Detail Card -->
     <div class="athletic-card rounded-3xl overflow-hidden relative border border-zinc-800/80 bg-zinc-950 shadow-2xl">
-        <!-- Cinematic Hero Media Box -->
-        <div class="h-64 sm:h-96 w-full bg-black relative overflow-hidden">
-            <img src="/static/images/{{ exercise.slug }}.jpg" 
-                 alt="{{ exercise.name }}"
-                 class="w-full h-full object-cover opacity-85"
-                 onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-zinc-950/70 via-transparent to-transparent"></div>
+        <!-- OpenGym 3D Biomechanical Animated Demo Showcase -->
+        <div class="w-full bg-zinc-950 relative overflow-hidden p-4 sm:p-8 flex flex-col items-center justify-center border-b border-zinc-800/80">
+            <!-- Background Ambient Glow -->
+            <div class="absolute inset-0 bg-radial from-orange-600/10 via-transparent to-transparent pointer-events-none"></div>
 
-            <!-- Title Overlay on Hero bottom -->
-            <div class="absolute bottom-6 left-6 right-6">
-                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-xs font-bold text-zinc-300 mb-2">
-                    <span>⚡ Doğru Form & Calisthenics Rehberi</span>
+            <div class="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden bg-black/80 border border-zinc-800 shadow-2xl group flex items-center justify-center">
+                <video id="detail-exercise-video"
+                       src="/static/animations/{{ exercise.slug }}.mp4" 
+                       poster="/static/images/{{ exercise.slug }}.jpg" 
+                       autoplay loop muted playsinline 
+                       class="w-full h-full object-contain">
+                </video>
+
+                <!-- 3D Animation Badge -->
+                <div class="absolute top-4 left-4 z-20">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/80 border border-white/15 backdrop-blur-md text-xs font-bold text-orange-400 shadow-md">
+                        <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+                        <span>3D Biyomekanik Form Animasyonu</span>
+                    </span>
+                </div>
+
+                <!-- Video Controls & AI Launch Overlay -->
+                <div class="absolute bottom-4 right-4 z-20 flex items-center gap-2">
+                    <button onclick="toggleDetailVideo()" id="video-toggle-btn"
+                            class="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md text-xs font-bold text-white border border-white/20 hover:bg-black transition-all shadow-md cursor-pointer flex items-center gap-1">
+                        <span id="video-toggle-icon">⏸</span>
+                        <span id="video-toggle-text">Duraklat</span>
+                    </button>
+                    <a href="/ai-koc?exercise={{ exercise.slug }}" 
+                       class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-orange-500/25 flex items-center gap-1.5">
+                        <span>📸 AI Kamera Koçu</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Title & Muscle Badges -->
+            <div class="w-full max-w-2xl mt-6 text-left">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-orange-500/15 border border-orange-500/30 text-orange-400">
+                        🎯 Birincil Kas: {{ exercise.muscle_group }}
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                        ✓ {{ exercise.equipment or 'Vücut Ağırlığı' }}
+                    </span>
+                    <button onclick="playExerciseAudio('{{ exercise.slug }}')"
+                            class="px-3 py-1 rounded-full text-xs font-bold bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white transition-all flex items-center gap-1 cursor-pointer">
+                        <span>🔊 Sesli Rehberi Dinle</span>
+                    </button>
                 </div>
                 <h1 class="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight">
                     {{ exercise.name }}
                 </h1>
             </div>
         </div>
+
+        <script>
+            function toggleDetailVideo() {
+                const vid = document.getElementById('detail-exercise-video');
+                const icon = document.getElementById('video-toggle-icon');
+                const text = document.getElementById('video-toggle-text');
+                if (!vid) return;
+                if (vid.paused) {
+                    vid.play();
+                    if (icon) icon.innerText = '⏸';
+                    if (text) text.innerText = 'Duraklat';
+                } else {
+                    vid.pause();
+                    if (icon) icon.innerText = '▶';
+                    if (text) text.innerText = 'Oynat';
+                }
+            }
+
+            let detailAudio = null;
+            function playExerciseAudio(slug) {
+                if (detailAudio) {
+                    detailAudio.pause();
+                    detailAudio.currentTime = 0;
+                }
+                detailAudio = new Audio(`/static/audio/bella/${slug}.mp3`);
+                detailAudio.play().catch(() => {
+                    detailAudio = new Audio(`/static/audio/${slug}.mp3`);
+                    detailAudio.play().catch(() => {});
+                });
+            }
+        </script>
         
         <div class="p-6 sm:p-10 space-y-10">
             <!-- Metric Cards -->

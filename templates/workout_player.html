@@ -4,10 +4,10 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto relative z-10" x-data="workoutPlayer()">
-    <!-- Navigation & Voice Toggle (Before Start) -->
-    <div class="mb-6 flex items-center justify-between">
-        <a href="/programlar/{{ program.slug }}" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-sm uppercase tracking-wider">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+    <!-- Navigation & Voice Toggle (Top Bar) -->
+    <div class="mb-5 flex items-center justify-between">
+        <a href="/programlar/{{ program.slug }}" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-xs sm:text-sm uppercase tracking-wider">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
             Programa Dön
         </a>
 
@@ -16,13 +16,13 @@
             <!-- Voice Persona Selector (Bella / Adam) -->
             <div class="flex items-center p-0.5 rounded-full bg-zinc-900 border border-zinc-700/80 text-[11px] font-bold">
                 <button @click="setVoice('bella')" 
-                        class="px-2.5 py-1 rounded-full transition-all flex items-center space-x-1"
+                        class="px-2.5 py-1 rounded-full transition-all flex items-center space-x-1 cursor-pointer"
                         :class="selectedVoice === 'bella' ? 'bg-orange-500 text-white shadow-sm' : 'text-zinc-400 hover:text-white'">
                     <span>👩</span>
                     <span>Bella</span>
                 </button>
                 <button @click="setVoice('adam')" 
-                        class="px-2.5 py-1 rounded-full transition-all flex items-center space-x-1"
+                        class="px-2.5 py-1 rounded-full transition-all flex items-center space-x-1 cursor-pointer"
                         :class="selectedVoice === 'adam' ? 'bg-orange-500 text-white shadow-sm' : 'text-zinc-400 hover:text-white'">
                     <span>👨</span>
                     <span>Adam</span>
@@ -30,7 +30,7 @@
             </div>
 
             <!-- Voice Coach Toggle -->
-            <button @click="toggleVoice()" class="flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all"
+            <button @click="toggleVoice()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all cursor-pointer"
                     :class="voiceEnabled ? 'bg-orange-500/15 border-orange-500 text-orange-400 shadow-sm' : 'bg-zinc-800/80 border-zinc-700 text-zinc-400'">
                 <span x-text="voiceEnabled ? '🔊' : '🔇'"></span>
                 <span x-text="voiceEnabled ? 'Sesli Koç' : 'Sessiz'"></span>
@@ -38,147 +38,250 @@
         </div>
     </div>
 
-    <!-- Main Player Card -->
-    <div class="athletic-card rounded-2xl overflow-hidden relative shadow-2xl">
-        <!-- Background Image of current exercise -->
-        <div class="absolute inset-0 opacity-15 z-0 pointer-events-none">
-            <img :src="'/static/images/' + (currentExercise ? currentExercise.slug : 'bench_press') + '.jpg'" 
-                 class="w-full h-full object-cover mix-blend-lighten filter blur-[1px]" 
-                 alt=""
-                 onerror="this.src='/static/images/home_gym_icon.jpg'">
-        </div>
+    <!-- Main Player Card (OpenGym Guided Workout Theme) -->
+    <div class="athletic-card rounded-3xl overflow-hidden relative shadow-2xl border border-zinc-800/80 bg-zinc-950">
         
-        <div class="relative z-10 p-6 md:p-10 min-h-[520px] flex flex-col justify-between">
+        <div class="relative z-10 p-5 sm:p-8 flex flex-col justify-between min-h-[580px]">
             
-            <!-- Header Info -->
-            <div class="flex justify-between items-start mb-6">
+            <!-- Header Info & Live Counters -->
+            <div class="flex justify-between items-start gap-3 pb-4 border-b border-zinc-800/80">
                 <div>
                     <div class="flex items-center space-x-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
-                        <h2 class="text-accent font-black text-xs md:text-sm uppercase tracking-widest">{{ program.title }} &bull; Gün {{ user_program.current_day }}</h2>
+                        <h2 class="text-orange-400 font-black text-xs uppercase tracking-widest">{{ program.title }} &bull; Gün {{ user_program.current_day }}</h2>
                     </div>
-                    <h1 class="text-2xl md:text-4xl font-black text-white uppercase tracking-tight mt-2" 
+                    <h1 class="text-xl sm:text-3xl font-black text-white uppercase tracking-tight mt-1.5 leading-snug" 
                         x-text="status === 'completed' ? 'Tebrikler! Antrenman Tamamlandı' : (status === 'resting' ? 'Dinlenme Zamanı' : currentExercise.name)"></h1>
+                    
+                    <!-- OpenGym Muscle Target & Equipment Tags -->
+                    <div class="flex flex-wrap items-center gap-2 mt-2" x-show="status === 'active' || status === 'resting'">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/15 border border-orange-500/30 text-orange-400">
+                            🎯 <span x-text="currentExercise.muscle_group"></span>
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-800 border border-zinc-700 text-zinc-300">
+                            ⚡ Vücut Ağırlığı
+                        </span>
+                    </div>
                 </div>
                 
-                <div class="text-right flex space-x-4">
-                    <div class="bg-black/40 border border-zinc-800/80 px-3 py-1.5 rounded-xl">
-                        <span class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400">Süre</span>
-                        <span class="text-lg font-mono font-black text-white" x-text="formatTime(totalSeconds)">00:00</span>
+                <div class="flex items-center space-x-2 shrink-0">
+                    <div class="bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 rounded-xl text-center">
+                        <span class="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Süre</span>
+                        <span class="text-base sm:text-lg font-mono font-black text-white" x-text="formatTime(totalSeconds)">00:00</span>
                     </div>
-                    <div class="bg-black/40 border border-zinc-800/80 px-3 py-1.5 rounded-xl">
-                        <span class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400">Kalori</span>
-                        <span class="text-lg font-mono font-black text-orange-400" x-text="Math.floor(totalCalories) + ' kcal'">0 kcal</span>
+                    <div class="bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 rounded-xl text-center">
+                        <span class="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Kalori</span>
+                        <span class="text-base sm:text-lg font-mono font-black text-orange-400" x-text="Math.floor(totalCalories) + ' kcal'">0 kcal</span>
                     </div>
                 </div>
             </div>
 
             <!-- Central Content Area -->
-            <div class="flex-grow flex flex-col items-center justify-center text-center py-6">
+            <div class="flex-grow flex flex-col items-center justify-center text-center py-4">
                 
-                <!-- Ready State -->
-                <div x-show="status === 'ready'" class="space-y-6 max-w-md">
-                    <div class="w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-orange-500 flex items-center justify-center mx-auto text-3xl font-black">
+                <!-- 1. Ready State -->
+                <div x-show="status === 'ready'" class="space-y-6 max-w-md py-6">
+                    <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center mx-auto text-4xl font-black shadow-xl shadow-orange-500/25 animate-pulse">
                         ⚡
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-white mb-1">Günün Antrenmanına Hazır Mısın?</h3>
-                        <p class="text-zinc-400 text-sm font-medium">Bugün programında <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket seni bekliyor.</p>
+                        <h3 class="text-2xl font-black text-white uppercase tracking-tight mb-2">Günün Antrenmanına Başla</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">
+                            Bugün programında <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket seni bekliyor. 
+                            Her hareket için 3D animasyonlu form rehberi ve set sayacı aktif olacak.
+                        </p>
                     </div>
 
-                    <button @click="startExercise()" class="bg-accent hover:bg-orange-500 text-white w-32 h-32 rounded-full font-black uppercase tracking-widest transition-transform transform hover:scale-105 active:scale-95 shadow-[0_0_50px_-10px_rgba(234,88,12,0.6)] flex items-center justify-center text-2xl mx-auto border-4 border-orange-400/30">
-                        BAŞLA
+                    <button @click="startWorkoutSession()" 
+                            class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xl uppercase tracking-wider py-5 px-12 rounded-full shadow-2xl shadow-orange-500/40 transition-all transform hover:scale-105 active:scale-95 cursor-pointer mx-auto flex items-center gap-2">
+                        <span>Antrenmana Başla</span>
+                        <span>➔</span>
                     </button>
                     
-                    <div class="flex items-center justify-center space-x-2 text-xs text-zinc-400 font-medium">
-                        <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>Sesli koç yönlendirmeleriyle antrenmanını en yüksek verimle tamamla.</span>
+                    <div class="flex items-center justify-center space-x-2 text-xs text-zinc-400 font-medium pt-2">
+                        <span>🎙️ ElevenLabs sesli koç anonslarıyla rehberlik eder.</span>
                     </div>
                 </div>
 
-                <!-- Active State (Sets/Reps) -->
-                <div x-show="status === 'active'" class="space-y-6 w-full max-w-md">
-                    <div class="inline-block px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider">
-                        Hareket <span x-text="(currentIndex + 1)"></span> / <span x-text="exercises.length"></span>
+                <!-- 2. Active State (OpenGym 3D Animated Demo + Set-by-Set Logging) -->
+                <div x-show="status === 'active'" class="w-full space-y-5">
+                    
+                    <!-- Exercise Index Header -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider">
+                            Hareket <span x-text="(currentIndex + 1)"></span> / <span x-text="exercises.length"></span>
+                        </span>
+                        <span class="text-xs font-black text-orange-400 uppercase tracking-widest">
+                            Set <span x-text="currentSetIndex + 1"></span> / <span x-text="currentExercise.sets"></span>
+                        </span>
                     </div>
 
-                    <div class="p-6 rounded-2xl bg-black/40 border border-zinc-800 backdrop-blur-sm">
-                        <div class="text-6xl md:text-8xl font-black text-white tracking-tighter" x-text="currentExercise.sets + ' × ' + currentExercise.reps"></div>
-                        <p class="text-zinc-400 font-bold uppercase tracking-widest text-sm mt-2">Set / Tekrar Hedefi</p>
+                    <!-- OpenGym 3D Animation Showcase Video Player -->
+                    <div class="relative w-full max-w-lg mx-auto aspect-video rounded-2xl overflow-hidden bg-zinc-900/90 border border-zinc-800/80 shadow-2xl group">
+                        <video id="workout-anim-video"
+                               :src="'/static/animations/' + currentExercise.slug + '.mp4'" 
+                               :poster="'/static/images/' + currentExercise.slug + '.jpg'" 
+                               autoplay loop muted playsinline 
+                               class="w-full h-full object-contain">
+                        </video>
+
+                        <!-- Video Overlay Controls -->
+                        <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
+                            <button @click="toggleVideoPlay()" 
+                                    class="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-[11px] font-bold text-white border border-white/20 hover:bg-black transition-all flex items-center gap-1 cursor-pointer shadow-md">
+                                <span x-text="isVideoPaused ? '▶ Oynat' : '⏸ Duraklat'"></span>
+                            </button>
+                            <a :href="'/ai-koc?exercise=' + currentExercise.slug" target="_blank"
+                               class="px-2.5 py-1 rounded-full bg-orange-600/90 hover:bg-orange-500 backdrop-blur-md text-[11px] font-bold text-white border border-orange-400/30 transition-all flex items-center gap-1 shadow-md">
+                                <span>📸 AI Kamera Koçu</span>
+                            </a>
+                        </div>
+
+                        <!-- 3D Animation Badge -->
+                        <div class="absolute top-2.5 left-2.5">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/75 backdrop-blur-md border border-white/10 text-zinc-300">
+                                🎥 3D Biyomekanik Animasyon
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- OpenGym Interactive Set Tracker Rows -->
+                    <div class="w-full max-w-lg mx-auto bg-zinc-900/60 rounded-2xl border border-zinc-800/80 p-3 sm:p-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs font-bold text-zinc-400 uppercase tracking-wider px-2 pb-1 border-b border-zinc-800/60">
+                            <span>Set</span>
+                            <span>Hedef Tekrar</span>
+                            <span>Durum</span>
+                        </div>
+
+                        <template x-for="(s, sIdx) in exerciseSets" :key="sIdx">
+                            <div class="flex items-center justify-between p-2.5 rounded-xl transition-all"
+                                 :class="sIdx === currentSetIndex ? 'bg-orange-500/10 border border-orange-500/40 shadow-sm' : (s.done ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-zinc-900/40 border border-zinc-800/40 opacity-70')">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black"
+                                          :class="s.done ? 'bg-emerald-500 text-white' : (sIdx === currentSetIndex ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400')"
+                                          x-text="sIdx + 1"></span>
+                                    <span class="font-bold text-sm text-white" x-text="'Set ' + (sIdx + 1)"></span>
+                                </div>
+
+                                <div class="font-mono font-black text-sm"
+                                     :class="sIdx === currentSetIndex ? 'text-orange-400' : 'text-zinc-300'"
+                                     x-text="currentExercise.reps + ' Tekrar'"></div>
+
+                                <div>
+                                    <template x-if="s.done">
+                                        <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                            ✓ Tamamlandı
+                                        </span>
+                                    </template>
+                                    <template x-if="!s.done && sIdx === currentSetIndex">
+                                        <button @click="completeSet(sIdx)"
+                                                class="px-4 py-1.5 rounded-full text-xs font-black bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md shadow-orange-500/20 active:scale-95 transition-all cursor-pointer">
+                                            ✓ Tamamla
+                                        </button>
+                                    </template>
+                                    <template x-if="!s.done && sIdx !== currentSetIndex">
+                                        <span class="text-xs font-bold text-zinc-600 px-3 py-1">
+                                            Bekliyor
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
                     <!-- Motivational speech bubble -->
-                    <div class="min-h-[28px] text-orange-400 text-sm font-semibold italic animate-pulse" x-text="coachComment"></div>
+                    <div class="min-h-[24px] text-orange-400 text-xs sm:text-sm font-semibold italic animate-pulse" x-text="coachComment"></div>
                     
-                    <button @click="finishExercise()" class="bg-emerald-500 hover:bg-emerald-400 text-white px-10 py-4 rounded-full font-black text-lg uppercase tracking-widest transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20 mx-auto flex items-center space-x-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                        <span>Hareketi Tamamladım</span>
+                    <!-- Quick Finish Action -->
+                    <button @click="completeSet(currentSetIndex)" 
+                            class="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-3.5 rounded-full font-black text-base uppercase tracking-wider transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20 mx-auto flex items-center space-x-2 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                        <span x-text="currentSetIndex >= currentExercise.sets - 1 ? 'Son Seti Bitir & İlerle' : 'Bu Seti Tamamla (' + (currentSetIndex + 1) + '/' + currentExercise.sets + ')'"></span>
                     </button>
                 </div>
 
-                <!-- Resting State -->
-                <div x-show="status === 'resting'" class="space-y-6 w-full max-w-md">
-                    <div class="inline-block px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider">
+                <!-- 3. Resting State (OpenGym Countdown + '+15s' and 'Skip' buttons) -->
+                <div x-show="status === 'resting'" class="space-y-6 w-full max-w-md py-4">
+                    <div class="inline-block px-3.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider">
                         Derin Nefes Al & Dinlen
                     </div>
 
+                    <!-- OpenGym Circular Progress Countdown -->
                     <div class="relative w-44 h-44 mx-auto flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90">
                             <circle cx="88" cy="88" r="76" stroke="currentColor" stroke-width="8" class="text-zinc-800" fill="transparent" />
                             <circle cx="88" cy="88" r="76" stroke="currentColor" stroke-width="8" class="text-orange-500 transition-all duration-1000 ease-linear"
                                     :stroke-dasharray="2 * Math.PI * 76"
-                                    :stroke-dashoffset="2 * Math.PI * 76 * (1 - (timeLeft / (currentExercise.rest || 30)))"
+                                    :stroke-dashoffset="2 * Math.PI * 76 * (1 - (timeLeft / initialRestDuration))"
                                     fill="transparent" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-5xl font-mono font-black text-white" x-text="timeLeft"></span>
-                            <span class="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">saniye</span>
+                            <span class="text-[10px] uppercase font-bold text-zinc-400 tracking-wider mt-0.5">saniye</span>
                         </div>
                     </div>
                     
-                    <div class="p-4 bg-zinc-900/90 rounded-xl border border-zinc-800 text-left">
-                        <p class="text-xs text-zinc-500 uppercase font-bold tracking-widest mb-1">Sıradaki Hareket</p>
-                        <p class="text-white font-bold text-base uppercase" x-text="nextExercise ? nextExercise.name : 'Antrenman Bitişi'"></p>
+                    <!-- OpenGym Rest Controls: [+15s] and [Skip] -->
+                    <div class="flex items-center justify-center gap-3">
+                        <button @click="addRest(15)" 
+                                class="px-5 py-2.5 rounded-full bg-zinc-900 border border-zinc-700 hover:border-orange-500/50 text-white font-bold text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-md flex items-center gap-1.5">
+                            <span class="text-orange-400 font-black">+15s</span>
+                            <span>Ekle</span>
+                        </button>
+                        
+                        <button @click="skipRest()" 
+                                class="px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-lg shadow-orange-500/20 flex items-center gap-1.5">
+                            <span>Dinlenmeyi Atla</span>
+                            <span>➔</span>
+                        </button>
                     </div>
 
-                    <div>
-                        <button @click="skipRest()" class="text-zinc-400 hover:text-white uppercase font-bold text-xs tracking-widest border-b border-zinc-600 hover:border-white transition-colors pb-1">
-                            Dinlenmeyi Atla & Hemen Başla &rarr;
-                        </button>
+                    <!-- Next Set / Exercise Preview Banner -->
+                    <div class="p-4 bg-zinc-900/90 rounded-2xl border border-zinc-800 text-left flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-0.5">Sıradaki Adım</p>
+                            <p class="text-white font-black text-sm uppercase" 
+                               x-text="currentSetIndex < currentExercise.sets ? (currentExercise.name + ' (Set ' + (currentSetIndex + 1) + '/' + currentExercise.sets + ')') : (nextExercise ? nextExercise.name : 'Antrenman Sonu!')"></p>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-black overflow-hidden border border-zinc-700/60 shrink-0">
+                            <img :src="'/static/images/' + (currentSetIndex < currentExercise.sets ? currentExercise.slug : (nextExercise ? nextExercise.slug : 'home_gym_icon')) + '.jpg'" 
+                                 class="w-full h-full object-cover" 
+                                 onerror="this.src='/static/images/home_gym_icon.jpg'">
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Completed State -->
-                <div x-show="status === 'completed'" class="space-y-6 max-w-md">
-                    <div class="w-24 h-24 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+                <!-- 4. Completed State -->
+                <div x-show="status === 'completed'" class="space-y-6 max-w-md py-4">
+                    <div class="w-24 h-24 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-bounce">
                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-black text-white uppercase tracking-tight">Efsane Antrenman!</h3>
-                        <p class="text-zinc-400 text-sm mt-1">Günün antrenmanını tamamladın. Disiplinin her geçen gün seni hedefine yaklaştırıyor.</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Efsane Antrenman!</h3>
+                        <p class="text-zinc-400 text-sm mt-1">Günün antrenmanını tamamladın. Disiplinin seni hedefine adım adım ulaştırıyor.</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 py-2">
-                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3.5">
                             <div class="text-zinc-500 text-xs font-bold uppercase">Toplam Süre</div>
                             <div class="text-white font-mono font-black text-xl" x-text="formatTime(totalSeconds)"></div>
                         </div>
-                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3.5">
                             <div class="text-zinc-500 text-xs font-bold uppercase">Yakılan Kalori</div>
                             <div class="text-orange-400 font-mono font-black text-xl" x-text="Math.floor(totalCalories) + ' kcal'"></div>
                         </div>
                     </div>
 
-                    <button @click="finishWorkout()" class="bg-accent hover:bg-orange-500 text-white w-full py-4 rounded-xl font-black text-base uppercase tracking-widest transition-transform transform hover:scale-[1.02] shadow-lg shadow-orange-500/30">
+                    <button @click="finishWorkout()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white w-full py-4 rounded-xl font-black text-base uppercase tracking-widest transition-transform transform hover:scale-[1.02] shadow-xl shadow-orange-500/30 cursor-pointer">
                         Antrenmanı Kaydet & Rozetini Kap
                     </button>
                 </div>
 
             </div>
             
-            <!-- Progress Bar -->
-            <div class="w-full bg-zinc-900 h-2.5 rounded-full overflow-hidden" x-show="status !== 'ready'">
-                <div class="bg-gradient-to-r from-orange-500 to-amber-400 h-full transition-all duration-500 shadow-sm" 
+            <!-- Global Workout Progress Bar -->
+            <div class="w-full bg-zinc-900 h-2.5 rounded-full overflow-hidden mt-2" x-show="status !== 'ready'">
+                <div class="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full transition-all duration-500 shadow-sm" 
                      :style="'width: ' + (((currentIndex + (status === 'completed' ? 1 : 0)) / exercises.length) * 100) + '%'"></div>
             </div>
             
@@ -192,6 +295,8 @@
         {
             name: "{{ pe.exercise.name }}",
             slug: "{{ pe.exercise.slug }}",
+            muscle_group: "{{ pe.exercise.muscle_group }}",
+            difficulty: "{{ pe.exercise.difficulty }}",
             sets: {{ pe.sets }},
             reps: {{ pe.reps }},
             rest: {{ pe.rest_seconds if pe.rest_seconds else 30 }}
@@ -203,8 +308,11 @@
         return {
             exercises: exercisesData,
             currentIndex: 0,
+            currentSetIndex: 0,
+            exerciseSets: [],
             status: 'ready', // ready, active, resting, completed
             timeLeft: 0,
+            initialRestDuration: 30,
             totalSeconds: 0,
             totalCalories: 0,
             timerInterval: null,
@@ -212,12 +320,13 @@
             voiceEnabled: true,
             coachComment: "Hazır olduğunda başla!",
             audioCtx: null,
+            isVideoPaused: false,
 
             selectedVoice: 'bella', // Default to Bella (ElevenLabs high quality studio voice)
             activeAudio: null,
 
             get currentExercise() {
-                if (!this.exercises || this.exercises.length === 0) return { name: "Egzersiz", sets: 3, reps: 10, rest: 30, slug: "squat" };
+                if (!this.exercises || this.exercises.length === 0) return { name: "Egzersiz", sets: 3, reps: 10, rest: 30, slug: "standart-air-squat", muscle_group: "Tüm Vücut" };
                 if (this.currentIndex >= this.exercises.length) {
                     return this.exercises[this.exercises.length - 1];
                 }
@@ -234,6 +343,16 @@
                 if (AudioContext) {
                     this.audioCtx = new AudioContext();
                 }
+                this.buildSetsForCurrentExercise();
+            },
+
+            buildSetsForCurrentExercise() {
+                const count = this.currentExercise.sets || 3;
+                this.exerciseSets = [];
+                for (let i = 0; i < count; i++) {
+                    this.exerciseSets.push({ setNum: i + 1, done: false });
+                }
+                this.currentSetIndex = 0;
             },
 
             setVoice(voice) {
@@ -249,7 +368,19 @@
                 }
             },
 
-            // Play Studio ElevenLabs Audio with Graceful Fallback
+            toggleVideoPlay() {
+                const vid = document.getElementById('workout-anim-video');
+                if (!vid) return;
+                if (vid.paused) {
+                    vid.play();
+                    this.isVideoPaused = false;
+                } else {
+                    vid.pause();
+                    this.isVideoPaused = true;
+                }
+            },
+
+            // Play Studio ElevenLabs Audio with Fallback
             playVoiceAudio(filename, fallbackText) {
                 if (!this.voiceEnabled) return;
                 try {
@@ -259,7 +390,6 @@
                     }
                 } catch(e) {}
 
-                // Try selected voice folder first (/static/audio/bella/filename)
                 const voicePath = `/static/audio/${this.selectedVoice}/${filename}`;
                 const basePath = `/static/audio/${filename}`;
 
@@ -267,11 +397,9 @@
                 this.activeAudio = audio;
 
                 audio.play().catch(err => {
-                    // Fallback to base audio path
                     const fallbackAudio = new Audio(basePath);
                     this.activeAudio = fallbackAudio;
                     fallbackAudio.play().catch(e => {
-                        // Ultimate fallback to browser speech if audio is blocked
                         if (fallbackText) {
                             this.speakFallback(fallbackText);
                         }
@@ -290,11 +418,6 @@
                 } catch(e) {}
             },
 
-            speak(text) {
-                this.speakFallback(text);
-            },
-
-            // Web Audio Synthesizer: Beeps & Fanfares
             playBeep(freq = 600, duration = 0.12, type = 'sine') {
                 if (!this.voiceEnabled) return;
                 try {
@@ -315,9 +438,7 @@
                     gain.connect(this.audioCtx.destination);
                     osc.start();
                     osc.stop(this.audioCtx.currentTime + duration);
-                } catch(e) {
-                    console.log('Audio synth error:', e);
-                }
+                } catch(e) {}
             },
 
             playVictoryFanfare() {
@@ -334,45 +455,51 @@
                 return `${m}:${s}`;
             },
             
-            startExercise() {
+            startWorkoutSession() {
                 if (this.audioCtx && this.audioCtx.state === 'suspended') {
                     this.audioCtx.resume();
                 }
 
-                if (this.status === 'ready') {
-                    this.timerInterval = setInterval(() => {
-                        if (this.status !== 'completed') {
-                            this.totalSeconds++;
-                            this.totalCalories += (8.5 / 60); // approx 8.5 kcal per min active
-                        }
-                    }, 1000);
-                }
-                
+                this.timerInterval = setInterval(() => {
+                    if (this.status !== 'completed') {
+                        this.totalSeconds++;
+                        this.totalCalories += (8.5 / 60);
+                    }
+                }, 1000);
+
+                this.startExercise();
+            },
+
+            startExercise() {
                 this.status = 'active';
-                this.coachComment = "Formuna odaklan, nefesini kontrol et!";
+                this.buildSetsForCurrentExercise();
+                this.coachComment = `Formuna odaklan: ${this.currentExercise.name}`;
                 this.playBeep(880, 0.2);
 
                 const exercise = this.currentExercise;
-                // Play ElevenLabs Studio Audio for this exercise!
                 this.playVoiceAudio(`${exercise.slug}.mp3`, `Sıradaki hareket: ${exercise.name}. Hazır ol ve başla!`);
             },
             
-            finishExercise() {
-                this.playBeep(700, 0.15);
+            completeSet(setIdx) {
+                if (setIdx < 0 || setIdx >= this.exerciseSets.length) return;
+                this.exerciseSets[setIdx].done = true;
+                this.playBeep(700, 0.12);
 
-                if (this.currentIndex >= this.exercises.length - 1) {
-                    this.status = 'completed';
-                    clearInterval(this.timerInterval);
-                    this.playVictoryFanfare();
-                    this.playVoiceAudio("finished.mp3", "Tebrikler! Bugünkü antrenmanı harika bir disiplinle bitirdin. Şimdi sonuçlarını kaydet!");
-                    return;
+                // Is there another set in this exercise?
+                if (setIdx < this.exerciseSets.length - 1) {
+                    this.currentSetIndex = setIdx + 1;
+                    this.startRestTimer(this.currentExercise.rest || 30);
+                    this.playVoiceAudio("rest.mp3", `Harika set! ${this.timeLeft} saniye dinlen.`);
+                } else {
+                    // All sets completed for this exercise!
+                    this.finishExercise();
                 }
-                
+            },
+
+            startRestTimer(seconds) {
                 this.status = 'resting';
-                this.timeLeft = this.currentExercise.rest || 30;
-                
-                // Play ElevenLabs rest audio
-                this.playVoiceAudio("rest.mp3", `Güzel iş! ${this.timeLeft} saniye dinlen.`);
+                this.initialRestDuration = seconds;
+                this.timeLeft = seconds;
                 
                 clearInterval(this.restInterval);
                 this.restInterval = setInterval(() => {
@@ -395,13 +522,45 @@
                     }
                 }, 1000);
             },
+
+            addRest(sec = 15) {
+                this.timeLeft += sec;
+                this.initialRestDuration = Math.max(this.initialRestDuration, this.timeLeft);
+                this.playBeep(520, 0.08);
+            },
             
             skipRest() {
                 clearInterval(this.restInterval);
-                this.currentIndex++;
-                this.playBeep(880, 0.2);
+                this.playBeep(880, 0.15);
                 this.playVoiceAudio("skip_rest.mp3", "Dinlenmeyi geçtin.");
-                this.startExercise();
+
+                // If sets remain in current exercise, resume active
+                if (this.currentSetIndex < this.currentExercise.sets && !this.exerciseSets[this.currentSetIndex].done) {
+                    this.status = 'active';
+                    this.coachComment = `Set ${this.currentSetIndex + 1} için hazır ol!`;
+                } else {
+                    // Move to next exercise
+                    this.currentIndex++;
+                    this.startExercise();
+                }
+            },
+
+            finishExercise() {
+                this.playBeep(800, 0.2);
+
+                if (this.currentIndex >= this.exercises.length - 1) {
+                    this.status = 'completed';
+                    clearInterval(this.timerInterval);
+                    clearInterval(this.restInterval);
+                    this.playVictoryFanfare();
+                    this.playVoiceAudio("finished.mp3", "Tebrikler! Bugünkü antrenmanı harika bir disiplinle bitirdin. Şimdi sonuçlarını kaydet!");
+                    return;
+                }
+                
+                // Inter-exercise rest
+                this.currentSetIndex = this.currentExercise.sets; // mark all sets done
+                this.startRestTimer(this.currentExercise.rest || 45);
+                this.playVoiceAudio("rest.mp3", `Egzersiz tamamlandı! ${this.timeLeft} saniye dinlen ve bir sonrakine hazırlan.`);
             },
             
             finishWorkout() {

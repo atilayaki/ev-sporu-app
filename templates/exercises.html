@@ -72,36 +72,48 @@
         {% for exercise in exercises %}
         <div class="athletic-card rounded-2xl overflow-hidden flex flex-col justify-between border border-zinc-800/80 bg-zinc-900/60 group hover:border-orange-500/50 transition-all shadow-xl">
             <!-- Thumbnail Box -->
-            <div class="relative h-48 w-full bg-black/60 overflow-hidden">
+            <div class="relative h-48 w-full bg-black/80 overflow-hidden group/thumb cursor-pointer"
+                 onmouseenter="const v = this.querySelector('video'); if(v) v.play();"
+                 onmouseleave="const v = this.querySelector('video'); if(v) { v.pause(); v.currentTime = 0; }">
                 <img src="/static/images/{{ exercise.slug }}.jpg" 
                      alt="{{ exercise.name }}"
                      class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                      onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
                 
-                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/25 to-transparent"></div>
+                <!-- OpenGym 3D Looping Animation Video on Hover -->
+                <video src="/static/animations/{{ exercise.slug }}.mp4"
+                       muted loop playsinline preload="none"
+                       class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                       onerror="this.style.display='none'"></video>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/25 to-transparent pointer-events-none"></div>
 
                 <!-- Muscle Group Pill -->
-                <div class="absolute top-3 left-3">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/70 text-zinc-300 border border-zinc-700/80 backdrop-blur-md">
+                <div class="absolute top-3 left-3 z-10">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/75 text-zinc-300 border border-zinc-700/80 backdrop-blur-md">
                         {{ exercise.muscle_group }}
                     </span>
                 </div>
 
-                <!-- Difficulty Badge -->
-                <div class="absolute top-3 right-3">
+                <!-- 3D Animation Pill & Difficulty Badge -->
+                <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-400 border border-orange-500/40 backdrop-blur-md">
+                        <svg class="w-2.5 h-2.5 text-orange-400 animate-spin" style="animation-duration: 4s;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        3D
+                    </span>
                     {% if exercise.difficulty == 'Başlangıç' %}
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 backdrop-blur-md">Başlangıç</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 backdrop-blur-md">Kolay</span>
                     {% elif exercise.difficulty == 'İleri' %}
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/40 backdrop-blur-md">İleri</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/40 backdrop-blur-md">İleri</span>
                     {% else %}
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40 backdrop-blur-md">Orta</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40 backdrop-blur-md">Orta</span>
                     {% endif %}
                 </div>
 
                 <!-- Bottom Metrics -->
-                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-semibold text-zinc-300">
-                    <span class="bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800">⏱️ {{ exercise.duration_seconds or 45 }} sn</span>
-                    <span class="bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800 text-orange-400">🔥 {{ exercise.calories_estimate or 8 }} kcal</span>
+                <div class="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between text-[11px] font-semibold text-zinc-300 pointer-events-none">
+                    <span class="bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800">⏱️ {{ exercise.duration_seconds or 45 }} sn</span>
+                    <span class="bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm border border-zinc-800 text-orange-400">🔥 {{ exercise.calories_estimate or 8 }} kcal</span>
                 </div>
             </div>
 

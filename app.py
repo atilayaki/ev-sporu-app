@@ -149,6 +149,35 @@ def create_app():
         completed_workouts_count = UserProgress.query.count() + 2840
         total_calories_burned = sum([p.calories_burned or 0 for p in UserProgress.query.all()]) + 460000
 
+        # OpenGym-style Weekly Calendar Strip (Monday - Sunday)
+        today = date.today()
+        start_of_week = today - timedelta(days=today.weekday())
+        weekly_calendar = []
+        day_names = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+        day_full = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
+
+        user_completed_dates = set()
+        if current_user.is_authenticated:
+            logs = UserProgress.query.filter(
+                UserProgress.user_id == current_user.id,
+                UserProgress.completed_at >= datetime.combine(start_of_week, datetime.min.time())
+            ).all()
+            for log in logs:
+                if log.completed_at:
+                    user_completed_dates.add(log.completed_at.date())
+
+        for i in range(7):
+            d = start_of_week + timedelta(days=i)
+            weekly_calendar.append({
+                'day_short': day_names[i],
+                'day_full': day_full[i],
+                'day_num': d.day,
+                'date_str': d.strftime('%Y-%m-%d'),
+                'is_today': (d == today),
+                'is_past': (d < today),
+                'is_completed': (d in user_completed_dates)
+            })
+
         return render_template(
             'index.html',
             featured_programs=featured_programs,
@@ -157,7 +186,9 @@ def create_app():
             total_programs=total_programs,
             total_challenges=total_challenges,
             completed_workouts_count=completed_workouts_count,
-            total_calories_burned=total_calories_burned
+            total_calories_burned=total_calories_burned,
+            weekly_calendar=weekly_calendar,
+            today=today
         )
 
     @app.route('/bilgi/<slug>')
@@ -439,6 +470,68 @@ def create_app():
             mg = p.exercise.muscle_group if (p.exercise and p.exercise.muscle_group) else 'Tüm Vücut'
             muscle_distribution[mg] = muscle_distribution.get(mg, 0) + 1
 
+        # OpenGym 52-Week Activity Heatmap (similar to GitHub / openGym)
+        workout_counts_by_date = {}
+        for p in all_progress:
+            if p.completed_at:
+                dt_key = p.completed_at.strftime('%Y-%m-%d')
+                workout_counts_by_date[dt_key] = workout_counts_by_date.get(dt_key, 0) + 1
+
+        total_days = 52 * 7
+        end_date = today
+        start_date = end_date - timedelta(days=total_days - 1)
+        start_date = start_date - timedelta(days=start_date.weekday())
+        
+        heatmap_days = []
+        cur_d = start_date
+        while cur_d <= end_date:
+            dt_key = cur_d.strftime('%Y-%m-%d')
+            cnt = workout_counts_by_date.get(dt_key, 0)
+            level = 0
+            if cnt >= 4:
+                level = 4
+            elif cnt >= 3:
+                level = 3
+            elif cnt >= 2:
+                level = 2
+            elif cnt >= 1:
+                level = 1
+            heatmap_days.append({
+                'date': dt_key,
+                'count': cnt,
+                'level': level,
+                'weekday': cur_d.weekday(),
+                'is_today': (cur_d == today)
+            })
+            cur_d += timedelta(days=1)
+
+        # OpenGym Personal Records (PRs)
+        pr_definitions = [
+            {'slug': 'standart-push-up-normal-sinav', 'name': 'Standart Şınav', 'unit': 'Tekrar', 'target': '30 Tekrar', 'benchmark': '20'},
+            {'slug': 'standart-air-squat', 'name': 'Air Squat', 'unit': 'Tekrar', 'target': '50 Tekrar', 'benchmark': '35'},
+            {'slug': 'forearm-plank-on-kol-planki', 'name': 'Ön Kol Planki', 'unit': 'Saniye', 'target': '120 Saniye', 'benchmark': '60'},
+            {'slug': 'standard-burpee', 'name': 'Standard Burpee', 'unit': 'Tekrar', 'target': '25 Tekrar', 'benchmark': '15'},
+            {'slug': 'bicycle-crunch-bisiklet-mekigi', 'name': 'Bisiklet Mekiği', 'unit': 'Tekrar', 'target': '40 Tekrar', 'benchmark': '25'},
+            {'slug': 'mountain-climber', 'name': 'Mountain Climber', 'unit': 'Tekrar', 'target': '50 Tekrar', 'benchmark': '30'}
+        ]
+        personal_records = []
+        for item in pr_definitions:
+            logs_for_ex = [p for p in all_progress if p.exercise and p.exercise.slug == item['slug']]
+            best_val = 0
+            for p in logs_for_ex:
+                dur = p.duration_spent or 0
+                val = dur if item['unit'] == 'Saniye' else max(dur // 3, 10)
+                if val > best_val:
+                    best_val = val
+            personal_records.append({
+                'slug': item['slug'],
+                'name': item['name'],
+                'unit': item['unit'],
+                'target': item['target'],
+                'benchmark': item['benchmark'],
+                'best': best_val if best_val > 0 else None
+            })
+
         return render_template(
             'profile.html',
             favorites=favorites,
@@ -452,7 +545,9 @@ def create_app():
             total_workouts=total_workouts,
             total_calories=total_calories,
             total_minutes=total_minutes,
-            muscle_distribution=muscle_distribution
+            muscle_distribution=muscle_distribution,
+            heatmap_days=heatmap_days,
+            personal_records=personal_records
         )
 
     @app.route('/favori-ekle/<int:exercise_id>', methods=['POST'])
