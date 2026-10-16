@@ -84,7 +84,7 @@ def create_app():
         if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
             tmp_db = '/tmp/site.db'
             version_file = '/tmp/db_version.txt'
-            CURRENT_DB_VERSION = '20261014_v4'
+            CURRENT_DB_VERSION = '20261016_v6'
             try:
                 needs_copy = not os.path.exists(tmp_db)
                 if not needs_copy:
@@ -294,41 +294,72 @@ def create_app():
                 is_rest_day = not any(pe.day_number == user_program.current_day for pe in program.exercises)
         return render_template('program_detail.html', program=program, user_program=user_program, is_rest_day=is_rest_day)
 
-    @app.route('/programlar/<slug>/katil', methods=['POST'])
-    @login_required
+    @app.route('/programlar/<slug>/katil', methods=['POST', 'GET'])
     def join_program(slug):
         program = Program.query.filter_by(slug=slug).first_or_404()
-        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first()
-        if not user_program:
-            user_program = UserProgram(user_id=current_user.id, program_id=program.id)
-            db.session.add(user_program)
-            db.session.commit()
+        if current_user.is_authenticated:
+            user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first()
+            if not user_program:
+                user_program = UserProgram(user_id=current_user.id, program_id=program.id, current_day=1)
+                try:
+                    db.session.add(user_program)
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
             flash(f'{program.title} programına katıldınız!', 'success')
-        return redirect(url_for('program_detail', slug=slug))
+        return redirect(url_for('workout_player', slug=slug))
 
     @app.route('/programlar/<slug>/antrenman')
-    @login_required
     def workout_player(slug):
         program = Program.query.filter_by(slug=slug).first_or_404()
-        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
         
-        if user_program.current_day > program.duration_days:
-            flash('Bu programı zaten tamamladın!', 'success')
-            return redirect(url_for('program_detail', slug=slug))
-        
+        # Support optional day query parameter: e.g. /programlar/<slug>/antrenman?day=1
+        day_param = request.args.get('day', type=int)
+
+        user_program = None
+        if current_user.is_authenticated:
+            user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first()
+            if not user_program:
+                user_program = UserProgram(user_id=current_user.id, program_id=program.id, current_day=1)
+                try:
+                    db.session.add(user_program)
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+
+        if not user_program:
+            class MockUserProgram:
+                current_day = 1
+            user_program = MockUserProgram()
+
+        # Target day calculation
+        target_day = day_param if (day_param and 1 <= day_param <= program.duration_days) else user_program.current_day
+        if target_day > program.duration_days:
+            target_day = program.duration_days
+
         # Get exercises for current day
-        day_exercises = [pe for pe in program.exercises if pe.day_number == user_program.current_day]
+        day_exercises = [pe for pe in program.exercises if pe.day_number == target_day]
         if not day_exercises:
-            flash('Bugün dinlenme günü. Kaslarının toparlanmasına izin ver!', 'info')
-            return redirect(url_for('program_detail', slug=slug))
+            # Fallback to nearest active day or Day 1
+            for d in range(1, program.duration_days + 1):
+                candidates = [pe for pe in program.exercises if pe.day_number == d]
+                if candidates:
+                    day_exercises = candidates
+                    target_day = d
+                    break
             
-        return render_template('workout_player.html', program=program, user_program=user_program, exercises=day_exercises)
+        return render_template('workout_player.html', program=program, user_program=user_program, exercises=day_exercises, active_day=target_day)
 
     @app.route('/programlar/<slug>/dinlenme', methods=['POST'])
     @login_required
     def complete_rest_day(slug):
         program = Program.query.filter_by(slug=slug).first_or_404()
-        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
+        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first()
+        if not user_program:
+            user_program = UserProgram(user_id=current_user.id, program_id=program.id, current_day=1)
+            db.session.add(user_program)
+            db.session.commit()
+
         has_exercises = any(pe.day_number == user_program.current_day for pe in program.exercises)
         if not has_exercises and user_program.current_day <= program.duration_days:
             user_program.current_day += 1
@@ -337,10 +368,17 @@ def create_app():
         return redirect(url_for('program_detail', slug=slug))
 
     @app.route('/programlar/<slug>/tamamla', methods=['POST'])
-    @login_required
     def complete_workout(slug):
         program = Program.query.filter_by(slug=slug).first_or_404()
-        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first_or_404()
+        
+        if not current_user.is_authenticated:
+            return jsonify({'success': True, 'redirect': url_for('program_detail', slug=slug)})
+
+        user_program = UserProgram.query.filter_by(user_id=current_user.id, program_id=program.id).first()
+        if not user_program:
+            user_program = UserProgram(user_id=current_user.id, program_id=program.id, current_day=1)
+            db.session.add(user_program)
+            db.session.commit()
         
         data = request.get_json() or {}
         total_duration = int(data.get('duration_spent', 0) or 0)

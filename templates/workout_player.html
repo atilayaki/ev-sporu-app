@@ -48,7 +48,7 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
-                        <h2 class="text-orange-400 font-black text-xs uppercase tracking-widest">{{ program.title }} &bull; Gün {{ user_program.current_day }}</h2>
+                        <h2 class="text-orange-400 font-black text-xs uppercase tracking-widest">{{ program.title }} &bull; Gün {{ active_day or user_program.current_day }}</h2>
                     </div>
                     <h1 class="text-xl sm:text-3xl font-black text-white uppercase tracking-tight mt-1.5 leading-snug" 
                         x-text="status === 'completed' ? 'Tebrikler! Antrenman Tamamlandı' : (status === 'resting' ? 'Dinlenme Zamanı' : currentExercise.name)"></h1>
@@ -293,12 +293,12 @@
     const exercisesData = [
         {% for pe in exercises %}
         {
-            name: "{{ pe.exercise.name }}",
-            slug: "{{ pe.exercise.slug }}",
-            muscle_group: "{{ pe.exercise.muscle_group }}",
-            difficulty: "{{ pe.exercise.difficulty }}",
-            sets: {{ pe.sets }},
-            reps: {{ pe.reps }},
+            name: {{ pe.exercise.name|tojson }},
+            slug: {{ pe.exercise.slug|tojson }},
+            muscle_group: {{ pe.exercise.muscle_group|tojson }},
+            difficulty: {{ pe.exercise.difficulty|tojson }},
+            sets: {{ pe.sets or 3 }},
+            reps: {{ pe.reps or 12 }},
             rest: {{ pe.rest_seconds if pe.rest_seconds else 30 }}
         }{% if not loop.last %},{% endif %}
         {% endfor %}

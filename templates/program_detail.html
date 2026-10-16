@@ -135,22 +135,26 @@
                                 <h3 class="text-white font-bold text-base">Bu programa katılmaya hazır mısın?</h3>
                                 <p class="text-zinc-400 text-xs mt-0.5">İlerlemeni kaydet, streak oluştur ve puan toplayarak lider tablosunda yüksel.</p>
                             </div>
-                            <form action="/programlar/{{ program.slug }}/katil" method="POST">
-                                <button type="submit" class="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm uppercase tracking-wider shadow-xl shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer">
-                                    Programa Katıl ve Başla →
-                                </button>
-                            </form>
+                            <a href="/programlar/{{ program.slug }}/antrenman" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm uppercase tracking-wider shadow-xl shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 text-center flex items-center justify-center gap-2 cursor-pointer">
+                                <span>Programa Katıl ve Başla</span>
+                                <span>➔</span>
+                            </a>
                         </div>
                     {% endif %}
                 {% else %}
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h3 class="text-white font-bold text-base">Gelişimini takip etmek için giriş yap</h3>
+                            <h3 class="text-white font-bold text-base">Hemen antrenmana başla veya giriş yap</h3>
                             <p class="text-zinc-400 text-xs mt-0.5">Ücretsiz üye olarak bu programı takvimine ekle ve egzersizlerini kaydet.</p>
                         </div>
-                        <a href="/giris" class="inline-flex justify-center items-center px-7 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all">
-                            Giriş Yap ve Katıl
-                        </a>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <a href="/programlar/{{ program.slug }}/antrenman" class="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all text-center">
+                                ⚡ Hemen Başla
+                            </a>
+                            <a href="/giris" class="px-5 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider border border-zinc-700 transition-all text-center">
+                                Giriş Yap
+                            </a>
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -198,15 +202,21 @@
                             {% endif %}
                         </div>
 
-                        {% if day_no in days_map %}
-                            <span class="text-xs font-bold text-zinc-400">
-                                {{ days_map[day_no]|length }} Egzersiz
-                            </span>
-                        {% else %}
-                            <span class="text-xs font-bold text-zinc-400">
-                                Dinlenme & Toparlanma
-                            </span>
-                        {% endif %}
+                        <div class="flex items-center gap-3">
+                            {% if day_no in days_map %}
+                                <span class="text-xs font-bold text-zinc-400 hidden sm:inline">
+                                    {{ days_map[day_no]|length }} Egzersiz
+                                </span>
+                                <a href="/programlar/{{ program.slug }}/antrenman?day={{ day_no }}" 
+                                   class="px-3 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/30 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm">
+                                    <span>▶ Başlat</span>
+                                </a>
+                            {% else %}
+                                <span class="text-xs font-bold text-zinc-400">
+                                    Dinlenme & Toparlanma
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <!-- Day Content -->
