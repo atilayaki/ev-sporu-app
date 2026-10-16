@@ -10,7 +10,7 @@
     <header class="relative z-40 w-full px-4 pt-3 pb-2 flex items-center justify-between">
         <!-- Close (Exit to Home) -->
         <button onclick="window.location.href='/'" title="Kapat"
-                class="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-2xl font-light">
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-2xl font-light cursor-pointer">
             ✕
         </button>
 
@@ -30,7 +30,7 @@
 
         <!-- Right Settings / Guidelines Toggle -->
         <button onclick="toggleGuideModal()" title="Form Kuralları & İpuçları"
-                class="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl">
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white hover:bg-white/10 active:scale-90 transition-all text-xl cursor-pointer">
             ⚙️
         </button>
     </header>
@@ -40,12 +40,12 @@
         <div id="camera-viewfinder-container" 
              class="relative w-full h-full max-w-[420px] mx-auto rounded-[32px] sm:rounded-[40px] overflow-hidden bg-zinc-950 border border-white/15 shadow-2xl flex items-center justify-center aspect-[9/16]">
             
-            <!-- Ambient Glow / Blur Video Background (Eliminates harsh black bars in 0.5x Ultra-Wide mode) -->
-            <canvas id="ambient_canvas" class="absolute inset-0 w-full h-full object-cover filter blur-3xl opacity-50 scale-110 pointer-events-none transition-opacity duration-300"></canvas>
+            <!-- Ambient Glow Video Background (Ultra-Wide Mode) -->
+            <canvas id="ambient_canvas" class="absolute inset-0 w-full h-full object-cover filter blur-3xl opacity-40 scale-110 pointer-events-none transition-opacity duration-300"></canvas>
 
-            <!-- Video & Canvas (iPhone 15 Pro Max True Ultra-Wide & 9:16 Display) -->
-            <video id="webcam" class="hidden" autoplay playsinline muted></video>
-            <canvas id="output_canvas" class="w-full h-full object-contain transition-all duration-300 relative z-10"></canvas>
+            <!-- Video & Canvas: Hardware Accelerated 60 FPS Video with Transparent AR Overlay -->
+            <video id="webcam" class="absolute inset-0 w-full h-full object-cover transition-all duration-300 z-0" autoplay playsinline muted></video>
+            <canvas id="output_canvas" class="absolute inset-0 w-full h-full object-cover transition-all duration-300 pointer-events-none z-10"></canvas>
 
             <!-- Loading & Start Overlay -->
             <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/95 z-40 p-6 text-center backdrop-blur-md">
@@ -67,40 +67,40 @@
                 </button>
             </div>
 
-            <!-- LEFT TOOL STRIP (Instagram Floating Vertical Tools: Aa, ∞, ◫, ⚙) -->
+            <!-- LEFT TOOL STRIP (Instagram Floating Vertical Tools: Skeleton, Angle, FOV, Reset, Fullscreen) -->
             <div class="absolute left-3 sm:left-4 top-4 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
                 <!-- Skeleton Lines Toggle -->
                 <button onclick="toggleSkeleton()" id="skeleton-btn" title="İskelet Çizgileri"
-                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm">
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm cursor-pointer">
                     🦴
                 </button>
                 <!-- Live Angle Pill Toggle -->
                 <button onclick="toggleAnglePill()" id="angle-toggle-btn" title="Açı Göstergesi"
-                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black">
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black cursor-pointer">
                     📐
                 </button>
                 <!-- Wide FOV / Fit Toggle -->
                 <button onclick="toggleFitMode()" id="fit-mode-btn" title="Geniş Kadraj / Doldur"
-                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black">
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black cursor-pointer">
                     🔍
                 </button>
                 <!-- Reset Counter -->
                 <button onclick="resetCounter()" title="Sayacı Sıfırla"
-                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs">
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs cursor-pointer">
                     🔄
                 </button>
                 <!-- Fullscreen API -->
                 <button onclick="toggleFullscreen()" title="Tam Ekran"
-                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs">
+                        class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs cursor-pointer">
                     ⛶
                 </button>
             </div>
 
-            <!-- FLOATING HUD OVERLAYS (Floating on top of video) -->
+            <!-- FLOATING HUD OVERLAYS -->
             <div class="absolute inset-0 p-4 pointer-events-none flex flex-col justify-between z-20">
                 <!-- Top Center: Rep Counter Badge & Framing Guide -->
                 <div class="flex flex-col items-center gap-2 pt-1">
-                    <div class="flex flex-col items-center bg-black/65 backdrop-blur-xl border border-orange-500/40 px-6 py-2 rounded-2xl shadow-2xl shadow-orange-500/15 pointer-events-auto">
+                    <div class="flex flex-col items-center bg-black/75 backdrop-blur-xl border border-orange-500/40 px-6 py-2.5 rounded-2xl shadow-2xl shadow-orange-500/15 pointer-events-auto">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             <span id="active-ex-name" class="text-[11px] font-black uppercase tracking-wider text-orange-400">SQUAT</span>
@@ -111,30 +111,34 @@
                             <span>•</span>
                             <span id="cal-counter" class="text-amber-400 font-mono">0.0 kcal</span>
                         </div>
+                        <!-- Mini Target & Muscle Chip -->
+                        <div id="active-ex-badge" class="mt-1 text-[10px] text-zinc-300 bg-white/10 px-2 py-0.5 rounded-full font-medium">
+                            Hedef: 15 Tekrar • Bacak & Kalça
+                        </div>
                     </div>
 
                     <!-- Smart Framing Guide Banner -->
-                    <div id="framing-guide-banner" class="pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-black/65 border-white/10 text-zinc-300">
+                    <div id="framing-guide-banner" class="pointer-events-auto transition-all duration-300 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-black/75 border-white/10 text-zinc-300">
                         <span id="framing-icon">📐</span>
                         <span id="framing-msg">Vücudunuzu kadraja yerleştirin</span>
                     </div>
                 </div>
 
-                <!-- Bottom Center: iPhone 15 Pro Max Zoom Dial & Feedback Pills -->
+                <!-- Bottom Center: Zoom Dial & Feedback Pills -->
                 <div class="flex flex-col items-center justify-center gap-2 pb-1" id="feedback-dock">
                     
-                    <!-- iPhone 15 Pro Max Focal Length / Zoom Dial (0.5x Ultra-Wide • 1x Standart • 2x Telephoto) -->
+                    <!-- iPhone 15 Pro Max Zoom Dial -->
                     <div class="flex items-center p-1 rounded-full bg-black/70 backdrop-blur-xl border border-white/20 shadow-2xl pointer-events-auto">
-                        <button onclick="setZoomMode(0.5)" id="zoom-btn-05" title="0.5x Ultra Geniş Açı (Tüm Vücut Fitness Açısı)"
-                                class="px-3 py-1 rounded-full text-xs font-black transition-all bg-amber-400 text-black shadow-lg">
+                        <button onclick="setZoomMode(0.5)" id="zoom-btn-05" title="0.5x Ultra Geniş Açı (Tüm Vücut)"
+                                class="px-3 py-1 rounded-full text-xs font-black transition-all bg-amber-400 text-black shadow-lg cursor-pointer">
                             0.5×
                         </button>
                         <button onclick="setZoomMode(1)" id="zoom-btn-1" title="1x Standart Kadraj"
-                                class="px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all">
+                                class="px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer">
                             1×
                         </button>
                         <button onclick="setZoomMode(2)" id="zoom-btn-2" title="2x Yakın Plan"
-                                class="px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all">
+                                class="px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer">
                             2×
                         </button>
                     </div>
@@ -155,92 +159,92 @@
     </main>
 
     <!-- BOTTOM INSTAGRAM FILTER WHEEL & SHUTTER CONTROLS -->
-    <footer class="relative z-40 w-full pt-1 pb-4 flex flex-col items-center gap-2">
+    <footer class="relative z-40 w-full pt-1 pb-4 flex flex-col items-center gap-2 pointer-events-auto">
         
-        <!-- Instagram Story Filter Wheel (Snap Carousel) -->
-        <div class="w-full max-w-lg overflow-x-auto no-scrollbar py-2 px-6 flex items-center justify-center gap-3.5" id="instagram-filter-wheel">
+        <!-- Instagram Story Filter Wheel (Smooth Snap Carousel centered with padding) -->
+        <div class="w-full max-w-lg overflow-x-auto no-scrollbar py-2.5 flex items-center gap-3.5 snap-x snap-mandatory scroll-smooth px-[calc(50%-2rem)]" id="instagram-filter-wheel">
             <!-- 1. Squat -->
             <button onclick="switchExercise('squat')" id="filter-squat" data-category="leg" 
-                    class="filter-circle active shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-2xl shadow-xl transition-all transform scale-110">
+                    class="filter-circle active snap-center shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-2xl shadow-xl transition-all transform scale-110 cursor-pointer">
                 🏋️
             </button>
             <!-- 2. Pushup -->
             <button onclick="switchExercise('pushup')" id="filter-pushup" data-category="upper" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 💪
             </button>
             <!-- 3. Plank -->
             <button onclick="switchExercise('plank')" id="filter-plank" data-category="core" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 ⏱️
             </button>
             <!-- 4. Jumping Jack -->
             <button onclick="switchExercise('jumping_jack')" id="filter-jumping_jack" data-category="cardio" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 ⭐
             </button>
             <!-- 5. Lunge -->
             <button onclick="switchExercise('lunge')" id="filter-lunge" data-category="leg" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🦵
             </button>
             <!-- 6. Crunch -->
             <button onclick="switchExercise('crunch')" id="filter-crunch" data-category="core" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🍫
             </button>
             <!-- 7. Glute Bridge -->
             <button onclick="switchExercise('glute_bridge')" id="filter-glute_bridge" data-category="leg" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🍑
             </button>
             <!-- 8. Biceps Curl -->
             <button onclick="switchExercise('biceps_curl')" id="filter-biceps_curl" data-category="upper" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🦾
             </button>
             <!-- 9. High Knees -->
             <button onclick="switchExercise('high_knees')" id="filter-high_knees" data-category="cardio" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🏃
             </button>
             <!-- 10. Mountain Climber -->
             <button onclick="switchExercise('mountain_climber')" id="filter-mountain_climber" data-category="core" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🧗
             </button>
             <!-- 11. Wall Sit -->
             <button onclick="switchExercise('wall_sit')" id="filter-wall_sit" data-category="leg" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🧱
             </button>
             <!-- 12. Burpee -->
             <button onclick="switchExercise('burpee')" id="filter-burpee" data-category="cardio" 
-                    class="filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md">
+                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer">
                 🔥
             </button>
         </div>
 
-        <!-- Mode Slider & Action Bar (GÖNDERİ - HİKAYE - REELS style) -->
+        <!-- Mode Slider & Action Bar -->
         <div class="w-full max-w-md px-6 flex items-center justify-between text-white text-xs font-bold pt-1">
-            <!-- Left: Save / Summary Button (Instagram Gallery Thumbnail Style) -->
+            <!-- Left: Save / Summary Button -->
             <button onclick="saveAiWorkout()" id="save-workout-btn" title="Antrenmanı Tamamla & Kaydet"
-                    class="w-10 h-10 rounded-xl bg-zinc-900 border border-white/20 hover:border-orange-500 flex items-center justify-center text-white active:scale-90 transition-all shadow-lg overflow-hidden group">
+                    class="w-10 h-10 rounded-xl bg-zinc-900 border border-white/20 hover:border-orange-500 flex items-center justify-center text-white active:scale-90 transition-all shadow-lg overflow-hidden group cursor-pointer">
                 <span class="text-base group-hover:scale-110 transition-transform">💾</span>
             </button>
 
             <!-- Center Category Slider (TÜMÜ, BACAK, ÜST, CORE, KARDİYO) -->
             <div class="flex items-center gap-3.5 uppercase tracking-wider text-[11px]" id="bottom-categories">
-                <button onclick="filterCategory('all')" class="cat-link active text-white font-black transition-all">Tümü</button>
-                <button onclick="filterCategory('leg')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Bacak</button>
-                <button onclick="filterCategory('upper')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Üst</button>
-                <button onclick="filterCategory('core')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Core</button>
-                <button onclick="filterCategory('cardio')" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all">Kardiyo</button>
+                <button onclick="filterCategory('all', this)" class="cat-link active text-white font-black transition-all cursor-pointer">Tümü</button>
+                <button onclick="filterCategory('leg', this)" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all cursor-pointer">Bacak</button>
+                <button onclick="filterCategory('upper', this)" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all cursor-pointer">Üst</button>
+                <button onclick="filterCategory('core', this)" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all cursor-pointer">Core</button>
+                <button onclick="filterCategory('cardio', this)" class="cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all cursor-pointer">Kardiyo</button>
             </div>
 
-            <!-- Right: Flip Camera Button (Instagram Flip Style) -->
+            <!-- Right: Flip Camera Button -->
             <button onclick="flipCamera()" title="Kamerayı Çevir (Ön/Arka)"
-                    class="w-10 h-10 rounded-full bg-zinc-900 border border-white/20 hover:border-white flex items-center justify-center text-white active:rotate-180 transition-transform duration-300 shadow-lg">
+                    class="w-10 h-10 rounded-full bg-zinc-900 border border-white/20 hover:border-white flex items-center justify-center text-white active:rotate-180 transition-transform duration-300 shadow-lg cursor-pointer">
                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
             </button>
         </div>
@@ -248,7 +252,7 @@
 
 </div>
 
-<!-- WORKOUT COMPLETION CELEBRATION MODAL (Frosted Glass Instagram Style) -->
+<!-- WORKOUT COMPLETION CELEBRATION MODAL -->
 <div id="workout-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
     <div class="relative w-full max-w-sm rounded-[32px] bg-zinc-900 border border-zinc-700/80 p-6 text-center shadow-2xl space-y-4">
         <div class="w-16 h-16 mx-auto rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
@@ -258,44 +262,40 @@
             <h3 class="text-2xl font-black text-white font-heading uppercase tracking-tight">Tebrikler!</h3>
             <p class="text-xs text-zinc-400 mt-1" id="modal-subtitle">Antrenmanını başarıyla tamamladın</p>
         </div>
-        
-        <div class="grid grid-cols-3 gap-2 py-2">
+
+        <div class="grid grid-cols-2 gap-3 py-2">
             <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                <div class="text-[10px] text-zinc-500 uppercase font-black">Tekrar/Süre</div>
-                <div class="text-lg font-black text-white" id="modal-reps">0</div>
+                <span class="text-xs text-zinc-400 font-bold block mb-1">Miktar</span>
+                <span class="text-2xl font-black text-orange-400" id="modal-reps">0</span>
             </div>
             <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                <div class="text-[10px] text-zinc-500 uppercase font-black">Kalori</div>
-                <div class="text-lg font-black text-orange-400" id="modal-cals">0 kcal</div>
-            </div>
-            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
-                <div class="text-[10px] text-zinc-500 uppercase font-black">Form Skoru</div>
-                <div class="text-lg font-black text-emerald-400" id="modal-score">%96</div>
+                <span class="text-xs text-zinc-400 font-bold block mb-1">Kalori</span>
+                <span class="text-2xl font-black text-amber-400" id="modal-cals">0 kcal</span>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 pt-2">
-            <button onclick="closeModalAndReset()" class="flex-1 py-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider transition-all">
-                Sıfırla
+        <div class="space-y-2 pt-2">
+            <button onclick="closeModalAndReset()" 
+                    class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all active:scale-95 cursor-pointer">
+                Yeni Harekete Başla
             </button>
-            <button onclick="closeModal()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all">
-                Tamam
+            <button onclick="window.location.href='/'" 
+                    class="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs uppercase transition-all cursor-pointer">
+                Ana Sayfaya Dön
             </button>
         </div>
     </div>
 </div>
 
-<!-- FORM RULES & GUIDE MODAL -->
+<!-- FORM RULES & GUIDELINES MODAL -->
 <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-    <div class="relative w-full max-w-md rounded-[32px] bg-zinc-900 border border-zinc-700/80 p-6 shadow-2xl space-y-4">
+    <div class="relative w-full max-w-sm rounded-[32px] bg-zinc-900 border border-zinc-700/80 p-6 shadow-2xl space-y-4">
         <div class="flex items-center justify-between">
-            <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
-                <span>💡</span> Form Rehberi & Kamera İpuçları
-            </h3>
-            <button onclick="toggleGuideModal()" class="text-zinc-400 hover:text-white text-xl">✕</button>
+            <h3 class="text-lg font-black text-white font-heading uppercase tracking-tight">Kamera Koçu Rehberi</h3>
+            <button onclick="toggleGuideModal()" class="text-zinc-400 hover:text-white text-xl cursor-pointer">✕</button>
         </div>
-        
-        <div class="space-y-3 text-xs text-zinc-300">
+
+        <div class="space-y-3 text-xs leading-relaxed">
             <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
                 <div class="font-bold text-orange-400 mb-1">📸 Kamera Konumu</div>
                 <p class="text-zinc-400">Telefonunuzu bel hizasında sabit tutun ve 2-3 metre geriye çekilerek tüm vücudunuzun kadraja girmesini sağlayın.</p>
@@ -309,7 +309,7 @@
             </div>
         </div>
 
-        <button onclick="toggleGuideModal()" class="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase transition-all">
+        <button onclick="toggleGuideModal()" class="w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase transition-all cursor-pointer">
             Anladım
         </button>
     </div>
@@ -328,6 +328,7 @@
     const calCounter = document.getElementById('cal-counter');
     const counterLabel = document.getElementById('counter-label');
     const activeExName = document.getElementById('active-ex-name');
+    const activeExBadge = document.getElementById('active-ex-badge');
     const angleText = document.getElementById('angle-text');
     const formFeedback = document.getElementById('form-feedback');
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -356,7 +357,9 @@
     const exerciseConfig = {
         squat: {
             name: "Squat",
-            target: "3 Set × 15 Tekrar",
+            target: "15 Tekrar",
+            targetNum: 15,
+            muscleGroup: "Ön Bacak & Kalça",
             type: "reps",
             calPerUnit: 0.45,
             rulesTitle: "Squat Doğru Form Kuralları",
@@ -369,7 +372,9 @@
         },
         pushup: {
             name: "Şınav",
-            target: "3 Set × 12 Tekrar",
+            target: "12 Tekrar",
+            targetNum: 12,
+            muscleGroup: "Göğüs & Triceps",
             type: "reps",
             calPerUnit: 0.55,
             rulesTitle: "Şınav Doğru Form Kuralları",
@@ -382,7 +387,9 @@
         },
         plank: {
             name: "Plank",
-            target: "45 - 60 Saniye",
+            target: "45 Saniye",
+            targetNum: 45,
+            muscleGroup: "Tüm Karın & Core",
             type: "time",
             calPerUnit: 0.15,
             rulesTitle: "Plank Form Kuralları",
@@ -395,7 +402,9 @@
         },
         jumping_jack: {
             name: "Jumping Jack",
-            target: "30 - 50 Zıplama",
+            target: "30 Zıplama",
+            targetNum: 30,
+            muscleGroup: "Tüm Vücut & Kardiyo",
             type: "reps",
             calPerUnit: 0.25,
             rulesTitle: "Jumping Jack Kuralları",
@@ -407,8 +416,10 @@
             voicePrompt: "Jumping Jack modu. Zıplamaya hazırlan!"
         },
         lunge: {
-            name: "Lunge (Hamle)",
-            target: "Her bacak 12 Tekrar",
+            name: "Lunge",
+            target: "12 Tekrar",
+            targetNum: 12,
+            muscleGroup: "Bacak & Glute",
             type: "reps",
             calPerUnit: 0.40,
             rulesTitle: "Lunge Doğru Form Kuralları",
@@ -420,8 +431,10 @@
             voicePrompt: "Lunge modu. Ön bacağını 90 derece büküp doğrul."
         },
         crunch: {
-            name: "Mekik (Crunch)",
-            target: "3 Set × 20 Tekrar",
+            name: "Mekik",
+            target: "20 Tekrar",
+            targetNum: 20,
+            muscleGroup: "Üst Karın",
             type: "reps",
             calPerUnit: 0.35,
             rulesTitle: "Mekik / Crunch Kuralları",
@@ -434,7 +447,9 @@
         },
         glute_bridge: {
             name: "Glute Bridge",
-            target: "3 Set × 15 Tekrar",
+            target: "15 Tekrar",
+            targetNum: 15,
+            muscleGroup: "Kalça & Hamstring",
             type: "reps",
             calPerUnit: 0.30,
             rulesTitle: "Glute Bridge Kuralları",
@@ -447,7 +462,9 @@
         },
         biceps_curl: {
             name: "Biceps Curl",
-            target: "3 Set × 12 Tekrar",
+            target: "12 Tekrar",
+            targetNum: 12,
+            muscleGroup: "Pazular (Biceps)",
             type: "reps",
             calPerUnit: 0.28,
             rulesTitle: "Biceps Curl Kuralları",
@@ -460,7 +477,9 @@
         },
         high_knees: {
             name: "Diz Çekme",
-            target: "40 - 60 Adım",
+            target: "40 Adım",
+            targetNum: 40,
+            muscleGroup: "Kardiyo & Alt Karın",
             type: "reps",
             calPerUnit: 0.32,
             rulesTitle: "Diz Çekme (High Knees) Kuralları",
@@ -473,7 +492,9 @@
         },
         mountain_climber: {
             name: "Mountain Climber",
-            target: "30 - 45 Tekrar",
+            target: "30 Tekrar",
+            targetNum: 30,
+            muscleGroup: "Core & Kondisyon",
             type: "reps",
             calPerUnit: 0.45,
             rulesTitle: "Mountain Climber Kuralları",
@@ -486,7 +507,9 @@
         },
         wall_sit: {
             name: "Duvar Oturuşu",
-            target: "30 - 45 Saniye",
+            target: "30 Saniye",
+            targetNum: 30,
+            muscleGroup: "Ön Bacak & Dayanıklılık",
             type: "time",
             calPerUnit: 0.18,
             rulesTitle: "Duvar Oturuşu Kuralları",
@@ -499,7 +522,9 @@
         },
         burpee: {
             name: "Burpee",
-            target: "10 - 15 Tekrar",
+            target: "12 Tekrar",
+            targetNum: 12,
+            muscleGroup: "Tüm Vücut Patlayıcı Güç",
             type: "reps",
             calPerUnit: 0.85,
             rulesTitle: "Burpee Kuralları",
@@ -513,21 +538,27 @@
     };
 
     // Category Filter Function
-    function filterCategory(cat) {
+    function filterCategory(cat, btnEl) {
         document.querySelectorAll('.cat-link').forEach(b => {
-            b.className = "cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all";
+            b.className = "cat-link text-zinc-500 hover:text-zinc-300 font-bold transition-all cursor-pointer";
         });
-        if (event && event.target) {
-            event.target.className = "cat-link active text-white font-black transition-all";
+        if (btnEl) {
+            btnEl.className = "cat-link active text-white font-black transition-all cursor-pointer";
         }
 
+        let firstVisibleBtn = null;
         document.querySelectorAll('.filter-circle').forEach(el => {
             if (cat === 'all' || el.dataset.category === cat) {
                 el.style.display = 'inline-flex';
+                if (!firstVisibleBtn) firstVisibleBtn = el;
             } else {
                 el.style.display = 'none';
             }
         });
+
+        if (firstVisibleBtn) {
+            firstVisibleBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
     }
 
     // iPhone 15 Pro Max Zoom Controller (0.5x Ultra-Wide, 1x Standard, 2x Telephoto)
@@ -538,37 +569,37 @@
         const btn2 = document.getElementById('zoom-btn-2');
         const fitBtn = document.getElementById('fit-mode-btn');
 
-        if (btn05) btn05.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all";
-        if (btn1) btn1.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all";
-        if (btn2) btn2.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all";
+        if (btn05) btn05.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer";
+        if (btn1) btn1.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer";
+        if (btn2) btn2.className = "px-3 py-1 rounded-full text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer";
 
         if (zoom === 0.5) {
-            if (btn05) btn05.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-amber-400 text-black shadow-lg scale-105";
-            canvasElement.className = "w-full h-full object-contain transition-all duration-300 relative z-10";
-            if (ambientCanvas) ambientCanvas.style.opacity = "0.5";
+            if (btn05) btn05.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-amber-400 text-black shadow-lg scale-105 cursor-pointer";
+            videoElement.className = "absolute inset-0 w-full h-full object-contain transition-all duration-300 z-0";
+            canvasElement.className = "absolute inset-0 w-full h-full object-contain transition-all duration-300 pointer-events-none z-10";
+            if (ambientCanvas) ambientCanvas.style.opacity = "0.4";
             if (fitBtn) {
                 fitBtn.innerHTML = "0.5×";
                 fitBtn.classList.add('text-amber-400');
             }
-            speakText("0.5x Ultra geniş açı.");
         } else if (zoom === 1) {
-            if (btn1) btn1.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-white text-black shadow-lg scale-105";
-            canvasElement.className = "w-full h-full object-cover transition-all duration-300 relative z-10";
+            if (btn1) btn1.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-white text-black shadow-lg scale-105 cursor-pointer";
+            videoElement.className = "absolute inset-0 w-full h-full object-cover transition-all duration-300 z-0";
+            canvasElement.className = "absolute inset-0 w-full h-full object-cover transition-all duration-300 pointer-events-none z-10";
             if (ambientCanvas) ambientCanvas.style.opacity = "0";
             if (fitBtn) {
                 fitBtn.innerHTML = "1×";
                 fitBtn.classList.remove('text-amber-400');
             }
-            speakText("1x Standart kadraj.");
         } else if (zoom === 2) {
-            if (btn2) btn2.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-white text-black shadow-lg scale-105";
-            canvasElement.className = "w-full h-full object-cover scale-125 transition-all duration-300 relative z-10";
+            if (btn2) btn2.className = "px-3 py-1 rounded-full text-xs font-black transition-all bg-white text-black shadow-lg scale-105 cursor-pointer";
+            videoElement.className = "absolute inset-0 w-full h-full object-cover scale-125 transition-all duration-300 z-0";
+            canvasElement.className = "absolute inset-0 w-full h-full object-cover scale-125 transition-all duration-300 pointer-events-none z-10";
             if (ambientCanvas) ambientCanvas.style.opacity = "0";
             if (fitBtn) {
                 fitBtn.innerHTML = "2×";
                 fitBtn.classList.remove('text-amber-400');
             }
-            speakText("2x Yakın plan.");
         }
 
         applyHardwareZoom(zoom);
@@ -580,7 +611,7 @@
         else setZoomMode(0.5);
     }
 
-    // Hardware Zoom via MediaStream Track Constraints (Supported on iPhone 15 Pro Max & Android)
+    // Hardware Zoom via MediaStream Track Constraints
     function applyHardwareZoom(zoomVal) {
         try {
             if (currentStream) {
@@ -605,25 +636,21 @@
         } catch(e) {}
     }
 
-    // Number Announcer in Turkish
-    const numberWords = {
-        1: "Bir", 2: "İki", 3: "Üç", 4: "Dört", 5: "Beş",
-        6: "Altı", 7: "Yedi", 8: "Sekiz", 9: "Dokuz", 10: "On",
-        11: "On bir", 12: "On iki", 13: "On üç", 14: "On dört", 15: "On beş",
-        16: "On altı", 17: "On yedi", 18: "On sekiz", 19: "On dokuz", 20: "Yirmi"
-    };
-
+    // Rep Announcer using ElevenLabs Studio Audio Files
     function announceRep(num) {
         if (!voiceEnabled) return;
-        if (num === 1) playCoachAudio('count_1.mp3', 'Bir');
-        else if (num === 2) playCoachAudio('count_2.mp3', 'İki');
-        else if (num === 3) playCoachAudio('count_3.mp3', 'Üç');
+        if (num === 1) playCoachAudio('count_1.mp3');
+        else if (num === 2) playCoachAudio('count_2.mp3');
+        else if (num === 3) playCoachAudio('count_3.mp3');
         else if (num % 5 === 0) {
-            speakText(`${num}! Harika!`);
-        } else if (numberWords[num]) {
-            speakText(numberWords[num]);
+            playSuccessChime();
         } else {
-            speakText(`${num}`);
+            playBeep(620, 0.08);
+        }
+
+        // Haptic feedback on mobile
+        if (navigator.vibrate) {
+            try { navigator.vibrate(35); } catch(e) {}
         }
     }
 
@@ -671,8 +698,11 @@
         showSkeleton = !showSkeleton;
         const btn = document.getElementById('skeleton-btn');
         btn.className = showSkeleton 
-            ? "w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold"
-            : "w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-zinc-500 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold";
+            ? "w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold cursor-pointer"
+            : "w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-zinc-500 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm font-bold cursor-pointer";
+        if (!showSkeleton) {
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        }
     }
 
     // Toggle Angle Pill
@@ -699,7 +729,7 @@
         }
     }
 
-    // Sound Synthesizer
+    // Web Audio Synthesizer for Clean Sound Chimes
     function playBeep(freq = 600, duration = 0.12, type = 'sine') {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -723,6 +753,7 @@
     }
 
     let currentVoicePersona = 'bella'; // Default Bella (ElevenLabs Studio Voice)
+    const audioCache = {};
     let activeCoachAudio = null;
 
     function toggleVoicePersona() {
@@ -732,17 +763,18 @@
         if (currentVoicePersona === 'bella') {
             if (emojiEl) emojiEl.innerText = "👩";
             if (nameEl) nameEl.innerText = "Bella";
-            playCoachAudio('welcome.mp3', "Bella koç devrede.");
+            playCoachAudio('welcome.mp3');
         } else {
             if (emojiEl) emojiEl.innerText = "👨";
             if (nameEl) nameEl.innerText = "Adam";
-            playCoachAudio('welcome.mp3', "Adam koç devrede.");
+            playCoachAudio('welcome.mp3');
         }
     }
 
-    // Play ElevenLabs Studio Audio with Automatic Fallback
-    function playCoachAudio(filename, fallbackText) {
+    // Pre-cached High-Performance Audio Player (Completely Decoupled from Camera)
+    function playCoachAudio(filename) {
         if (!voiceEnabled) return;
+        
         try {
             if (activeCoachAudio) {
                 activeCoachAudio.pause();
@@ -751,30 +783,30 @@
         } catch(e) {}
 
         const voicePath = `/static/audio/${currentVoicePersona}/${filename}`;
-        const basePath = `/static/audio/${filename}`;
+        
+        if (!audioCache[voicePath]) {
+            audioCache[voicePath] = new Audio(voicePath);
+        }
 
-        const audio = new Audio(voicePath);
+        const audio = audioCache[voicePath];
         activeCoachAudio = audio;
+        audio.currentTime = 0;
 
-        audio.play().catch(() => {
-            const fallbackAudio = new Audio(basePath);
-            activeCoachAudio = fallbackAudio;
-            fallbackAudio.play().catch(() => {
-                if (fallbackText) speakText(fallbackText);
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                const basePath = `/static/audio/${filename}`;
+                if (!audioCache[basePath]) {
+                    audioCache[basePath] = new Audio(basePath);
+                }
+                const fallbackAudio = audioCache[basePath];
+                activeCoachAudio = fallbackAudio;
+                fallbackAudio.currentTime = 0;
+                fallbackAudio.play().catch(() => {
+                    playBeep(520, 0.12);
+                });
             });
-        });
-    }
-
-    // Turkish Speech Synthesis (Fallback)
-    function speakText(text) {
-        if (!voiceEnabled || !('speechSynthesis' in window)) return;
-        try {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'tr-TR';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        } catch(e) {}
+        }
     }
 
     function toggleVoice() {
@@ -786,7 +818,7 @@
             textEl.innerText = "Sesli Koç";
             iconEl.innerText = "🔊";
             btn.className = "px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-xs font-bold text-white hover:bg-black/80 active:scale-95 transition-all shadow-md cursor-pointer";
-            playCoachAudio('welcome.mp3', "Sesli koç aktif.");
+            playCoachAudio('welcome.mp3');
         } else {
             textEl.innerText = "Sessiz";
             iconEl.innerText = "🔇";
@@ -812,7 +844,7 @@
         return angle;
     }
 
-    // Switch Exercise Mode (Instagram Filter Selection)
+    // Switch Exercise Mode (Smooth Instagram Shutter Wheel Filter)
     function switchExercise(exKey) {
         if (!exerciseConfig[exKey]) return;
         currentExercise = exKey;
@@ -825,31 +857,39 @@
 
         // Update Instagram Filter Wheel Styling
         document.querySelectorAll('.filter-circle').forEach(b => {
-            b.className = "filter-circle shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md";
+            b.className = "filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex items-center justify-center text-xl opacity-75 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer";
         });
 
         const activeCircle = document.getElementById(`filter-${exKey}`);
         if (activeCircle) {
-            activeCircle.className = "filter-circle active shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-2xl shadow-xl transition-all transform scale-110";
+            activeCircle.className = "filter-circle active snap-center shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-2xl shadow-xl transition-all transform scale-110 cursor-pointer";
             activeCircle.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
 
         const conf = exerciseConfig[exKey];
-        activeExName.innerText = conf.name.toUpperCase();
-        counterLabel.innerText = conf.type === 'time' ? "Süre" : "Tekrar";
-        repCounter.innerText = conf.type === 'time' ? "0s" : "0";
+        if (activeExName) activeExName.innerText = conf.name.toUpperCase();
+        if (counterLabel) counterLabel.innerText = conf.type === 'time' ? "Süre" : "Tekrar";
+        if (repCounter) repCounter.innerText = conf.type === 'time' ? "0s" : "0";
+        if (activeExBadge) activeExBadge.innerText = `Hedef: ${conf.target} • ${conf.muscleGroup}`;
+        
         updateCalories();
-        formFeedback.innerText = "Pozisyon bekleniyor";
-        formFeedback.className = "text-zinc-400 font-bold";
+        if (formFeedback) {
+            formFeedback.innerText = "Pozisyon bekleniyor";
+            formFeedback.className = "text-zinc-400 font-bold";
+        }
 
-        playCoachAudio(`${exKey}.mp3`, conf.voicePrompt);
+        if (navigator.vibrate) {
+            try { navigator.vibrate(30); } catch(e) {}
+        }
+
+        playCoachAudio(`${exKey}.mp3`);
     }
 
     function updateCalories() {
         const conf = exerciseConfig[currentExercise] || { calPerUnit: 0.4 };
         const amount = conf.type === 'time' ? holdSeconds : reps;
         const cal = amount * conf.calPerUnit;
-        calCounter.innerText = `${cal.toFixed(1)} kcal`;
+        if (calCounter) calCounter.innerText = `${cal.toFixed(1)} kcal`;
     }
 
     function resetCounter() {
@@ -857,43 +897,24 @@
         holdSeconds = 0;
         isDown = false;
         isStageTwo = false;
+        clearInterval(timerInterval);
+        timerInterval = null;
         const conf = exerciseConfig[currentExercise];
-        repCounter.innerText = conf.type === 'time' ? "0s" : "0";
+        if (repCounter) repCounter.innerText = conf.type === 'time' ? "0s" : "0";
         updateCalories();
-        formFeedback.innerText = "Sıfırlandı";
-        formFeedback.className = "text-zinc-400 font-bold";
+        if (formFeedback) {
+            formFeedback.innerText = "Sıfırlandı";
+            formFeedback.className = "text-zinc-400 font-bold";
+        }
         playBeep(450, 0.1);
     }
 
-    // Ergonomic Biomechanical AR Kinematic Connections (Clean lines without messy face webs)
+    // AR Kinematic Connections
     const AR_KINEMATIC_CONNECTIONS = [
-        // Torso Core Box
-        [11, 12], // Left shoulder to right shoulder
-        [11, 23], // Left shoulder to left hip
-        [12, 24], // Right shoulder to right hip
-        [23, 24], // Left hip to right hip
-        
-        // Left Arm Chain
-        [11, 13], // Left shoulder to left elbow
-        [13, 15], // Left elbow to left wrist
-        
-        // Right Arm Chain
-        [12, 14], // Right shoulder to right elbow
-        [14, 16], // Right elbow to right wrist
-        
-        // Left Leg Chain
-        [23, 25], // Left hip to left knee
-        [25, 27], // Left knee to left ankle
-        [27, 29], // Left ankle to left heel
-        [29, 31], // Left heel to left foot index
-        [27, 31], // Left ankle to foot index
-        
-        // Right Leg Chain
-        [24, 26], // Right hip to right knee
-        [26, 28], // Right knee to right ankle
-        [28, 30], // Right ankle to right heel
-        [30, 32], // Right heel to right foot index
-        [28, 32]  // Right ankle to foot index
+        [11, 12], [11, 23], [12, 24], [23, 24],
+        [11, 13], [13, 15], [12, 14], [14, 16],
+        [23, 25], [25, 27], [27, 29], [29, 31], [27, 31],
+        [24, 26], [26, 28], [28, 30], [30, 32], [28, 32]
     ];
 
     function getActiveExerciseJoints(ex) {
@@ -901,25 +922,25 @@
             case 'squat':
             case 'wall_sit':
             case 'lunge':
-                return [23, 24, 25, 26, 27, 28]; // Hips, knees, ankles
+                return [23, 24, 25, 26, 27, 28];
             case 'pushup':
             case 'biceps_curl':
-                return [11, 12, 13, 14, 15, 16]; // Shoulders, elbows, wrists
+                return [11, 12, 13, 14, 15, 16];
             case 'plank':
             case 'crunch':
             case 'glute_bridge':
-                return [11, 12, 23, 24, 25, 26]; // Torso core & knees
+                return [11, 12, 23, 24, 25, 26];
             case 'jumping_jack':
             case 'high_knees':
             case 'mountain_climber':
             case 'burpee':
-                return [15, 16, 25, 26, 27, 28]; // Limbs & joints
+                return [15, 16, 25, 26, 27, 28];
             default:
                 return [];
         }
     }
 
-    // Strict Human Body Verification Gate (Rejects furniture, curtains, shadows & random objects)
+    // Strict Human Body Verification Gate
     function validateHumanPose(lm) {
         if (!lm || lm.length < 33) return false;
 
@@ -933,7 +954,6 @@
         const hVisR = (rh && rh.visibility) || 0;
         const noseVis = (nose && nose.visibility) || 0;
 
-        // 1. Torso Anchor: A genuine human body MUST have detectable shoulders & core
         const hasShoulders = (sVisL > 0.55 && sVisR > 0.55);
         const hasTorsoSpan = (sVisL > 0.55 || sVisR > 0.55) && (hVisL > 0.50 || hVisR > 0.50);
         const hasUpperBody = (sVisL > 0.55 || sVisR > 0.55) && (noseVis > 0.60);
@@ -942,7 +962,6 @@
             return false;
         }
 
-        // 2. Anatomical Proportions: Shoulder distance must be physically plausible in frame
         if (ls && rs && sVisL > 0.45 && sVisR > 0.45) {
             const shoulderSpan = Math.hypot(ls.x - rs.x, ls.y - rs.y);
             if (shoulderSpan < 0.035 || shoulderSpan > 0.88) {
@@ -950,7 +969,6 @@
             }
         }
 
-        // 3. Torso Distance: Shoulders to hips vector must be physically plausible
         if ((sVisL > 0.5 || sVisR > 0.5) && (hVisL > 0.5 || hVisR > 0.5)) {
             const midSx = (ls.x + rs.x) / 2;
             const midSy = (ls.y + rs.y) / 2;
@@ -962,42 +980,38 @@
             }
         }
 
-        // 4. Mean Core Visibility: Average score of major body anchors
         let coreSum = sVisL + sVisR + hVisL + hVisR;
         let coreCount = 4;
         if (noseVis > 0.5) { coreSum += noseVis; coreCount++; }
-        if ((coreSum / coreCount) < 0.50) {
+        if ((coreSum / coreCount) < 0.48) {
             return false;
         }
 
-        // 5. Outlier Rejection: Coordinates must reside within camera field
         let outliers = 0;
         for (let i = 0; i < 33; i++) {
             const p = lm[i];
-            if (p && (p.x < -0.25 || p.x > 1.25 || p.y < -0.25 || p.y > 1.25)) {
+            if (p && (p.x < -0.3 || p.x > 1.3 || p.y < -0.3 || p.y > 1.3)) {
                 outliers++;
             }
         }
-        if (outliers > 7) {
+        if (outliers > 8) {
             return false;
         }
 
         return true;
     }
 
-    // High-Precision Custom AR Skeleton Renderer (Glowing neon kinematic lines & glowing joint nodes)
+    // High-Precision Lightweight Custom AR Skeleton Renderer (Zero Stall)
     function drawCustomARSkeleton(ctx, lm, width, height) {
-        const VIS_THRESHOLD = 0.55; // Strictly only render visible, confident joints
+        const VIS_THRESHOLD = 0.52;
         const activeJoints = getActiveExerciseJoints(currentExercise);
 
         ctx.save();
 
-        // Glowing Kinematic Lines
+        // Neon Kinematic Lines
         ctx.lineWidth = 3.5;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = 'rgba(249, 115, 22, 0.7)';
         ctx.strokeStyle = '#f97316';
 
         for (const [i, j] of AR_KINEMATIC_CONNECTIONS) {
@@ -1011,9 +1025,9 @@
             }
         }
 
-        // Neck anchor line (from mid-shoulder to nose)
+        // Neck anchor line
         const nose = lm[0], ls = lm[11], rs = lm[12];
-        if (nose && ls && rs && nose.visibility >= 0.6 && ls.visibility >= VIS_THRESHOLD && rs.visibility >= VIS_THRESHOLD) {
+        if (nose && ls && rs && nose.visibility >= 0.55 && ls.visibility >= VIS_THRESHOLD && rs.visibility >= VIS_THRESHOLD) {
             const midX = ((ls.x + rs.x) / 2) * width;
             const midY = ((ls.y + rs.y) / 2) * height;
             ctx.beginPath();
@@ -1031,18 +1045,23 @@
                 const y = p.y * height;
                 const isActive = activeJoints.includes(idx);
 
-                ctx.shadowBlur = isActive ? 12 : 5;
-                ctx.shadowColor = isActive ? 'rgba(52, 211, 153, 0.95)' : 'rgba(249, 115, 22, 0.8)';
+                // Outer Glowing Halo for Active Joints
+                if (isActive) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 7.5, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+                    ctx.fill();
+                }
 
-                // Outer Ring
+                // Joint Circle
                 ctx.beginPath();
-                ctx.arc(x, y, isActive ? 5.5 : 4, 0, 2 * Math.PI);
+                ctx.arc(x, y, isActive ? 5 : 3.5, 0, 2 * Math.PI);
                 ctx.fillStyle = isActive ? '#10b981' : '#f97316';
                 ctx.fill();
 
-                // Inner Core
+                // Inner Bright Core
                 ctx.beginPath();
-                ctx.arc(x, y, isActive ? 2.5 : 1.8, 0, 2 * Math.PI);
+                ctx.arc(x, y, 1.8, 0, 2 * Math.PI);
                 ctx.fillStyle = '#ffffff';
                 ctx.fill();
             }
@@ -1051,32 +1070,14 @@
         ctx.restore();
     }
 
-    // Temporal Hysteresis State for False Positive Prevention
     let humanDetectionStreak = 0;
     let humanLostStreak = 0;
     let isHumanConfirmed = false;
 
-    // MediaPipe Pose Main Callback
+    // MediaPipe Pose Main Callback (Runs transparently over hardware video)
     function onResults(results) {
-        if (videoElement.videoWidth && videoElement.videoHeight) {
-            if (canvasElement.width !== videoElement.videoWidth || canvasElement.height !== videoElement.videoHeight) {
-                canvasElement.width = videoElement.videoWidth;
-                canvasElement.height = videoElement.videoHeight;
-            }
-        }
-
-        // Draw ambient glow for 0.5x Ultra-Wide mode
-        if (ambientCanvas && currentZoomMode === 0.5 && ambientCanvasCtx) {
-            if (ambientCanvas.width !== 160 || ambientCanvas.height !== 284) {
-                ambientCanvas.width = 160;
-                ambientCanvas.height = 284;
-            }
-            ambientCanvasCtx.drawImage(results.image, 0, 0, ambientCanvas.width, ambientCanvas.height);
-        }
-
-        canvasCtx.save();
+        // Clear AR canvas to transparent
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
         const hasValidPose = results.poseLandmarks && validateHumanPose(results.poseLandmarks);
 
@@ -1120,21 +1121,20 @@
             }
         } else {
             updateFramingGuide(null, false);
-            angleText.innerText = "İnsan taranıyor...";
-            formFeedback.innerText = "Kadrajda insan aranıyor";
-            formFeedback.className = "text-zinc-500 font-medium";
+            if (angleText) angleText.innerText = "İnsan taranıyor...";
+            if (formFeedback) {
+                formFeedback.innerText = "Kadrajda insan aranıyor";
+                formFeedback.className = "text-zinc-500 font-medium";
+            }
 
-            // Pause hold timers if human leaves frame
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
         }
-
-        canvasCtx.restore();
     }
 
-    // Helper: Select Profile Side Facing Camera (Bilateral Auto-Detection)
+    // Bilateral Auto-Detection
     function getBestSide(lm, leftIndices, rightIndices) {
         let leftScore = 0, rightScore = 0;
         leftIndices.forEach(i => { leftScore += (lm[i]?.visibility || 0); });
@@ -1142,7 +1142,7 @@
         return rightScore > leftScore ? 'right' : 'left';
     }
 
-    // 1. Squat (Bilateral Hip-Knee-Ankle)
+    // 1. Squat
     function handleSquat(lm) {
         const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
         const hip = side === 'right' ? lm[24] : lm[23];
@@ -1151,7 +1151,7 @@
 
         if (!hip || !knee || !ankle || hip.visibility < 0.55 || knee.visibility < 0.55 || ankle.visibility < 0.45) return;
         const angle = Math.round(calculateAngle(hip, knee, ankle));
-        angleText.innerText = `Diz: ${angle}°`;
+        if (angleText) angleText.innerText = `Diz: ${angle}°`;
 
         if (angle < 95) {
             if (!isDown) {
@@ -1162,7 +1162,7 @@
         }
         if (angle > 158 && isDown) {
             reps++;
-            repCounter.innerText = reps;
+            if (repCounter) repCounter.innerText = reps;
             isDown = false;
             formFeedback.innerText = `✓ Tekrar: ${reps}`;
             formFeedback.className = "text-emerald-400 font-bold";
@@ -1172,7 +1172,7 @@
         }
     }
 
-    // 2. Push-up (Bilateral Shoulder-Elbow-Wrist)
+    // 2. Push-up
     function handlePushup(lm) {
         const side = getBestSide(lm, [11, 13, 15], [12, 14, 16]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
@@ -1181,7 +1181,7 @@
 
         if (!shoulder || !elbow || !wrist || shoulder.visibility < 0.55 || elbow.visibility < 0.55 || wrist.visibility < 0.45) return;
         const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
-        angleText.innerText = `Dirsek: ${angle}°`;
+        if (angleText) angleText.innerText = `Dirsek: ${angle}°`;
 
         if (angle < 92) {
             if (!isDown) {
@@ -1192,7 +1192,7 @@
         }
         if (angle > 155 && isDown) {
             reps++;
-            repCounter.innerText = reps;
+            if (repCounter) repCounter.innerText = reps;
             isDown = false;
             formFeedback.innerText = `✓ Şınav: ${reps}`;
             formFeedback.className = "text-emerald-400 font-bold";
@@ -1202,7 +1202,7 @@
         }
     }
 
-    // 3. Plank (Bilateral Shoulder-Hip-Ankle Alignment)
+    // 3. Plank
     function handlePlank(lm) {
         const side = getBestSide(lm, [11, 23, 27], [12, 24, 28]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
@@ -1211,7 +1211,7 @@
 
         if (!shoulder || !hip || !ankle || shoulder.visibility < 0.55 || hip.visibility < 0.55 || ankle.visibility < 0.45) return;
         const bodyAngle = Math.round(calculateAngle(shoulder, hip, ankle));
-        angleText.innerText = `Omurga: ${bodyAngle}°`;
+        if (angleText) angleText.innerText = `Omurga: ${bodyAngle}°`;
 
         if (bodyAngle >= 150 && bodyAngle <= 195) {
             formFeedback.innerText = "Mükemmel duruş!";
@@ -1220,11 +1220,10 @@
             if (!timerInterval) {
                 timerInterval = setInterval(() => {
                     holdSeconds++;
-                    repCounter.innerText = `${holdSeconds}s`;
+                    if (repCounter) repCounter.innerText = `${holdSeconds}s`;
                     updateCalories();
                     if (holdSeconds % 10 === 0) {
                         playBeep(700, 0.15);
-                        speakText(`${holdSeconds} saniye!`);
                     }
                 }, 1000);
             }
@@ -1236,7 +1235,7 @@
         }
     }
 
-    // 4. Jumping Jack (Hands & Feet Extension)
+    // 4. Jumping Jack
     function handleJumpingJack(lm) {
         const lw = lm[15], rw = lm[16], nose = lm[0];
         const la = lm[27], ra = lm[28], ls = lm[11], rs = lm[12];
@@ -1247,12 +1246,12 @@
             const shoulderDist = (ls && rs) ? Math.abs(ls.x - rs.x) : 0.2;
             const feetApart = ankleDist > (shoulderDist * 1.25);
 
-            angleText.innerText = `Açıklık: ${(ankleDist / (shoulderDist || 0.2)).toFixed(1)}x`;
+            if (angleText) angleText.innerText = `Açıklık: ${(ankleDist / (shoulderDist || 0.2)).toFixed(1)}x`;
 
             if (handsUp && feetApart) isDown = true;
             if (!handsUp && !feetApart && isDown) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isDown = false;
                 formFeedback.innerText = `✓ Zıplama: ${reps}`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1263,7 +1262,7 @@
         }
     }
 
-    // 5. Lunge (Bilateral Front Knee Flexion)
+    // 5. Lunge
     function handleLunge(lm) {
         const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
         const hip = side === 'right' ? lm[24] : lm[23];
@@ -1272,7 +1271,7 @@
 
         if (hip && knee && ankle && hip.visibility > 0.55 && knee.visibility > 0.55 && ankle.visibility > 0.45) {
             const angle = Math.round(calculateAngle(hip, knee, ankle));
-            angleText.innerText = `Ön Diz: ${angle}°`;
+            if (angleText) angleText.innerText = `Ön Diz: ${angle}°`;
 
             if (angle < 98) {
                 isDown = true;
@@ -1281,7 +1280,7 @@
             }
             if (angle > 155 && isDown) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isDown = false;
                 formFeedback.innerText = `✓ Lunge: ${reps}`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1292,7 +1291,7 @@
         }
     }
 
-    // 6. Crunch (Torso Core Contraction)
+    // 6. Crunch
     function handleCrunch(lm) {
         const side = getBestSide(lm, [11, 23, 25], [12, 24, 26]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
@@ -1301,7 +1300,7 @@
 
         if (shoulder && hip && knee && shoulder.visibility > 0.55 && hip.visibility > 0.55) {
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
-            angleText.innerText = `Karın Açısı: ${angle}°`;
+            if (angleText) angleText.innerText = `Karın Açısı: ${angle}°`;
 
             if (angle < 115) {
                 isDown = true;
@@ -1310,7 +1309,7 @@
             }
             if (angle > 145 && isDown) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isDown = false;
                 formFeedback.innerText = `✓ Mekik: ${reps}`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1321,7 +1320,7 @@
         }
     }
 
-    // 7. Glute Bridge (Hip Extension)
+    // 7. Glute Bridge
     function handleGluteBridge(lm) {
         const side = getBestSide(lm, [11, 23, 25], [12, 24, 26]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
@@ -1330,7 +1329,7 @@
 
         if (shoulder && hip && knee && shoulder.visibility > 0.55 && hip.visibility > 0.55 && knee.visibility > 0.50) {
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
-            angleText.innerText = `Köprü: ${angle}°`;
+            if (angleText) angleText.innerText = `Köprü: ${angle}°`;
 
             if (angle > 158) {
                 isDown = true;
@@ -1339,7 +1338,7 @@
             }
             if (angle < 135 && isDown) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isDown = false;
                 formFeedback.innerText = `✓ Köprü: ${reps}`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1350,7 +1349,7 @@
         }
     }
 
-    // 8. Biceps Curl (Bilateral Forearm Flexion)
+    // 8. Biceps Curl
     function handleBicepsCurl(lm) {
         const side = getBestSide(lm, [11, 13, 15], [12, 14, 16]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
@@ -1359,7 +1358,7 @@
 
         if (shoulder && elbow && wrist && shoulder.visibility > 0.55 && elbow.visibility > 0.55 && wrist.visibility > 0.50) {
             const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
-            angleText.innerText = `Dirsek: ${angle}°`;
+            if (angleText) angleText.innerText = `Dirsek: ${angle}°`;
 
             if (angle < 60) {
                 isDown = true;
@@ -1368,7 +1367,7 @@
             }
             if (angle > 150 && isDown) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isDown = false;
                 formFeedback.innerText = `✓ Curl: ${reps}`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1379,7 +1378,7 @@
         }
     }
 
-    // 9. High Knees (Knee Drive Elevation)
+    // 9. High Knees
     function handleHighKnees(lm) {
         const lh = lm[23], rh = lm[24], lk = lm[25], rk = lm[26];
         if (lh && rh && lh.visibility > 0.50 && rh.visibility > 0.50) {
@@ -1389,7 +1388,7 @@
             if (leftUp || rightUp) {
                 if (!isDown) {
                     reps++;
-                    repCounter.innerText = reps;
+                    if (repCounter) repCounter.innerText = reps;
                     isDown = true;
                     formFeedback.innerText = `✓ Adım: ${reps}`;
                     formFeedback.className = "text-emerald-400 font-bold";
@@ -1403,7 +1402,7 @@
         }
     }
 
-    // 10. Mountain Climber (Plank Knee Drive)
+    // 10. Mountain Climber
     function handleMountainClimber(lm) {
         const side = getBestSide(lm, [15, 23, 25], [16, 24, 26]);
         const wrist = side === 'right' ? lm[16] : lm[15];
@@ -1415,7 +1414,7 @@
 
             if (kneeToChest && !isDown) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isDown = true;
                 formFeedback.innerText = `✓ Tırmanış: ${reps}`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1428,7 +1427,7 @@
         }
     }
 
-    // 11. Wall Sit (Isometric Knee Hold)
+    // 11. Wall Sit
     function handleWallSit(lm) {
         const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
         const hip = side === 'right' ? lm[24] : lm[23];
@@ -1437,7 +1436,7 @@
 
         if (hip && knee && ankle && hip.visibility > 0.55 && knee.visibility > 0.55 && ankle.visibility > 0.45) {
             const angle = Math.round(calculateAngle(hip, knee, ankle));
-            angleText.innerText = `Diz: ${angle}°`;
+            if (angleText) angleText.innerText = `Diz: ${angle}°`;
 
             if (angle >= 80 && angle <= 105) {
                 formFeedback.innerText = "Pozisyonu bozma!";
@@ -1446,11 +1445,10 @@
                 if (!timerInterval) {
                     timerInterval = setInterval(() => {
                         holdSeconds++;
-                        repCounter.innerText = `${holdSeconds}s`;
+                        if (repCounter) repCounter.innerText = `${holdSeconds}s`;
                         updateCalories();
                         if (holdSeconds % 10 === 0) {
                             playBeep(700, 0.15);
-                            speakText(`${holdSeconds} saniye!`);
                         }
                     }, 1000);
                 }
@@ -1463,7 +1461,7 @@
         }
     }
 
-    // 12. Burpee (Plank to Jump Sequence)
+    // 12. Burpee
     function handleBurpee(lm) {
         const side = getBestSide(lm, [11, 23, 15], [12, 24, 16]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
@@ -1482,7 +1480,7 @@
             }
             if (isJump && isStageTwo) {
                 reps++;
-                repCounter.innerText = reps;
+                if (repCounter) repCounter.innerText = reps;
                 isStageTwo = false;
                 formFeedback.innerText = `✓ Burpee: ${reps}! Harika!`;
                 formFeedback.className = "text-emerald-400 font-bold";
@@ -1493,20 +1491,24 @@
         }
     }
 
-    // Camera Controller (iPhone 15 Pro Max Pro Specs & High Resolution)
+    // Camera Controller (Front / Back Flip)
     function flipCamera() {
         currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-        canvasElement.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+        const flipTransform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+        videoElement.style.transform = flipTransform;
+        canvasElement.style.transform = flipTransform;
         if (ambientCanvas) {
-            ambientCanvas.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+            ambientCanvas.style.transform = flipTransform;
         }
         initCamera();
     }
 
     async function initCamera() {
-        canvasElement.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+        const flipTransform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+        videoElement.style.transform = flipTransform;
+        canvasElement.style.transform = flipTransform;
         if (ambientCanvas) {
-            ambientCanvas.style.transform = (currentFacingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+            ambientCanvas.style.transform = flipTransform;
         }
 
         if (currentStream) {
@@ -1520,13 +1522,13 @@
             cameraAnimationId = null;
         }
 
-        // iPhone 15 Pro Max Ultra-Wide High Definition Constraints (Up to 1080p/4K 60fps)
+        // Standard Mobile HD constraints (Smooth 60 FPS hardware performance)
         const constraints = {
             audio: false,
             video: {
                 facingMode: currentFacingMode,
-                width: { ideal: 1920, min: 1280 },
-                height: { ideal: 1080, min: 720 },
+                width: { ideal: 1280, max: 1920 },
+                height: { ideal: 720, max: 1080 },
                 frameRate: { ideal: 60, min: 30 }
             }
         };
@@ -1534,7 +1536,7 @@
         try {
             currentStream = await navigator.mediaDevices.getUserMedia(constraints);
         } catch (err) {
-            console.warn("High-res stream unavailable, falling back to basic:", err);
+            console.warn("Target stream unavailable, falling back to basic:", err);
             try {
                 currentStream = await navigator.mediaDevices.getUserMedia({
                     audio: false,
@@ -1552,21 +1554,45 @@
         // Apply hardware zoom setting
         applyHardwareZoom(currentZoomMode);
 
-        // Active MediaPipe rendering loop with frame rate throttling guard
-        let isProcessing = false;
-        async function renderLoop() {
+        // Active Decoupled Render Loop (Smooth Native Video + Throttled MediaPipe AI)
+        let isProcessingPose = false;
+        let lastPoseTime = 0;
+        let lastAmbientTime = 0;
+        const POSE_THROTTLE_MS = 33; // ~30 FPS for AI pose estimation to prevent device overheating
+
+        async function renderLoop(timestamp) {
             if (!videoElement.paused && !videoElement.ended && videoElement.readyState >= 2) {
-                if (!isProcessing) {
-                    isProcessing = true;
+                
+                // Keep AR Canvas resolution matched to native video resolution
+                if (canvasElement.width !== videoElement.videoWidth || canvasElement.height !== videoElement.videoHeight) {
+                    canvasElement.width = videoElement.videoWidth || 640;
+                    canvasElement.height = videoElement.videoHeight || 480;
+                }
+
+                // Ambient Canvas Background Throttled to 10 FPS
+                if (ambientCanvas && currentZoomMode === 0.5 && ambientCanvasCtx) {
+                    if (!lastAmbientTime || (timestamp - lastAmbientTime > 100)) {
+                        lastAmbientTime = timestamp;
+                        ambientCanvasCtx.drawImage(videoElement, 0, 0, ambientCanvas.width || 80, ambientCanvas.height || 142);
+                    }
+                }
+
+                // Send frame to MediaPipe Pose with cadence guard
+                if (!isProcessingPose && (timestamp - lastPoseTime >= POSE_THROTTLE_MS)) {
+                    isProcessingPose = true;
+                    lastPoseTime = timestamp;
                     try {
                         await pose.send({ image: videoElement });
-                    } catch(e) {}
-                    isProcessing = false;
+                    } catch(e) {
+                        console.warn("Pose estimation error:", e);
+                    } finally {
+                        isProcessingPose = false;
+                    }
                 }
             }
             cameraAnimationId = requestAnimationFrame(renderLoop);
         }
-        renderLoop();
+        cameraAnimationId = requestAnimationFrame(renderLoop);
     }
 
     // Celebration Modal
@@ -1578,7 +1604,7 @@
         document.getElementById('modal-subtitle').innerText = `${exerciseConfig[currentExercise].name} antrenmanın başarıyla tamamlandı!`;
         modal.classList.remove('hidden');
         playSuccessChime();
-        playCoachAudio('finished.mp3', "Tebrikler! Antrenmanın başarıyla kaydedildi.");
+        playCoachAudio('finished.mp3');
     }
 
     function closeModal() {
@@ -1632,8 +1658,8 @@
         smoothLandmarks: true,
         enableSegmentation: false,
         smoothSegmentation: false,
-        minDetectionConfidence: 0.68,
-        minTrackingConfidence: 0.68
+        minDetectionConfidence: 0.65,
+        minTrackingConfidence: 0.65
     });
     
     pose.onResults(onResults);
@@ -1647,7 +1673,7 @@
         loadingOverlay.classList.add('hidden');
         initCamera();
         setZoomMode(0.5);
-        playCoachAudio('welcome.mp3', "Yapay zeka antrenörü hazır. İstediğin hareketi seç ve başla!");
+        playCoachAudio('welcome.mp3');
     });
 </script>
 {% endblock %}
