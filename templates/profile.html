@@ -456,9 +456,14 @@
                     </h4>
                     <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Hedef: {{ pr.target }}</span>
                 </div>
-                <a href="/egzersizler/{{ pr.slug }}" title="3D Form Demosunu İzle" class="w-7 h-7 rounded-lg bg-zinc-800 group-hover:bg-accent text-zinc-400 group-hover:text-white flex items-center justify-center transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                </a>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <a href="/ai-koc?exercise={{ pr.slug }}" title="AI Koç ile Yap" class="px-2 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all">
+                        <span>🤖 AI Koç</span>
+                    </a>
+                    <a href="/egzersizler/{{ pr.slug }}" title="3D Form Demosunu İzle" class="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-accent text-zinc-400 hover:text-white flex items-center justify-center transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </a>
+                </div>
             </div>
 
             <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-end justify-between">
@@ -532,9 +537,12 @@
                         <a href="/egzersizler/{{ fav.slug }}" class="font-bold text-white hover:text-accent transition-colors uppercase">{{ fav.name }}</a>
                         <p class="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-wide">{{ fav.muscle_group }}</p>
                     </div>
-                    <form action="/favori-ekle/{{ fav.id }}" method="POST">
-                        <button type="submit" class="text-zinc-500 hover:text-white hover:bg-zinc-800 text-xs font-bold border border-zinc-700 px-3 py-2 rounded-sm uppercase tracking-wide transition-colors">Kaldır</button>
-                    </form>
+                    <div class="flex items-center gap-2">
+                        <a href="/ai-koc?exercise={{ fav.slug }}" class="bg-orange-500/20 hover:bg-orange-500 text-orange-400 hover:text-white text-xs font-bold border border-orange-500/40 px-3 py-2 rounded-sm uppercase tracking-wide transition-colors">🤖 AI Koç</a>
+                        <form action="/favori-ekle/{{ fav.id }}" method="POST">
+                            <button type="submit" class="text-zinc-500 hover:text-white hover:bg-zinc-800 text-xs font-bold border border-zinc-700 px-3 py-2 rounded-sm uppercase tracking-wide transition-colors">Kaldır</button>
+                        </form>
+                    </div>
                 </li>
             {% endfor %}
             </ul>
