@@ -1,0 +1,59 @@
+{
+  "packageId": "com.evdespor.app",
+  "host": "ev-sporu-app.vercel.app",
+  "name": "Evde Spor",
+  "launcherName": "Evde Spor",
+  "display": "standalone",
+  "themeColor": "#EA580C",
+  "themeColorDark": "#09090B",
+  "navigationColor": "#09090B",
+  "navigationColorDark": "#09090B",
+  "navigationDividerColor": "#18181B",
+  "navigationDividerColorDark": "#18181B",
+  "backgroundColor": "#09090B",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://ev-sporu-app.vercel.app/static/images/icons/icon-512x512.png",
+  "maskableIconUrl": "https://ev-sporu-app.vercel.app/static/images/icons/maskable-icon-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "evdespor-key"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "AI Hareket Koçu",
+      "shortName": "AI Koç",
+      "url": "https://ev-sporu-app.vercel.app/ai-koc",
+      "chosenIconUrl": "https://ev-sporu-app.vercel.app/static/images/icons/icon-192x192.png"
+    },
+    {
+      "name": "Egzersiz Kütüphanesi",
+      "shortName": "Egzersizler",
+      "url": "https://ev-sporu-app.vercel.app/egzersizler",
+      "chosenIconUrl": "https://ev-sporu-app.vercel.app/static/images/icons/icon-192x192.png"
+    },
+    {
+      "name": "Antrenman Programları",
+      "shortName": "Programlar",
+      "url": "https://ev-sporu-app.vercel.app/programlar",
+      "chosenIconUrl": "https://ev-sporu-app.vercel.app/static/images/icons/icon-192x192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://ev-sporu-app.vercel.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://ev-sporu-app.vercel.app/",
+  "minSdkVersion": 21,
+  "orientation": "portrait-primary",
+  "fingerprints": []
+}

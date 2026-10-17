@@ -1,0 +1,39 @@
+{
+  "appId": "com.evdespor.app",
+  "appName": "Evde Spor",
+  "webDir": "static",
+  "server": {
+    "url": "https://ev-sporu-app.vercel.app",
+    "cleartext": false,
+    "allowNavigation": [
+      "ev-sporu-app.vercel.app",
+      "*.vercel.app"
+    ]
+  },
+  "android": {
+    "backgroundColor": "#09090b",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "backgroundColor": "#09090b",
+    "contentInset": "automatic",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1800,
+      "launchAutoHide": true,
+      "backgroundColor": "#09090b",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#09090b"
+    }
+  }
+}

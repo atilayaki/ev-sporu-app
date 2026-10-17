@@ -1,26 +1,35 @@
-// Evde Spor PWA Service Worker
-const CACHE_NAME = 'ev-sporu-cache-v1';
+// Evde Spor PWA & Store-Ready Service Worker v2
+const CACHE_NAME = 'ev-sporu-cache-v2';
+const OFFLINE_URL = '/offline';
 const PRECACHE_URLS = [
   '/',
+  '/offline',
+  '/egzersizler',
+  '/programlar',
+  '/breathe',
   '/manifest.json',
-  '/static/css/style.css',
+  '/static/images/app_logo.jpg',
   '/static/images/icon-192.png',
   '/static/images/icon-512.png',
-  '/static/images/home_gym_icon.jpg'
+  '/static/images/icons/icon-192x192.png',
+  '/static/images/icons/icon-512x512.png',
+  '/static/images/icons/maskable-icon-512x512.png'
 ];
 
-// Install: Cache critical static shell
+// Install: Cache critical app shell & offline fallback page
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_URLS).catch(err => {
-        console.warn('Pre-caching warning:', err);
-      });
+      return Promise.allSettled(
+        PRECACHE_URLS.map((url) =>
+          cache.add(url).catch((err) => console.warn('Pre-cache skipped:', url, err))
+        )
+      );
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate: Clean up old caches
+// Activate: Clean up old caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -35,41 +44,36 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: Network First with Cache Fallback for HTML/data, Cache First for static images/css
+// Fetch: Network First with Offline Page Fallback for navigation, Stale-While-Revalidate for static assets
 self.addEventListener('fetch', (event) => {
-  // Ignore non-GET or chrome-extension requests
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // For static assets (images, fonts, css, js) -> Stale While Revalidate / Cache First
+  // Static assets -> Cache First with background update
   if (url.pathname.startsWith('/static/')) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          // Fetch updated version in background
-          fetch(event.request).then((networkResponse) => {
+        const fetchPromise = fetch(event.request)
+          .then((networkResponse) => {
             if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
+              const cloned = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
             }
-          }).catch(() => {});
-          return cachedResponse;
-        }
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200) return response;
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
-          return response;
-        });
+            return networkResponse;
+          })
+          .catch(() => cachedResponse);
+
+        return cachedResponse || fetchPromise;
       })
     );
     return;
   }
 
-  // For navigation / pages -> Network first, fallback to cache
+  // HTML Navigation & Dynamic routes -> Network First, fallback to Cache, then /offline
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && event.request.mode === 'navigate') {
           const cloned = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
         }
@@ -79,7 +83,9 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request).then((cached) => {
           if (cached) return cached;
           if (event.request.mode === 'navigate') {
-            return caches.match('/');
+            return caches.match(OFFLINE_URL).then((offlinePage) => {
+              return offlinePage || caches.match('/');
+            });
           }
         });
       })

@@ -765,6 +765,96 @@ def create_app():
         selected_exercise = request.args.get('exercise', '').strip()
         return render_template('ai_coach.html', hide_nav=hide_nav, selected_exercise=selected_exercise)
 
+    @app.route('/gizlilik-politikasi')
+    @app.route('/privacy')
+    def privacy_policy():
+        return render_template('privacy_policy.html')
+
+    @app.route('/kullanim-kosullari')
+    @app.route('/terms')
+    def terms_of_use():
+        return render_template('terms.html')
+
+    @app.route('/veri-silme')
+    @app.route('/delete-account')
+    def delete_account_page():
+        return render_template('delete_account.html')
+
+    @app.route('/hesap-sil', methods=['POST'])
+    def delete_account_action():
+        target_user = None
+        if current_user.is_authenticated:
+            target_user = current_user
+        else:
+            email = (request.form.get('email') or '').strip()
+            password = request.form.get('password') or ''
+            u = User.query.filter_by(email=email).first()
+            if u and check_password_hash(u.password_hash, password):
+                target_user = u
+            else:
+                flash('E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edin.', 'danger')
+                return redirect(url_for('delete_account_page'))
+
+        if target_user:
+            uid = target_user.id
+            if current_user.is_authenticated and current_user.id == uid:
+                logout_user()
+            user_obj = User.query.get(uid)
+            if user_obj:
+                user_obj.favorites = []
+                UserProgress.query.filter_by(user_id=uid).delete()
+                DailyLog.query.filter_by(user_id=uid).delete()
+                UserProgram.query.filter_by(user_id=uid).delete()
+                UserChallenge.query.filter_by(user_id=uid).delete()
+                UserBadge.query.filter_by(user_id=uid).delete()
+                db.session.delete(user_obj)
+                db.session.commit()
+            flash('Hesabınız ve tüm kişisel antrenman verileriniz kalıcı olarak silindi.', 'info')
+        return redirect(url_for('index'))
+
+    @app.route('/offline')
+    def offline_page():
+        return render_template('offline.html')
+
+    @app.route('/.well-known/assetlinks.json')
+    def serve_assetlinks():
+        package_name = os.environ.get('ANDROID_PACKAGE_NAME', 'app.evdespor.fitness')
+        sha256_fp = os.environ.get(
+            'ANDROID_SHA256_FINGERPRINT',
+            'FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C'
+        )
+        return jsonify([
+            {
+                "relation": [
+                    "delegate_permission/common.handle_all_urls",
+                    "delegate_permission/common.get_login_creds"
+                ],
+                "target": {
+                    "namespace": "android_app",
+                    "package_name": package_name,
+                    "sha256_cert_fingerprints": [sha256_fp]
+                }
+            }
+        ])
+
+    @app.route('/.well-known/apple-app-site-association')
+    def serve_apple_association():
+        app_id = os.environ.get('APPLE_APP_ID', 'TEAMID.app.evdespor.fitness')
+        return jsonify({
+            "applinks": {
+                "apps": [],
+                "details": [
+                    {
+                        "appID": app_id,
+                        "paths": ["*"]
+                    }
+                ]
+            },
+            "webcredentials": {
+                "apps": [app_id]
+            }
+        })
+
     return app
 
 app = create_app()

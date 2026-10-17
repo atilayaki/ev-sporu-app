@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Gizlilik Politikası ve KVKK Aydınlatma Metni - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4">
+    <div class="athletic-card rounded-3xl p-6 sm:p-10 border border-zinc-800 bg-zinc-900/80 shadow-2xl space-y-8">
+        <div class="border-b border-zinc-800 pb-6">
+            <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                Google Play & App Store Uyumlu
+            </span>
+            <h1 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mt-4">
+                Gizlilik Politikası ve Kişisel Verilerin Korunması
+            </h1>
+            <p class="text-xs text-zinc-400 mt-2">Son Güncelleme: 17 Ekim 2026 • Uygulama: Evde Spor (Web, Android & iOS)</p>
+        </div>
+
+        <div class="space-y-6 text-sm text-zinc-300 leading-relaxed">
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">1. Genel Bakış</h2>
+                <p>
+                    <strong>Evde Spor</strong> ("Uygulama"), kullanıcıların ekipmansız ev antrenmanları yapmasını, yapay zeka destekli kamera koçu ile egzersiz formunu analiz etmesini ve su/kalori/oruç takibi gerçekleştirmesini sağlayan bir sağlık ve fitness uygulamasıdır. Gizliliğiniz bizim için en üst önceliktir.
+                </p>
+            </section>
+
+            <section class="p-5 rounded-2xl bg-zinc-950 border border-emerald-500/30 space-y-2">
+                <h2 class="text-lg font-black text-emerald-400 uppercase tracking-tight flex items-center gap-2">
+                    <span>📸</span>
+                    <span>2. Kamera İzni ve Yapay Zeka Görüntü İşleme Politikası</span>
+                </h2>
+                <p class="text-zinc-300">
+                    Uygulamamızdaki <strong>AI Hareket Koçu</strong> özelliği, egzersiz tekrarlarınızı otomatik saymak ve eklem açılarınızı (Squat, Şınav, Plank vb. 60 hareket) gerçek zamanlı analiz etmek için cihazınızın kamerasına (<code>android.permission.CAMERA</code> / <code>NSCameraUsageDescription</code>) erişim izni ister.
+                </p>
+                <ul class="list-disc list-inside text-zinc-400 space-y-1 pt-1">
+                    <li><strong>%100 Cihaz İçi (On-Device) İşleme:</strong> Kamera görüntüleriniz Google MediaPipe Pose teknolojisi ile tamamen kendi cihazınızın işlemcisinde anlık olarak analiz edilir.</li>
+                    <li><strong>Kayıt veya Aktarım Yoktur:</strong> Kamera görüntüleriniz veya videolarınız hiçbir koşulda kaydedilmez, sunucularımıza gönderilmez, buluta yüklenmez ve üçüncü taraflarla paylaşılmaz.</li>
+                    <li>Kamera erişimini yalnızca AI Hareket Koçu ekranını açtığınızda kullanırız; ekranı kapattığınız anda kamera akışı tamamen durdurulur.</li>
+                </ul>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">3. Toplanan ve İşlenen Veriler</h2>
+                <p>Uygulamaya üye olduğunuzda ve antrenman yaptığınızda yalnızca hizmeti sunmak için gerekli olan minimum veriler saklanır:</p>
+                <ul class="list-disc list-inside text-zinc-400 space-y-1.5">
+                    <li><strong>Hesap Bilgileri:</strong> Adınız, e-posta adresiniz ve şifrelenmiş (hashlenmiş) parolanız.</li>
+                    <li><strong>Fitness ve Sağlık Verileri:</strong> Tamamladığınız egzersizler, antrenman süreleri, tahmini yakılan kalori miktarı, günlük su tüketimi (ml), aralıklı oruç başlangıç zamanı ve kazanılan rozetler.</li>
+                    <li><strong>Cihaz Bilgileri:</strong> Uygulama içi tercihlerinizi (sesli koç seçimi, PWA kurulum durumu) saklamak için yerel depolama (LocalStorage) ve oturum çerezleri kullanılır.</li>
+                </ul>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">4. Verilerin Kullanım Amacı ve Paylaşımı</h2>
+                <p>
+                    Toplanan veriler yalnızca kişisel antrenman ilerlemenizi göstermek, haftalık/yıllık ısı haritanızı oluşturmak ve liderlik tablosunda sıralamanızı hesaplamak için kullanılır. Kişisel verileriniz <strong>hiçbir reklam ağına satılmaz veya üçüncü taraflara pazarlama amacıyla aktarılmaz</strong>.
+                </p>
+            </section>
+
+            <section class="p-5 rounded-2xl bg-zinc-950 border border-orange-500/30 space-y-3">
+                <h2 class="text-lg font-black text-orange-400 uppercase tracking-tight">5. Hesap ve Veri Silme Hakkı (Account Deletion)</h2>
+                <p>
+                    Google Play Store ve Apple App Store veri güvenliği politikaları ile KVKK/GDPR kapsamında, hesabınızı ve tüm ilişkili verilerinizi (antrenman geçmişi, su/kalori kayıtları, rozetler ve kişisel bilgiler) dilediğiniz zaman kalıcı olarak silebilirsiniz.
+                </p>
+                <div class="pt-1 flex flex-wrap gap-3">
+                    <a href="/veri-silme" class="inline-flex items-center gap-2 bg-red-500/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/40 font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all">
+                        <span>🗑️ Hesap ve Veri Silme Sayfasına Git</span>
+                    </a>
+                    <a href="/kullanim-kosullari" class="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all">
+                        <span>📄 Kullanım Koşulları</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">6. İletişim</h2>
+                <p>
+                    Gizlilik politikamız veya kişisel verilerinizle ilgili her türlü soru ve talebiniz için uygulama içi destek bölümünden veya <code>destek@evdespor.app</code> adresinden bizimle iletişime geçebilirsiniz.
+                </p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

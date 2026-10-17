@@ -1,42 +1,185 @@
 {
+  "id": "/",
   "name": "Evde Spor - Kişisel Antrenör ve AI Fitness",
   "short_name": "Evde Spor",
-  "description": "Ekipmansız ev antrenmanları, yapay zeka hareket analizi, sesli koç ve kişisel fitness takibi.",
+  "description": "Ekipmansız ev antrenmanları, 60+ egzersiz kütüphanesi, yapay zeka kamera hareket analizi, sesli koç ve kişisel fitness takibi.",
+  "lang": "tr-TR",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#09090b",
   "theme_color": "#ea580c",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
   "icons": [
     {
-      "src": "/static/images/icon-192.png",
-      "sizes": "192x192",
+      "src": "/static/images/icons/icon-48x48.png",
+      "sizes": "48x48",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/static/images/icon-512.png",
+      "src": "/static/images/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/icon-1024x1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icons/maskable-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/images/icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/screenshots/mobile-home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Evde Spor Ana Ekran ve Kişisel Antrenman"
+    },
+    {
+      "src": "/static/screenshots/mobile-exercises.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "60+ Animasyonlu Egzersiz ve AI Koç Kütüphanesi"
+    },
+    {
+      "src": "/static/screenshots/mobile-programs.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Hedefe Özel Hazır Antrenman Programları"
+    },
+    {
+      "src": "/static/screenshots/desktop-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Evde Spor Geniş Ekran Fitness Deneyimi"
     }
   ],
   "categories": ["fitness", "health", "sports", "lifestyle"],
   "shortcuts": [
     {
       "name": "AI Hareket Koçu",
+      "short_name": "AI Koç",
       "url": "/ai-koc",
-      "description": "Kamera ile gerçek zamanlı hareket ve tekrar analizi"
+      "description": "Kamera ile gerçek zamanlı hareket ve tekrar analizi",
+      "icons": [
+        {
+          "src": "/static/images/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Egzersiz Kütüphanesi",
+      "short_name": "Egzersizler",
+      "url": "/egzersizler",
+      "description": "60+ ekipmansız ev egzersizi ve form rehberi",
+      "icons": [
+        {
+          "src": "/static/images/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Antrenman Programları",
+      "short_name": "Programlar",
       "url": "/programlar",
-      "description": "Hazır fitness ve kalori yakım programları"
+      "description": "Hazır fitness ve kalori yakım programları",
+      "icons": [
+        {
+          "src": "/static/images/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Profilim",
+      "short_name": "Profil",
       "url": "/profil",
-      "description": "İlerleme raporları, su takibi ve rozetler"
+      "description": "İlerleme raporları, su takibi ve rozetler",
+      "icons": [
+        {
+          "src": "/static/images/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

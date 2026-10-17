@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanım Koşulları ve Sağlık Beyanı - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4">
+    <div class="athletic-card rounded-3xl p-6 sm:p-10 border border-zinc-800 bg-zinc-900/80 shadow-2xl space-y-8">
+        <div class="border-b border-zinc-800 pb-6">
+            <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                Yasal Bilgilendirme & Sağlık Beyanı
+            </span>
+            <h1 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mt-4">
+                Kullanım Koşulları ve Tıbbi Sorumluluk Reddi
+            </h1>
+            <p class="text-xs text-zinc-400 mt-2">Son Güncelleme: 17 Ekim 2026 • Evde Spor</p>
+        </div>
+
+        <div class="space-y-6 text-sm text-zinc-300 leading-relaxed">
+            <section class="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                <h2 class="text-lg font-black text-amber-400 uppercase tracking-tight">⚠️ 1. Tıbbi Sorumluluk Reddi (Medical Disclaimer)</h2>
+                <p>
+                    <strong>Evde Spor</strong> uygulamasında yer alan 60 vücut ağırlığı egzersizi, antrenman programları, yapay zeka kamera koçu yönlendirmeleri, su/kalori hedefleri ve aralıklı oruç sayaçları yalnızca <strong>bilgilendirme ve genel kondisyon</strong> amaçlıdır; tıbbi tavsiye, teşhis veya tedavi yerine geçmez.
+                </p>
+                <p>
+                    Herhangi bir egzersiz programına veya beslenme/oruç düzenine başlamadan önce, özellikle kalp-damar rahatsızlığınız, eklem/omurga sorununuz, hamilelik durumunuz veya kronik bir rahatsızlığınız varsa mutlaka bir hekime danışınız. Egzersiz sırasında baş dönmesi, keskin ağrı veya nefes darlığı hissederseniz antrenmanı derhal durdurunuz.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">2. Hizmetin Kapsamı ve Kullanım</h2>
+                <p>
+                    Kullanıcılar, uygulama içerisindeki egzersizleri kendi fiziksel kapasitelerine uygun olarak ve güvenli bir ev ortamında (kaymayan zemin, yeterli hareket alanı) uygulamakla yükümlüdür.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">3. Kullanıcı Hesabı ve Güvenlik</h2>
+                <p>
+                    Kayıt sırasında verilen bilgilerin doğruluğundan ve hesap şifresinin güvenliğinden kullanıcı sorumludur. Kullanıcılar diledikleri zaman hesaplarını <a href="/veri-silme" class="text-orange-400 underline font-bold">Hesap ve Veri Silme</a> sayfasından kalıcı olarak kapatabilirler.
+                </p>
+            </section>
+
+            <section class="space-y-2">
+                <h2 class="text-lg font-black text-white uppercase tracking-tight text-orange-400">4. Fikri Mülkiyet</h2>
+                <p>
+                    Uygulama içerisindeki tüm yazılım kodları, 3D egzersiz animasyonları, Türkçe sesli koç seslendirmeleri, tasarımlar ve içerikler Evde Spor'a aittir.
+                </p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
