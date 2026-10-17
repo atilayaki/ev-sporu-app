@@ -111,24 +111,184 @@
         
         <div class="p-6 sm:p-10 space-y-10">
             <!-- Metric Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
                 <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
                     <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Hedef Bölge</span>
-                    <span class="font-bold text-white text-base sm:text-lg">{{ exercise.muscle_group }}</span>
+                    <span class="font-bold text-white text-sm sm:text-base">{{ exercise.muscle_group }}</span>
                 </div>
                 <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
-                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Zorluk</span>
-                    <span class="font-bold text-orange-400 text-base sm:text-lg">{{ exercise.difficulty }}</span>
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Zorluk & Kademe</span>
+                    <span class="font-bold text-orange-400 text-sm sm:text-base">{{ exercise.difficulty }} (Sv.{{ meta.tier if meta else 2 }})</span>
                 </div>
                 <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
-                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Gereken Ekipman</span>
-                    <span class="font-bold text-emerald-400 text-base sm:text-lg">{{ exercise.equipment or 'Vücut Ağırlığı' }}</span>
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Mekanik & Patern</span>
+                    <span class="font-bold text-amber-400 text-sm sm:text-base">{{ meta.mechanic if meta else 'Bileşik' }}</span>
                 </div>
                 <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center">
+                    <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Önerilen Tempo</span>
+                    <span class="font-mono font-black text-emerald-400 text-sm sm:text-base">{{ meta.tempo if meta else '2-1-2' }}</span>
+                </div>
+                <div class="glass-panel rounded-2xl p-4 border border-zinc-800/80 text-center col-span-2 md:col-span-1">
                     <span class="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Tahmini Kalori</span>
-                    <span class="font-mono font-bold text-white text-base sm:text-lg">~{{ exercise.calories_estimate or 8 }} kcal</span>
+                    <span class="font-mono font-bold text-white text-sm sm:text-base">~{{ exercise.calories_estimate or 8 }} kcal</span>
                 </div>
             </div>
+
+            <!-- Biyomekanik Kimlik, İkincil Kaslar & Tempo Rehberi (Gymbells & Swoley Style) -->
+            {% if meta %}
+            <div class="bg-gradient-to-r from-zinc-900/90 via-zinc-900/70 to-zinc-950 rounded-2xl p-5 sm:p-6 border border-zinc-800/90 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+                    <div>
+                        <span class="text-[11px] font-black uppercase tracking-widest text-orange-400 block mb-1">⚡ Biyomekanik & Ritim Kılavuzu</span>
+                        <h3 class="text-base sm:text-lg font-black text-white uppercase tracking-tight">
+                            {{ meta.pattern }} &bull; <span class="text-zinc-300 font-bold">{{ meta.tier_label }}</span>
+                        </h3>
+                    </div>
+                    <div class="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider shrink-0">
+                        🏆 Ustalık Hedefi: {{ meta.mastery_goal }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Secondary Muscles -->
+                    <div class="bg-zinc-950/70 rounded-xl p-4 border border-zinc-800/70">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-2">Yardımcı & İkincil Çalışan Kaslar</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for sec_m in meta.secondary_muscles %}
+                            <span class="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700/80 text-zinc-200 text-xs font-semibold">
+                                + {{ sec_m }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Tempo Breakdown -->
+                    <div class="bg-zinc-950/70 rounded-xl p-4 border border-zinc-800/70">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Tempo Kadansı (İniş - Bekleme - Çıkış)</span>
+                            <span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 font-mono text-xs font-black">{{ meta.tempo }}</span>
+                        </div>
+                        <p class="text-xs text-zinc-300 font-medium leading-relaxed mt-1">
+                            ⏱️ {{ meta.tempo_desc }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kademe Zinciri: Kolaylaştır (Easier) & Zorlaştır (Harder) -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+                        <span class="text-accent font-black">/</span>
+                        <span>Kalistenik Kademe Zinciri (Kolaylaştır / Zorlaştır)</span>
+                    </h3>
+                    <a href="/kalistenik-agaci" class="text-xs font-black text-orange-400 hover:text-orange-300 uppercase tracking-wider flex items-center gap-1">
+                        <span>🌳 Tüm Yetenek Ağacını Gör</span>
+                        <span>➔</span>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Easier Variation -->
+                    {% if easier_ex %}
+                    <a href="/egzersizler/{{ easier_ex.slug }}" class="group bg-zinc-900/80 hover:bg-zinc-900 border border-emerald-500/30 hover:border-emerald-500 p-4 rounded-2xl transition-all flex items-center gap-4 shadow-lg">
+                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0 relative">
+                            <img src="/static/images/{{ easier_ex.slug }}.jpg" alt="{{ easier_ex.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full mb-1">
+                                ⬇️ Çok mu Zor? Kolaylaştır (Önceki Kademe)
+                            </span>
+                            <h4 class="text-white font-black text-sm sm:text-base uppercase truncate group-hover:text-emerald-400 transition-colors">
+                                {{ easier_ex.name }}
+                            </h4>
+                            <p class="text-xs text-zinc-400">{{ easier_ex.difficulty }} &bull; {{ easier_ex.muscle_group }}</p>
+                        </div>
+                        <span class="text-emerald-400 font-black text-lg group-hover:-translate-x-1 transition-transform">←</span>
+                    </a>
+                    {% else %}
+                    <div class="bg-zinc-900/40 border border-zinc-800/60 p-4 rounded-2xl flex items-center gap-4 opacity-75">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl shrink-0">
+                            🌱
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400 block">Başlangıç Kademesi</span>
+                            <p class="text-xs text-zinc-400 mt-0.5">Bu hareket bu kas grubunun en temel (Seviye 1) giriş egzersizidir.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Harder Variation -->
+                    {% if harder_ex %}
+                    <a href="/egzersizler/{{ harder_ex.slug }}" class="group bg-zinc-900/80 hover:bg-zinc-900 border border-orange-500/30 hover:border-orange-500 p-4 rounded-2xl transition-all flex items-center gap-4 shadow-lg">
+                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0 relative">
+                            <img src="/static/images/{{ harder_ex.slug }}.jpg" alt="{{ harder_ex.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-orange-400 bg-orange-500/15 px-2 py-0.5 rounded-full mb-1">
+                                ⬆️ Çok mu Kolay? Zorlaştır (Sonraki Kademe)
+                            </span>
+                            <h4 class="text-white font-black text-sm sm:text-base uppercase truncate group-hover:text-orange-400 transition-colors">
+                                {{ harder_ex.name }}
+                            </h4>
+                            <p class="text-xs text-zinc-400">{{ harder_ex.difficulty }} &bull; {{ harder_ex.muscle_group }}</p>
+                        </div>
+                        <span class="text-orange-400 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+                    </a>
+                    {% else %}
+                    <div class="bg-zinc-900/40 border border-amber-500/30 p-4 rounded-2xl flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl shrink-0">
+                            👑
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">Zirve (Master) Hareket!</span>
+                            <p class="text-xs text-zinc-400 mt-0.5">Bu egzersiz serinin en üst (Elit) vücut ağırlığı kademesidir.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Visual Mini Progression Chain -->
+                {% if tree_chain %}
+                <div class="bg-zinc-950/90 border border-zinc-800/80 rounded-2xl p-4 overflow-x-auto">
+                    <div class="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 flex items-center justify-between">
+                        <span>{{ parent_tree.icon }} {{ parent_tree.title }} — Kademe Yolu</span>
+                        <span>Adım {{ tree_chain|selectattr('slug', 'equalto', exercise.slug)|list|length and '' }}</span>
+                    </div>
+                    <div class="flex items-center gap-2 min-w-max pb-1">
+                        {% for node in tree_chain %}
+                        <a href="/egzersizler/{{ node.slug }}" 
+                           class="px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border {{ 'bg-orange-500 text-white border-orange-400 shadow-lg shadow-orange-500/25 scale-105' if node.slug == exercise.slug else 'bg-zinc-900/90 text-zinc-400 border-zinc-800 hover:border-zinc-600 hover:text-white' }}">
+                            <span class="w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center {{ 'bg-black/30 text-white' if node.slug == exercise.slug else 'bg-zinc-800 text-zinc-400' }}">{{ loop.index }}</span>
+                            <span class="truncate max-w-[150px]">{{ node.name }}</span>
+                        </a>
+                        {% if not loop.last %}
+                        <span class="text-zinc-600 font-black text-xs">➔</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Alternative / Swap Exercises -->
+                {% if swap_exercises %}
+                <div class="pt-2">
+                    <span class="text-xs font-bold uppercase tracking-widest text-zinc-400 block mb-3">🔄 Aynı Kas Grubunu Vuran Alternatif Hareketler (Swap)</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {% for sw in swap_exercises %}
+                        <a href="/egzersizler/{{ sw.slug }}" class="bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 hover:border-orange-500/50 p-3 rounded-xl flex items-center gap-3 transition-all group">
+                            <img src="/static/images/{{ sw.slug }}.jpg" alt="{{ sw.name }}" class="w-11 h-11 rounded-lg object-cover bg-black border border-zinc-800 shrink-0" onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                            <div class="min-w-0">
+                                <div class="text-xs font-black text-white group-hover:text-orange-400 truncate uppercase">{{ sw.name }}</div>
+                                <div class="text-[10px] text-zinc-500 font-semibold">{{ sw.difficulty }} &bull; ~{{ sw.calories_estimate or 8 }} kcal</div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
 
             <!-- Description -->
             <div class="space-y-3">

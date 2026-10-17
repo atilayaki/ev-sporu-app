@@ -50,24 +50,279 @@
             {% endfor %}
         </div>
 
-        <!-- Difficulty Pills -->
-        <div class="mt-4 flex items-center gap-2 text-xs">
-            <span class="text-zinc-500 font-bold uppercase tracking-wider text-[11px] mr-1">Seviye:</span>
-            {% for diff in ['Tümü', 'Başlangıç', 'Orta', 'İleri'] %}
-                {% set is_diff_active = (selected_difficulty == diff) or (not selected_difficulty and diff == 'Tümü') %}
-                <a href="/egzersizler?{% if selected_muscle and selected_muscle != 'Tümü' %}muscle={{ selected_muscle }}{% endif %}{% if diff != 'Tümü' %}&difficulty={{ diff }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
-                   class="px-3 py-1 rounded-lg font-semibold uppercase tracking-wider transition-all {{ 'bg-zinc-700 text-white font-bold' if is_diff_active else 'text-zinc-400 hover:text-white hover:bg-zinc-900' }}">
-                    {{ diff }}
-                </a>
-            {% endfor %}
+            <!-- Difficulty Pills -->
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-zinc-500 font-bold uppercase tracking-wider text-[11px] mr-1">Seviye:</span>
+                {% for diff in ['Tümü', 'Başlangıç', 'Orta', 'İleri'] %}
+                    {% set is_diff_active = (selected_difficulty == diff) or (not selected_difficulty and diff == 'Tümü') %}
+                    <a href="/egzersizler?{% if selected_muscle and selected_muscle != 'Tümü' %}muscle={{ selected_muscle }}{% endif %}{% if diff != 'Tümü' %}&difficulty={{ diff }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                       class="px-3 py-1 rounded-lg font-semibold uppercase tracking-wider transition-all {{ 'bg-zinc-700 text-white font-bold' if is_diff_active else 'text-zinc-400 hover:text-white hover:bg-zinc-900' }}">
+                        {{ diff }}
+                    </a>
+                {% endfor %}
 
-            <span class="ml-auto text-xs text-zinc-500">
-                <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket listelendi
-            </span>
+                <div class="ml-auto flex items-center gap-3">
+                    <a href="/kalistenik-agaci" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-1.5">
+                        <span>🌳 Kalistenik Yetenek Ağacı</span>
+                    </a>
+                    <a href="/antrenman-olustur" class="px-3 py-1.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/40 text-orange-400 font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-1.5">
+                        <span>⚡ Akıllı Antrenman Üret</span>
+                    </a>
+                    <span class="text-xs text-zinc-500 hidden sm:inline">
+                        <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket listelendi
+                    </span>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Exercise Cards Grid -->
+        <!-- MODÜL 2: İnteraktif Ön/Arka Vücut Kas Haritası (wger & Lyftr SVG Anatomy Explorer) -->
+        <div class="mb-10 athletic-card rounded-3xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-5 sm:p-7 shadow-2xl"
+             x-data="{
+                showMap: true,
+                hoveredMuscle: '',
+                selectedMuscle: {{ (selected_muscle or 'Tümü')|tojson }},
+                selectMuscle(m) {
+                    if (this.selectedMuscle === m) {
+                        window.location.href = '/egzersizler';
+                    } else {
+                        window.location.href = '/egzersizler?muscle=' + encodeURIComponent(m);
+                    }
+                },
+                isHighlighted(m) {
+                    return this.hoveredMuscle === m || this.selectedMuscle === m;
+                }
+             }">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-orange-400 mb-1">
+                        <span>🧬 İNTERAKTİF ANATOMİ & KAS HARİTASI</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+                        Hedef Kas Bölgeni Vücut Üzerinden Seç
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-0.5">
+                        Ön veya arka vücut haritasındaki kas gruplarına tıklayarak o bölgeyi çalıştıran hareketleri anında filtrele.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    {% if selected_muscle and selected_muscle != 'Tümü' %}
+                    <a href="/egzersizler" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider border border-zinc-700">
+                        ✕ Filtreyi Sıfırla ({{ selected_muscle }})
+                    </a>
+                    {% endif %}
+                    <button @click="showMap = !showMap" class="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider cursor-pointer">
+                        <span x-text="showMap ? 'Haritayı Gizle ▲' : 'Kas Haritasını Aç ▼'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="showMap" x-transition class="pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- Left: Front & Back SVG Human Anatomy Diagrams -->
+                <div class="lg:col-span-7 grid grid-cols-2 gap-4 bg-zinc-950/90 border border-zinc-800/80 rounded-2xl p-4 sm:p-6 relative">
+                    <!-- FRONT BODY (ÖN VÜCUT) -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-2 px-3 py-0.5 rounded-full bg-zinc-900 border border-zinc-800">
+                            Ön Görünüm (Anterior)
+                        </span>
+                        <svg viewBox="0 0 200 420" class="w-full max-w-[180px] h-auto select-none">
+                            <!-- Head & Neck (Neutral) -->
+                            <circle cx="100" cy="34" r="20" fill="#27272a" stroke="#3f3f46" stroke-width="2"/>
+                            <rect x="91" y="54" width="18" height="14" rx="4" fill="#27272a"/>
+
+                            <!-- Shoulders & Arms (Omuz, Kol) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Omuz, Kol'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Omuz, Kol')">
+                                <!-- Deltoids -->
+                                <path d="M55,70 Q42,75 40,96 L58,102 L65,72 Z"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <path d="M145,70 Q158,75 160,96 L142,102 L135,72 Z"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <!-- Biceps / Forearms -->
+                                <rect x="36" y="102" width="20" height="44" rx="9"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#f97316' : '#3f3f46'" stroke="#18181b" stroke-width="2"/>
+                                <rect x="144" y="102" width="20" height="44" rx="9"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#f97316' : '#3f3f46'" stroke="#18181b" stroke-width="2"/>
+                                <rect x="32" y="148" width="18" height="46" rx="8"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#fb923c' : '#27272a'" stroke="#18181b" stroke-width="2"/>
+                                <rect x="150" y="148" width="18" height="46" rx="8"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#fb923c' : '#27272a'" stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Chest (Göğüs - Pectorals) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Göğüs'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Göğüs')">
+                                <path d="M64,70 L98,70 L98,112 Q76,116 62,102 Z"
+                                      :fill="isHighlighted('Göğüs') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <path d="M136,70 L102,70 L102,112 Q124,116 138,102 Z"
+                                      :fill="isHighlighted('Göğüs') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Abs & Obliques (Karın, Core) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Karın, Core'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Karın, Core')">
+                                <!-- 6-pack + obliques -->
+                                <rect x="70" y="114" width="60" height="78" rx="10"
+                                      :fill="isHighlighted('Karın, Core') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <line x1="100" y1="116" x2="100" y2="188" stroke="#18181b" stroke-width="2.5"/>
+                                <line x1="74" y1="138" x2="126" y2="138" stroke="#18181b" stroke-width="2"/>
+                                <line x1="74" y1="162" x2="126" y2="162" stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Quads & Hip Flexors (Ön Bacak, Kalça) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Ön Bacak, Kalça'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Ön Bacak, Kalça')">
+                                <path d="M66,196 L97,196 L94,296 L68,296 Q62,245 66,196 Z"
+                                      :fill="isHighlighted('Ön Bacak, Kalça') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <path d="M134,196 L103,196 L106,296 L132,296 Q138,245 134,196 Z"
+                                      :fill="isHighlighted('Ön Bacak, Kalça') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Lower Legs / Shins (Arka Bacak, Baldır) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Arka Bacak, Baldır'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Arka Bacak, Baldır')">
+                                <rect x="69" y="302" width="23" height="82" rx="10"
+                                      :fill="isHighlighted('Arka Bacak, Baldır') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <rect x="108" y="302" width="23" height="82" rx="10"
+                                      :fill="isHighlighted('Arka Bacak, Baldır') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- BACK BODY (ARKA VÜCUT) -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-2 px-3 py-0.5 rounded-full bg-zinc-900 border border-zinc-800">
+                            Arka Görünüm (Posterior)
+                        </span>
+                        <svg viewBox="0 0 200 420" class="w-full max-w-[180px] h-auto select-none">
+                            <!-- Head & Neck -->
+                            <circle cx="100" cy="34" r="20" fill="#27272a" stroke="#3f3f46" stroke-width="2"/>
+                            <rect x="91" y="54" width="18" height="14" rx="4" fill="#27272a"/>
+
+                            <!-- Rear Delts & Triceps (Omuz, Kol) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Omuz, Kol'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Omuz, Kol')">
+                                <path d="M55,70 Q42,75 40,96 L58,102 L65,72 Z"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <path d="M145,70 Q158,75 160,96 L142,102 L135,72 Z"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <!-- Triceps -->
+                                <rect x="36" y="102" width="20" height="46" rx="9"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#f97316' : '#3f3f46'" stroke="#18181b" stroke-width="2"/>
+                                <rect x="144" y="102" width="20" height="46" rx="9"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#f97316' : '#3f3f46'" stroke="#18181b" stroke-width="2"/>
+                                <rect x="32" y="150" width="18" height="44" rx="8"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#fb923c' : '#27272a'" stroke="#18181b" stroke-width="2"/>
+                                <rect x="150" y="150" width="18" height="44" rx="8"
+                                      :fill="isHighlighted('Omuz, Kol') ? '#fb923c' : '#27272a'" stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Back / Lats / Traps / Erectors (Sırt) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Sırt'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Sırt')">
+                                <path d="M64,70 L136,70 L128,178 L72,178 Z"
+                                      :fill="isHighlighted('Sırt') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <line x1="100" y1="72" x2="100" y2="176" stroke="#18181b" stroke-width="2.5"/>
+                                <path d="M78,72 L100,115 L122,72" fill="none" stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Glutes (Ön Bacak, Kalça) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Ön Bacak, Kalça'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Ön Bacak, Kalça')">
+                                <rect x="66" y="180" width="32" height="42" rx="14"
+                                      :fill="isHighlighted('Ön Bacak, Kalça') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <rect x="102" y="180" width="32" height="42" rx="14"
+                                      :fill="isHighlighted('Ön Bacak, Kalça') ? '#ea580c' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                            </g>
+
+                            <!-- Hamstrings & Calves (Arka Bacak, Baldır) -->
+                            <g class="cursor-pointer transition-all duration-200"
+                               @mouseenter="hoveredMuscle = 'Arka Bacak, Baldır'" @mouseleave="hoveredMuscle = ''"
+                               @click="selectMuscle('Arka Bacak, Baldır')">
+                                <!-- Hamstrings -->
+                                <rect x="68" y="225" width="27" height="72" rx="10"
+                                      :fill="isHighlighted('Arka Bacak, Baldır') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <rect x="105" y="225" width="27" height="72" rx="10"
+                                      :fill="isHighlighted('Arka Bacak, Baldır') ? '#ea580c' : '#52525b'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <!-- Calves -->
+                                <rect x="70" y="302" width="23" height="82" rx="11"
+                                      :fill="isHighlighted('Arka Bacak, Baldır') ? '#f97316' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                                <rect x="107" y="302" width="23" height="82" rx="11"
+                                      :fill="isHighlighted('Arka Bacak, Baldır') ? '#f97316' : '#3f3f46'"
+                                      stroke="#18181b" stroke-width="2"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Right: Interactive Muscle Region Selector Cards -->
+                <div class="lg:col-span-5 space-y-2.5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2 flex items-center justify-between">
+                        <span>Kas Bölgeleri & Hareket Sayısı</span>
+                        <span class="text-orange-400" x-text="hoveredMuscle || (selectedMuscle !== 'Tümü' ? selectedMuscle : 'Bölge Seç')"></span>
+                    </div>
+
+                    {% set anatomy_regions = [
+                        {'name': 'Göğüs', 'desc': 'Pectoralis Major, Üst/Alt/İç Göğüs İtiş', 'icon': '🔥'},
+                        {'name': 'Sırt', 'desc': 'Kanat (Lats), Trapez, Rhomboid & Bel', 'icon': '🦅'},
+                        {'name': 'Omuz, Kol', 'desc': 'Deltoidler, Triceps, Biceps & Amut Gücü', 'icon': '💪'},
+                        {'name': 'Karın, Core', 'desc': 'Rectus Abdominis, Oblikler & Derin Core', 'icon': '💎'},
+                        {'name': 'Ön Bacak, Kalça', 'desc': 'Quadriceps, Gluteus Maximus & Medius', 'icon': '⚡'},
+                        {'name': 'Arka Bacak, Baldır', 'desc': 'Hamstrings, Gastrocnemius & Soleus', 'icon': '🛡️'},
+                        {'name': 'Kardiyo, Kondisyon', 'desc': 'Tam Vücut HIIT, Nabız & Yağ Yakımı', 'icon': '🚀'}
+                    ] %}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                        {% for reg in anatomy_regions %}
+                        <button type="button"
+                                @mouseenter="hoveredMuscle = '{{ reg.name }}'"
+                                @mouseleave="hoveredMuscle = ''"
+                                @click="selectMuscle('{{ reg.name }}')"
+                                class="w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer"
+                                :class="isHighlighted('{{ reg.name }}') ? 'bg-orange-500/15 border-orange-500 text-white shadow-md shadow-orange-500/10' : 'bg-zinc-900/80 border-zinc-800/90 text-zinc-300 hover:border-zinc-700'">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="text-lg shrink-0">{{ reg.icon }}</span>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-black uppercase tracking-tight truncate">{{ reg.name }}</div>
+                                    <div class="text-[11px] text-zinc-400 truncate">{{ reg.desc }}</div>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-black shrink-0 ml-2"
+                                  :class="isHighlighted('{{ reg.name }}') ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-orange-400'">
+                                {{ muscle_counts.get(reg.name, 0) if muscle_counts else '' }} Hareket
+                            </span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise Cards Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {% for exercise in exercises %}
         <div class="athletic-card rounded-2xl overflow-hidden flex flex-col justify-between border border-zinc-800/80 bg-zinc-900/60 group hover:border-orange-500/50 transition-all shadow-xl">

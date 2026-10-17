@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% block title %}Akıllı Antrenman Oluşturucu (Swoley Generator) - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-6xl mx-auto animate-fade-up" x-data="smartWorkoutBuilder()">
+    <!-- Header -->
+    <div class="mb-10 pb-6 border-b border-zinc-800/80 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-wider mb-3">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                <span>SWOLEY ALGORİTMİK ANTRENMAN MOTORU &bull; %100 VÜCUT AĞIRLIĞI</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
+                Akıllı Antrenman <span class="text-gradient">Oluşturucu</span>
+            </h1>
+            <p class="text-zinc-400 mt-2 text-base max-w-2xl font-medium">
+                Hedef bölgeni, antrenman amacını ve süreni seç; biyomekanik motorumuz sana özel set, tekrar, dinlenme ve tempo şemasını saniyeler içinde hazırlasın!
+            </p>
+        </div>
+
+        <a href="/kalistenik-agaci" class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 self-start lg:self-end">
+            <span>🌳 Kalistenik Yetenek Ağacı</span>
+            <span>➔</span>
+        </a>
+    </div>
+
+    <!-- Step 1, 2, 3 Configuration Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left Column: Builder Controls -->
+        <div class="lg:col-span-5 space-y-6">
+            
+            <!-- 1. Split / Target Region -->
+            <div class="athletic-card rounded-3xl p-6 border border-zinc-800/90 bg-zinc-950/90 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black uppercase tracking-widest text-orange-400">01 / Antrenman Bölgesi (Split)</span>
+                    <span class="text-[11px] font-bold text-zinc-500" x-text="selectedSplit.label"></span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <template x-for="sp in splits" :key="sp.id">
+                        <button type="button"
+                                @click="selectSplit(sp)"
+                                class="p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between"
+                                :class="selectedSplit.id === sp.id ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700'">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-lg" x-text="sp.icon"></span>
+                                <span x-show="selectedSplit.id === sp.id" class="w-2 h-2 rounded-full bg-orange-500"></span>
+                            </div>
+                            <div class="text-xs font-black uppercase tracking-tight" x-text="sp.label"></div>
+                            <div class="text-[10px] text-zinc-400 mt-0.5 line-clamp-1" x-text="sp.desc"></div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 2. Training Goal (Strength / Hypertrophy / Fat Burn) -->
+            <div class="athletic-card rounded-3xl p-6 border border-zinc-800/90 bg-zinc-950/90 space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black uppercase tracking-widest text-orange-400">02 / Antrenman Hedefi (Biyomekanik Şema)</span>
+                </div>
+
+                <div class="space-y-2.5">
+                    <template x-for="g in goals" :key="g.id">
+                        <button type="button"
+                                @click="selectGoal(g)"
+                                class="w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3"
+                                :class="selectedGoal.id === g.id ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700'">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl" x-text="g.icon"></span>
+                                <div>
+                                    <div class="text-sm font-black uppercase tracking-tight" x-text="g.label"></div>
+                                    <div class="text-[11px] text-zinc-400" x-text="g.desc"></div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <span class="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-[11px] font-black text-orange-400 block" x-text="g.sets + '×' + g.reps"></span>
+                                <span class="text-[10px] text-zinc-500 font-bold" x-text="g.rest + 'sn dinlenme'"></span>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 3. Level & Duration -->
+            <div class="athletic-card rounded-3xl p-6 border border-zinc-800/90 bg-zinc-950/90 space-y-5">
+                <div>
+                    <span class="text-xs font-black uppercase tracking-widest text-orange-400 block mb-3">03 / Zorluk Seviyesi</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <template x-for="lvl in ['Tümü', 'Başlangıç', 'Orta', 'İleri']" :key="lvl">
+                            <button type="button"
+                                    @click="selectedLevel = lvl; generateWorkout()"
+                                    class="py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer"
+                                    :class="selectedLevel === lvl ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'"
+                                    x-text="lvl === 'Tümü' ? 'Karışık' : lvl">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black uppercase tracking-widest text-orange-400">04 / Hareket Sayısı & Süre</span>
+                        <span class="font-mono text-xs font-black text-white" x-text="exerciseCount + ' Hareket (~' + estimatedMinutes + ' Dk)'"></span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <template x-for="cnt in [4, 5, 6, 8]" :key="cnt">
+                            <button type="button"
+                                    @click="exerciseCount = cnt; generateWorkout()"
+                                    class="py-2 rounded-xl font-mono text-xs font-black border transition-all cursor-pointer"
+                                    :class="exerciseCount === cnt ? 'bg-amber-500 text-black border-amber-400' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700'"
+                                    x-text="cnt + ' Hareket'">
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <button type="button"
+                        @click="generateWorkout()"
+                        class="w-full py-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🎲 Kombinasyonu Yeniden Karıştır</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Generated Workout Preview & Live Customizer -->
+        <div class="lg:col-span-7">
+            <div class="athletic-card rounded-3xl border border-zinc-800/90 bg-zinc-950 p-6 sm:p-8 shadow-2xl space-y-6">
+                <!-- Generated Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-500/20 text-orange-400 border border-orange-500/30" x-text="selectedSplit.label"></span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30" x-text="selectedGoal.label"></span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mt-2" x-text="workoutTitle"></h2>
+                    </div>
+
+                    <!-- Summary Metrics -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <div class="bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl text-center">
+                            <span class="block text-[9px] font-bold uppercase text-zinc-500">Tahmini Süre</span>
+                            <span class="font-mono font-black text-white text-sm" x-text="'~' + estimatedMinutes + ' Dk'"></span>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl text-center">
+                            <span class="block text-[9px] font-bold uppercase text-zinc-500">Kalori</span>
+                            <span class="font-mono font-black text-orange-400 text-sm" x-text="'~' + estimatedCalories + ' kcal'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise List with Easier / Harder / Swap Controls -->
+                <div class="space-y-3.5">
+                    <template x-for="(item, idx) in generatedList" :key="item.slug + '-' + idx">
+                        <div class="bg-zinc-900/75 border border-zinc-800/90 hover:border-orange-500/40 rounded-2xl p-4 transition-all">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <!-- Thumbnail & Info -->
+                                <div class="flex items-center gap-3.5 min-w-0">
+                                    <div class="relative w-16 h-16 rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0">
+                                        <img :src="'/static/images/' + item.slug + '.jpg'" :alt="item.name" class="w-full h-full object-cover" onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                                        <span class="absolute top-1 left-1 w-5 h-5 rounded-md bg-orange-500 text-white font-mono font-black text-[10px] flex items-center justify-center" x-text="idx + 1"></span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                            <span class="text-[10px] font-black uppercase tracking-wider text-orange-400" x-text="item.muscle_group"></span>
+                                            <span class="text-zinc-700">&bull;</span>
+                                            <span class="text-[10px] font-bold text-zinc-400" x-text="'Sv.' + item.tier + ' (' + item.difficulty + ')'"></span>
+                                            <span class="text-zinc-700">&bull;</span>
+                                            <span class="text-[10px] font-mono font-bold text-emerald-400" x-text="'Tempo ' + item.tempo"></span>
+                                        </div>
+                                        <a :href="'/egzersizler/' + item.slug" class="text-sm sm:text-base font-black text-white hover:text-orange-400 uppercase tracking-tight block truncate" x-text="item.name"></a>
+                                        <div class="text-xs font-mono font-bold text-zinc-300 mt-0.5">
+                                            <span class="text-orange-400" x-text="selectedGoal.sets + ' Set'"></span> &times;
+                                            <span x-text="selectedGoal.reps + ' Tekrar'"></span> &bull;
+                                            <span class="text-zinc-400" x-text="selectedGoal.rest + 'sn Dinlenme'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Scaling & Swap Buttons -->
+                                <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                                    <button type="button"
+                                            x-show="item.easier"
+                                            @click="scaleExercise(idx, item.easier)"
+                                            title="Çok mu zor? Bir alt kademeye kolaylaştır"
+                                            class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                        ⬇️ Kolaylaştır
+                                    </button>
+                                    <button type="button"
+                                            x-show="item.harder"
+                                            @click="scaleExercise(idx, item.harder)"
+                                            title="Çok mu kolay? Bir üst kademeye zorlaştır"
+                                            class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                        ⬆️ Zorlaştır
+                                    </button>
+                                    <button type="button"
+                                            @click="swapExercise(idx)"
+                                            title="Aynı bölgeyi çalıştıran başka bir hareketle değiştir"
+                                            class="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                        🔄 Değiştir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Launch Into Gym Mode Player CTA -->
+                <div class="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center gap-3">
+                    <a :href="launchUrl"
+                       class="w-full py-4 px-8 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-base uppercase tracking-wider shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-2 text-center">
+                        <span>🚀 Canlı Antrenman Oynatıcısında Başlat (Gym Mode)</span>
+                        <span>➔</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const FULL_CATALOG = {{ catalog|tojson }};
+
+    function smartWorkoutBuilder() {
+        return {
+            catalog: FULL_CATALOG,
+            splits: [
+                { id: 'full', label: 'Tüm Vücut (Full Body)', icon: '⚡', desc: 'Göğüs, Sırt, Bacak ve Core dengeli', muscles: ['Göğüs', 'Sırt', 'Ön Bacak, Kalça', 'Karın, Core', 'Kardiyo, Kondisyon'] },
+                { id: 'upper', label: 'Üst Vücut Zırhı', icon: '💪', desc: 'Göğüs, Sırt, Omuz ve Kollar', muscles: ['Göğüs', 'Sırt', 'Omuz, Kol'] },
+                { id: 'push', label: 'İtiş Günü (Push)', icon: '🔥', desc: 'Göğüs, Omuz ve Arka Kol (Triceps)', muscles: ['Göğüs', 'Omuz, Kol'] },
+                { id: 'pull_core', label: 'Çekiş & Sırt + Core', icon: '🦅', desc: 'Sırt, Kanat, Biceps ve Karın', muscles: ['Sırt', 'Karın, Core'] },
+                { id: 'lower', label: 'Alt Vücut & Kalça', icon: '🦵', desc: 'Ön Bacak, Kalça, Hamstring ve Baldır', muscles: ['Ön Bacak, Kalça', 'Arka Bacak, Baldır'] },
+                { id: 'core_hiit', label: 'Karın & HIIT Yağ Yakımı', icon: '🚀', desc: 'Core kompresyonu ve yüksek nabız', muscles: ['Karın, Core', 'Kardiyo, Kondisyon'] }
+            ],
+            goals: [
+                { id: 'hypertrophy', label: 'Kas Gelişimi & Şekillenme', icon: '🏋️', desc: 'Orta tekrar, kontrollü tempo (2-1-2), dengeli hipertrofi', sets: 3, reps: 12, rest: 45 },
+                { id: 'strength', label: 'Saf Güç & Kalistenik Ustalık', icon: '👑', desc: 'Zorlayıcı kademeler, düşük tekrar, uzun dinlenme', sets: 4, reps: 8, rest: 75 },
+                { id: 'fatburn', label: 'Yağ Yakımı & Metabolik HIIT', icon: '🔥', desc: 'Yüksek tekrar, kısa dinlenme, maksimum kalori yakımı', sets: 3, reps: 18, rest: 25 }
+            ],
+            selectedSplit: null,
+            selectedGoal: null,
+            selectedLevel: 'Tümü',
+            exerciseCount: 5,
+            generatedList: [],
+
+            init() {
+                this.selectedSplit = this.splits[0];
+                this.selectedGoal = this.goals[0];
+                this.generateWorkout();
+            },
+
+            selectSplit(sp) {
+                this.selectedSplit = sp;
+                this.generateWorkout();
+            },
+
+            selectGoal(g) {
+                this.selectedGoal = g;
+                this.generateWorkout();
+            },
+
+            get workoutTitle() {
+                if (!this.selectedSplit || !this.selectedGoal) return 'Özel Akıllı Antrenman';
+                return `${this.selectedSplit.label} • ${this.selectedGoal.label}`;
+            },
+
+            get estimatedMinutes() {
+                if (!this.selectedGoal) return 20;
+                const sets = this.selectedGoal.sets;
+                const workAndRestMin = (sets * (40 + this.selectedGoal.rest)) / 60;
+                return Math.max(10, Math.round(this.generatedList.length * workAndRestMin));
+            },
+
+            get estimatedCalories() {
+                if (!this.selectedGoal) return 150;
+                const base = this.generatedList.reduce((acc, ex) => acc + (ex.calories_estimate || 8), 0);
+                return Math.round(base * this.selectedGoal.sets * 1.15);
+            },
+
+            get launchUrl() {
+                const slugs = this.generatedList.map(i => i.slug).join(',');
+                const params = new URLSearchParams({
+                    title: this.workoutTitle,
+                    slugs: slugs,
+                    sets: this.selectedGoal ? this.selectedGoal.sets : 3,
+                    reps: this.selectedGoal ? this.selectedGoal.reps : 12,
+                    rest: this.selectedGoal ? this.selectedGoal.rest : 45
+                });
+                return `/ozel-antrenman?${params.toString()}`;
+            },
+
+            generateWorkout() {
+                if (!this.selectedSplit) return;
+                const targetMuscles = this.selectedSplit.muscles;
+                let pool = this.catalog.filter(e => targetMuscles.includes(e.muscle_group));
+
+                if (this.selectedLevel !== 'Tümü') {
+                    const levelPool = pool.filter(e => e.difficulty === this.selectedLevel);
+                    if (levelPool.length >= 3) {
+                        pool = levelPool;
+                    }
+                }
+
+                // Shuffle pool while trying to pick diverse muscle groups
+                const shuffled = [...pool].sort(() => Math.random() - 0.5);
+                const chosen = [];
+                const usedSlugs = new Set();
+
+                // Pass 1: one from each muscle in split
+                for (const mg of targetMuscles) {
+                    if (chosen.length >= this.exerciseCount) break;
+                    const candidate = shuffled.find(e => e.muscle_group === mg && !usedSlugs.has(e.slug));
+                    if (candidate) {
+                        chosen.push(candidate);
+                        usedSlugs.add(candidate.slug);
+                    }
+                }
+
+                // Pass 2: fill up to exerciseCount
+                for (const ex of shuffled) {
+                    if (chosen.length >= this.exerciseCount) break;
+                    if (!usedSlugs.has(ex.slug)) {
+                        chosen.push(ex);
+                        usedSlugs.add(ex.slug);
+                    }
+                }
+
+                this.generatedList = chosen;
+            },
+
+            scaleExercise(idx, targetSlug) {
+                if (!targetSlug) return;
+                const replacement = this.catalog.find(e => e.slug === targetSlug);
+                if (replacement) {
+                    this.generatedList.splice(idx, 1, replacement);
+                }
+            },
+
+            swapExercise(idx) {
+                const current = this.generatedList[idx];
+                if (!current) return;
+                const usedSlugs = new Set(this.generatedList.map(e => e.slug));
+                let candidates = [];
+
+                if (current.swaps && current.swaps.length > 0) {
+                    candidates = this.catalog.filter(e => current.swaps.includes(e.slug) && !usedSlugs.has(e.slug));
+                }
+                if (candidates.length === 0) {
+                    candidates = this.catalog.filter(e => e.muscle_group === current.muscle_group && e.slug !== current.slug && !usedSlugs.has(e.slug));
+                }
+                if (candidates.length === 0) {
+                    candidates = this.catalog.filter(e => e.muscle_group === current.muscle_group && e.slug !== current.slug);
+                }
+                if (candidates.length > 0) {
+                    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+                    this.generatedList.splice(idx, 1, pick);
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

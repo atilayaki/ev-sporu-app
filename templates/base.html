@@ -187,19 +187,21 @@
                     {{ navlink('/', 'Anasayfa', 'hidden xl:inline-flex') }}
                     {{ navlink('/egzersizler', 'Egzersizler') }}
                     {{ navlink('/programlar', 'Programlar') }}
-                    {{ navlink('/challenges', 'Meydan Okuma', 'hidden lg:inline-flex') }}
-                    {{ navlink('/liderlik', 'Liderlik', 'hidden xl:inline-flex') }}
-                    {{ navlink('/breathe', 'Nefes', 'hidden xl:inline-flex') }}
+                    {{ navlink('/antrenman-olustur', 'Antrenman Üret') }}
+                    {{ navlink('/kalistenik-agaci', 'Yetenek Ağacı', 'hidden lg:inline-flex') }}
+                    {{ navlink('/challenges', 'Meydan Okuma', 'hidden xl:inline-flex') }}
 
                     <!-- "Daha" dropdown for collapsed links -->
-                    <div class="relative xl:hidden" x-data="{ open: false }" @click.outside="open = false">
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                         <button @click="open = !open" class="nav-link gap-1">
                             <span>Daha</span>
                             <svg class="w-3 h-3 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <div x-show="open" x-cloak x-transition class="absolute left-0 mt-2 w-48 rounded-xl bg-zinc-950/95 border border-zinc-800 shadow-2xl backdrop-blur-xl p-1.5">
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 mt-2 w-52 rounded-xl bg-zinc-950/95 border border-zinc-800 shadow-2xl backdrop-blur-xl p-1.5 z-50">
                             <a href="/" class="block px-3 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white">🏠 Anasayfa</a>
-                            <a href="/challenges" class="lg:hidden block px-3 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white">🔥 Meydan Okuma</a>
+                            <a href="/antrenman-olustur" class="block px-3 py-2 rounded-lg text-sm font-semibold text-orange-400 hover:bg-zinc-800 hover:text-white">⚡ Akıllı Antrenman Üret</a>
+                            <a href="/kalistenik-agaci" class="block px-3 py-2 rounded-lg text-sm font-semibold text-amber-400 hover:bg-zinc-800 hover:text-white">🌳 Kalistenik Yetenek Ağacı</a>
+                            <a href="/challenges" class="block px-3 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white">🔥 Meydan Okuma</a>
                             <a href="/liderlik" class="block px-3 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white">🏆 Liderlik</a>
                             <a href="/breathe" class="block px-3 py-2 rounded-lg text-sm font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white">🌬️ Nefes</a>
                         </div>

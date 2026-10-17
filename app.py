@@ -15,6 +15,7 @@ import os
 import shutil
 from datetime import datetime, date, timedelta
 from urllib.parse import urlparse
+from exercise_meta import EXERCISE_META, CALISTHENICS_TREES, get_exercise_meta
 
 
 def update_streak(user):
@@ -260,6 +261,13 @@ def create_app():
         muscle_groups = ['Tümü', 'Göğüs', 'Karın, Core', 'Ön Bacak, Kalça', 'Arka Bacak, Baldır', 'Sırt', 'Omuz, Kol', 'Kardiyo, Kondisyon']
         total_count = Exercise.query.count()
 
+        # Muscle group counts for interactive SVG anatomy explorer
+        all_db_exercises = Exercise.query.all()
+        muscle_counts = {}
+        for ex_item in all_db_exercises:
+            mg_key = ex_item.muscle_group or 'Tümü'
+            muscle_counts[mg_key] = muscle_counts.get(mg_key, 0) + 1
+
         return render_template(
             'exercises.html',
             exercises=all_exercises,
@@ -267,7 +275,9 @@ def create_app():
             selected_muscle=muscle,
             selected_difficulty=difficulty,
             muscle_groups=muscle_groups,
-            total_count=total_count
+            total_count=total_count,
+            muscle_counts=muscle_counts,
+            exercise_meta=EXERCISE_META
         )
 
     @app.route('/egzersizler/<slug>')
@@ -276,7 +286,207 @@ def create_app():
         is_favorite = False
         if current_user.is_authenticated:
             is_favorite = exercise in current_user.favorites
-        return render_template('exercise_detail.html', exercise=exercise, is_favorite=is_favorite)
+
+        meta = get_exercise_meta(slug)
+        easier_ex = Exercise.query.filter_by(slug=meta['easier']).first() if meta.get('easier') else None
+        harder_ex = Exercise.query.filter_by(slug=meta['harder']).first() if meta.get('harder') else None
+        swap_slugs = meta.get('swaps', [])
+        swap_exercises = Exercise.query.filter(Exercise.slug.in_(swap_slugs)).all() if swap_slugs else []
+
+        # Find which Calisthenics Tree this exercise belongs to
+        parent_tree = None
+        tree_Chain = []
+        for t in CALISTHENICS_TREES:
+            if slug in t['nodes']:
+                parent_tree = t
+                ex_map = {e.slug: e for e in Exercise.query.filter(Exercise.slug.in_(t['nodes'])).all()}
+                tree_Chain = [ex_map[s] for s in t['nodes'] if s in ex_map]
+                break
+
+        return render_template(
+            'exercise_detail.html',
+            exercise=exercise,
+            is_favorite=is_favorite,
+            meta=meta,
+            easier_ex=easier_ex,
+            harder_ex=harder_ex,
+            swap_exercises=swap_exercises,
+            parent_tree=parent_tree,
+            tree_chain=tree_Chain
+        )
+
+    @app.route('/kalistenik-agaci')
+    def calisthenics_tree():
+        all_exercises = Exercise.query.all()
+        ex_by_slug = {e.slug: e for e in all_exercises}
+
+        completed_slugs = set()
+        if current_user.is_authenticated:
+            user_logs = UserProgress.query.filter_by(user_id=current_user.id).all()
+            for log_item in user_logs:
+                if log_item.exercise and log_item.exercise.slug:
+                    completed_slugs.add(log_item.exercise.slug)
+
+        trees_data = []
+        for tree in CALISTHENICS_TREES:
+            nodes_list = []
+            for idx, s in enumerate(tree['nodes']):
+                ex_obj = ex_by_slug.get(s)
+                if ex_obj:
+                    m = get_exercise_meta(s)
+                    nodes_list.append({
+                        'step': idx + 1,
+                        'slug': ex_obj.slug,
+                        'name': ex_obj.name,
+                        'difficulty': ex_obj.difficulty,
+                        'muscle_group': ex_obj.muscle_group,
+                        'calories': ex_obj.calories_estimate or 8,
+                        'duration': ex_obj.duration_seconds or 45,
+                        'tier': m['tier'],
+                        'tier_label': m['tier_label'],
+                        'tempo': m['tempo'],
+                        'mastery_goal': m['mastery_goal'],
+                        'mechanic': m['mechanic'],
+                        'completed': (ex_obj.slug in completed_slugs)
+                    })
+            trees_data.append({
+                'id': tree['id'],
+                'title': tree['title'],
+                'subtitle': tree['subtitle'],
+                'icon': tree['icon'],
+                'muscle_group': tree['muscle_group'],
+                'color': tree['color'],
+                'nodes': nodes_list
+            })
+
+        return render_template(
+            'calisthenics_tree.html',
+            trees=trees_data,
+            total_skills=len(all_exercises),
+            completed_count=len(completed_slugs)
+        )
+
+    @app.route('/antrenman-olustur')
+    def workout_builder():
+        all_exercises = Exercise.query.all()
+        catalog = []
+        for e in all_exercises:
+            m = get_exercise_meta(e.slug)
+            catalog.append({
+                'id': e.id,
+                'name': e.name,
+                'slug': e.slug,
+                'muscle_group': e.muscle_group,
+                'difficulty': e.difficulty,
+                'duration_seconds': e.duration_seconds or 45,
+                'calories_estimate': e.calories_estimate or 8,
+                'description': e.description,
+                'tier': m['tier'],
+                'tier_label': m['tier_label'],
+                'mechanic': m['mechanic'],
+                'pattern': m['pattern'],
+                'tempo': m['tempo'],
+                'tempo_desc': m['tempo_desc'],
+                'secondary_muscles': m['secondary_muscles'],
+                'easier': m['easier'],
+                'harder': m['harder'],
+                'swaps': m['swaps'],
+                'mastery_goal': m['mastery_goal']
+            })
+        return render_template('workout_builder.html', catalog=catalog)
+
+    @app.route('/ozel-antrenman')
+    def custom_workout_player():
+        """Launch custom generated workout directly inside the full-screen Gym Mode Workout Player."""
+        slugs_param = request.args.get('slugs', '').strip()
+        title_param = request.args.get('title', 'Özel Akıllı Antrenman').strip()
+        sets_param = request.args.get('sets', 3, type=int)
+        reps_param = request.args.get('reps', 12, type=int)
+        rest_param = request.args.get('rest', 45, type=int)
+
+        slug_list = [s.strip() for s in slugs_param.split(',') if s.strip()]
+        all_exercises = Exercise.query.all()
+        ex_by_slug = {e.slug: e for e in all_exercises}
+
+        if not slug_list:
+            slug_list = [
+                'standart-push-up-normal-sinav',
+                'standart-air-squat',
+                'mountain-climber',
+                'forearm-plank-on-kol-planki'
+            ]
+
+        class CustomProgramMock:
+            id = 0
+            title = title_param
+            slug = 'ozel-antrenman'
+            duration_days = 1
+
+        class CustomUserProgramMock:
+            current_day = 1
+
+        class CustomProgramExerciseMock:
+            def __init__(self, ex_obj, sets_val, reps_val, rest_val):
+                self.exercise = ex_obj
+                self.sets = sets_val
+                self.reps = reps_val
+                self.rest_seconds = rest_val
+
+        day_exercises = []
+        for s in slug_list:
+            if s in ex_by_slug:
+                day_exercises.append(CustomProgramExerciseMock(ex_by_slug[s], sets_param, reps_param, rest_param))
+
+        if not day_exercises and all_exercises:
+            for e in all_exercises[:5]:
+                day_exercises.append(CustomProgramExerciseMock(e, sets_param, reps_param, rest_param))
+
+        catalog_dict = {}
+        for e in all_exercises:
+            m = get_exercise_meta(e.slug)
+            catalog_dict[e.slug] = {
+                'name': e.name,
+                'slug': e.slug,
+                'muscle_group': e.muscle_group,
+                'difficulty': e.difficulty,
+                'tempo': m['tempo'],
+                'tempo_desc': m['tempo_desc'],
+                'mechanic': m['mechanic'],
+                'secondary_muscles': m['secondary_muscles'],
+                'easier': m['easier'],
+                'harder': m['harder'],
+                'swaps': m['swaps']
+            }
+
+        return render_template(
+            'workout_player.html',
+            program=CustomProgramMock(),
+            user_program=CustomUserProgramMock(),
+            exercises=day_exercises,
+            active_day=1,
+            is_custom_workout=True,
+            exercise_catalog=catalog_dict
+        )
+
+    @app.route('/api/ozel-antrenman-tamamla', methods=['POST'])
+    def complete_custom_workout():
+        if not current_user.is_authenticated:
+            return jsonify({'success': True, 'redirect': url_for('workout_builder')})
+
+        data = request.get_json() or {}
+        total_duration = int(data.get('duration_spent', 0) or 0)
+        total_calories = int(data.get('calories_burned', 0) or 0)
+
+        progress = UserProgress(
+            user_id=current_user.id,
+            duration_spent=total_duration,
+            calories_burned=total_calories
+        )
+        db.session.add(progress)
+        update_streak(current_user)
+        award_badge(current_user, 'İlk Adım')
+        db.session.commit()
+        return jsonify({'success': True, 'redirect': url_for('profile')})
 
     @app.route('/programlar')
     def programs():
@@ -347,8 +557,34 @@ def create_app():
                     day_exercises = candidates
                     target_day = d
                     break
+
+        all_exercises = Exercise.query.all()
+        catalog_dict = {}
+        for e in all_exercises:
+            m = get_exercise_meta(e.slug)
+            catalog_dict[e.slug] = {
+                'name': e.name,
+                'slug': e.slug,
+                'muscle_group': e.muscle_group,
+                'difficulty': e.difficulty,
+                'tempo': m['tempo'],
+                'tempo_desc': m['tempo_desc'],
+                'mechanic': m['mechanic'],
+                'secondary_muscles': m['secondary_muscles'],
+                'easier': m['easier'],
+                'harder': m['harder'],
+                'swaps': m['swaps']
+            }
             
-        return render_template('workout_player.html', program=program, user_program=user_program, exercises=day_exercises, active_day=target_day)
+        return render_template(
+            'workout_player.html',
+            program=program,
+            user_program=user_program,
+            exercises=day_exercises,
+            active_day=target_day,
+            is_custom_workout=False,
+            exercise_catalog=catalog_dict
+        )
 
     @app.route('/programlar/<slug>/dinlenme', methods=['POST'])
     @login_required

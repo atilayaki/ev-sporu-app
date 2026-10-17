@@ -5,14 +5,29 @@
 {% block content %}
 <div class="max-w-3xl mx-auto relative z-10" x-data="workoutPlayer()">
     <!-- Navigation & Voice Toggle (Top Bar) -->
-    <div class="mb-5 flex items-center justify-between">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+        {% if is_custom_workout %}
+        <a href="/antrenman-olustur" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-xs sm:text-sm uppercase tracking-wider">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            Antrenman Oluşturucuya Dön
+        </a>
+        {% else %}
         <a href="/programlar/{{ program.slug }}" class="text-zinc-400 hover:text-accent transition-colors flex items-center font-bold text-xs sm:text-sm uppercase tracking-wider">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
             Programa Dön
         </a>
+        {% endif %}
 
-        <!-- Voice Coach Options: Voice Selector & Toggle -->
-        <div class="flex items-center space-x-2">
+        <!-- Voice Coach & Screen Wake Lock Options -->
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Screen Wake Lock Indicator Badge -->
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1"
+                  :class="wakeLockActive ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500'"
+                  title="Antrenman boyunca telefon ekranının kapanmasını engeller">
+                <span>🔆</span>
+                <span x-text="wakeLockActive ? 'Ekran Uyanık' : 'Wake Lock Hazır'"></span>
+            </span>
+
             <!-- Voice Persona Selector (Bella / Adam) -->
             <div class="flex items-center p-0.5 rounded-full bg-zinc-900 border border-zinc-700/80 text-[11px] font-bold">
                 <button @click="setVoice('bella')" 
@@ -48,15 +63,18 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
-                        <h2 class="text-orange-400 font-black text-xs uppercase tracking-widest">{{ program.title }} &bull; Gün {{ active_day or user_program.current_day }}</h2>
+                        <h2 class="text-orange-400 font-black text-xs uppercase tracking-widest">{{ program.title }} {% if not is_custom_workout %}&bull; Gün {{ active_day or user_program.current_day }}{% endif %}</h2>
                     </div>
                     <h1 class="text-xl sm:text-3xl font-black text-white uppercase tracking-tight mt-1.5 leading-snug" 
                         x-text="status === 'completed' ? 'Tebrikler! Antrenman Tamamlandı' : (status === 'resting' ? 'Dinlenme Zamanı' : currentExercise.name)"></h1>
                     
-                    <!-- OpenGym Muscle Target & Equipment Tags -->
+                    <!-- OpenGym Muscle Target, Tempo & Equipment Tags -->
                     <div class="flex flex-wrap items-center gap-2 mt-2" x-show="status === 'active' || status === 'resting'">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-500/15 border border-orange-500/30 text-orange-400">
                             🎯 <span x-text="currentExercise.muscle_group"></span>
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                            ⏱️ Tempo: <span x-text="currentExerciseMeta.tempo || '2-1-2'"></span>
                         </span>
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-800 border border-zinc-700 text-zinc-300">
                             ⚡ Vücut Ağırlığı
@@ -87,8 +105,8 @@
                     <div>
                         <h3 class="text-2xl font-black text-white uppercase tracking-tight mb-2">Günün Antrenmanına Başla</h3>
                         <p class="text-zinc-400 text-sm leading-relaxed">
-                            Bugün programında <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket seni bekliyor. 
-                            Her hareket için 3D animasyonlu form rehberi ve set sayacı aktif olacak.
+                            Bugün programında <span class="text-orange-400 font-bold" x-text="exercises.length">{{ exercises|length }}</span> hareket seni bekliyor. 
+                            Her hareket için 3D animasyonlu form rehberi, canlı kademe değiştirici ve set sayacı aktif olacak.
                         </p>
                     </div>
 
@@ -99,18 +117,41 @@
                     </button>
                     
                     <div class="flex items-center justify-center space-x-2 text-xs text-zinc-400 font-medium pt-2">
-                        <span>🎙️ ElevenLabs sesli koç anonslarıyla rehberlik eder.</span>
+                        <span>🎙️ ElevenLabs sesli koç anonsları &amp; 🔆 Ekran Uyanık Tutma aktif.</span>
                     </div>
                 </div>
 
-                <!-- 2. Active State (OpenGym 3D Animated Demo + Set-by-Set Logging) -->
-                <div x-show="status === 'active'" class="w-full space-y-5">
+                <!-- 2. Active State (OpenGym 3D Animated Demo + Set-by-Set Logging + Live Swap) -->
+                <div x-show="status === 'active'" class="w-full space-y-4">
                     
-                    <!-- Exercise Index Header -->
-                    <div class="flex items-center justify-between px-1">
+                    <!-- Exercise Index & Live Scaling Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 px-1">
                         <span class="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider">
                             Hareket <span x-text="(currentIndex + 1)"></span> / <span x-text="exercises.length"></span>
                         </span>
+
+                        <!-- Live Exercise Easier / Harder / Swap Controls (Lyftr & Fitly Style) -->
+                        <div class="flex items-center gap-1.5">
+                            <button type="button"
+                                    x-show="currentExerciseMeta.easier"
+                                    @click="replaceCurrentExercise(currentExerciseMeta.easier, 'Hareket kolaylaştırıldı')"
+                                    class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                ⬇️ Kolaylaştır
+                            </button>
+                            <button type="button"
+                                    x-show="currentExerciseMeta.harder"
+                                    @click="replaceCurrentExercise(currentExerciseMeta.harder, 'Hareket zorlaştırıldı')"
+                                    class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                ⬆️ Zorlaştır
+                            </button>
+                            <button type="button"
+                                    x-show="currentExerciseMeta.swaps && currentExerciseMeta.swaps.length > 0"
+                                    @click="swapCurrentExerciseLive()"
+                                    class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                🔄 Alternatif
+                            </button>
+                        </div>
+
                         <span class="text-xs font-black text-orange-400 uppercase tracking-widest">
                             Set <span x-text="currentSetIndex + 1"></span> / <span x-text="currentExercise.sets"></span>
                         </span>
@@ -143,6 +184,12 @@
                                 🎥 3D Biyomekanik Animasyon
                             </span>
                         </div>
+                    </div>
+
+                    <!-- Tempo Cadence Guide Pill -->
+                    <div class="max-w-lg mx-auto px-3.5 py-2 rounded-xl bg-zinc-900/80 border border-zinc-800/80 text-xs text-zinc-300 flex items-center justify-between">
+                        <span class="font-bold text-zinc-400 uppercase text-[10px] tracking-wider">Ritim & Tempo Rehberi:</span>
+                        <span class="font-medium text-emerald-400 text-[11px]" x-text="currentExerciseMeta.tempo_desc || '2 sn kontrollü iniş • 1 sn sıkıştırma • 2 sn çıkış'"></span>
                     </div>
 
                     <!-- OpenGym Interactive Set Tracker Rows -->
@@ -303,10 +350,14 @@
         }{% if not loop.last %},{% endif %}
         {% endfor %}
     ];
+
+    const exerciseCatalogMap = {{ (exercise_catalog or {})|tojson }};
+    const isCustomWorkoutMode = {{ 'true' if is_custom_workout else 'false' }};
     
     function workoutPlayer() {
         return {
             exercises: exercisesData,
+            catalog: exerciseCatalogMap,
             currentIndex: 0,
             currentSetIndex: 0,
             exerciseSets: [],
@@ -324,6 +375,8 @@
 
             selectedVoice: 'bella', // Default to Bella (ElevenLabs high quality studio voice)
             activeAudio: null,
+            wakeLockSentinel: null,
+            wakeLockActive: false,
 
             get currentExercise() {
                 if (!this.exercises || this.exercises.length === 0) return { name: "Egzersiz", sets: 3, reps: 10, rest: 30, slug: "standart-air-squat", muscle_group: "Tüm Vücut" };
@@ -331,6 +384,11 @@
                     return this.exercises[this.exercises.length - 1];
                 }
                 return this.exercises[this.currentIndex];
+            },
+
+            get currentExerciseMeta() {
+                const slug = this.currentExercise ? this.currentExercise.slug : '';
+                return (this.catalog && this.catalog[slug]) ? this.catalog[slug] : { tempo: '2-1-2', tempo_desc: '2 sn kontrollü iniş • 1 sn sıkıştırma • 2 sn çıkış', easier: null, harder: null, swaps: [] };
             },
             
             get nextExercise() {
@@ -344,6 +402,52 @@
                     this.audioCtx = new AudioContext();
                 }
                 this.buildSetsForCurrentExercise();
+                this.requestWakeLock();
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible' && this.status !== 'completed') {
+                        this.requestWakeLock();
+                    }
+                });
+            },
+
+            async requestWakeLock() {
+                if ('wakeLock' in navigator) {
+                    try {
+                        this.wakeLockSentinel = await navigator.wakeLock.request('screen');
+                        this.wakeLockActive = true;
+                        this.wakeLockSentinel.addEventListener('release', () => {
+                            this.wakeLockActive = false;
+                        });
+                    } catch (err) {
+                        this.wakeLockActive = false;
+                    }
+                }
+            },
+
+            replaceCurrentExercise(newSlug, reasonText = 'Hareket değiştirildi') {
+                if (!newSlug || !this.catalog || !this.catalog[newSlug]) return;
+                const info = this.catalog[newSlug];
+                const cur = this.currentExercise;
+                this.exercises.splice(this.currentIndex, 1, {
+                    name: info.name,
+                    slug: info.slug,
+                    muscle_group: info.muscle_group,
+                    difficulty: info.difficulty,
+                    sets: cur.sets || 3,
+                    reps: cur.reps || 12,
+                    rest: cur.rest || 30
+                });
+                this.coachComment = `🔄 ${reasonText}: ${info.name}`;
+                this.playBeep(660, 0.12);
+                this.playVoiceAudio(`${info.slug}.mp3`, `Yeni hareket: ${info.name}`);
+            },
+
+            swapCurrentExerciseLive() {
+                const meta = this.currentExerciseMeta;
+                if (!meta.swaps || meta.swaps.length === 0) return;
+                const nextSlug = meta.swaps[Math.floor(Math.random() * meta.swaps.length)];
+                this.replaceCurrentExercise(nextSlug, 'Alternatif harekete geçildi');
             },
 
             buildSetsForCurrentExercise() {
@@ -459,6 +563,7 @@
                 if (this.audioCtx && this.audioCtx.state === 'suspended') {
                     this.audioCtx.resume();
                 }
+                this.requestWakeLock();
 
                 this.timerInterval = setInterval(() => {
                     if (this.status !== 'completed') {
@@ -564,7 +669,10 @@
             },
             
             finishWorkout() {
-                fetch('/programlar/{{ program.slug }}/tamamla', {
+                const targetEndpoint = isCustomWorkoutMode ? '/api/ozel-antrenman-tamamla' : '/programlar/{{ program.slug }}/tamamla';
+                const fallbackRedirect = isCustomWorkoutMode ? '/antrenman-olustur' : '/programlar/{{ program.slug }}';
+
+                fetch(targetEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -580,7 +688,7 @@
                 })
                 .catch(err => {
                     console.error("Antrenman kaydı hatası:", err);
-                    window.location.href = '/programlar/{{ program.slug }}';
+                    window.location.href = fallbackRedirect;
                 });
             }
         }

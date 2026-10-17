@@ -4917,8 +4917,25 @@
         : "Kameranı açıp 60 egzersizden dilediğini seçerek antrenmana başlayabilirsin.";
     document.getElementById('start-btn-text').innerText = `${selectedConf.name.split('(')[0].trim()} Başlat`;
 
+    // Screen Wake Lock API so phone screen never turns off during AI Coach workout
+    let aiCoachWakeLock = null;
+    async function requestAiCoachWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                aiCoachWakeLock = await navigator.wakeLock.request('screen');
+            } catch (e) {}
+        }
+    }
+    requestAiCoachWakeLock();
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            requestAiCoachWakeLock();
+        }
+    });
+
     startBtn.addEventListener('click', () => {
         loadingOverlay.classList.add('hidden');
+        requestAiCoachWakeLock();
         initCamera();
         setZoomMode(0.5);
         playCoachAudio(`${currentExercise}.mp3`);

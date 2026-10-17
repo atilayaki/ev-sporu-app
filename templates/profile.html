@@ -316,6 +316,170 @@
 
 </div>
 
+<!-- MODÜL 5: Vücut Ölçüleri, Kilo Trendi & TDEE / Makro Beslenme Hesaplayıcısı (wger & Lyftr Style) -->
+<div class="athletic-card rounded-2xl p-6 sm:p-8 mb-10 border border-zinc-800 relative z-10 no-print" x-data="bodyMetricsCalculator()">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
+        <div>
+            <div class="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-orange-400 mb-1">
+                <span>⚖️ VÜCUT ANALİZİ, KİLO TRENDİ &amp; TDEE MAKRO MOTORU</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+                Vücut Ölçülerin &amp; Günlük Makro Beslenme Planın
+            </h2>
+            <p class="text-xs text-zinc-400 mt-0.5">
+                Mifflin-St Jeor denklemiyle bazal metabolizmanı (BMR), günlük kalori ihtiyacını (TDEE), protein/karbonhidrat/yağ gramajını ve kilo geçmişini takip et.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="/antrenman-olustur" class="px-3.5 py-2 rounded-xl bg-orange-500/15 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/30 text-xs font-black uppercase tracking-wider transition-all">
+                ⚡ Özel Antrenman Üret
+            </a>
+            <a href="/kalistenik-agaci" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-black uppercase tracking-wider transition-all">
+                🌳 Yetenek Ağacı
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6">
+        <!-- Left: Body Inputs & Measurements -->
+        <div class="lg:col-span-5 space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Cinsiyet</label>
+                    <select x-model="gender" @change="recalculate()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:border-orange-500 outline-none">
+                        <option value="male">Erkek</option>
+                        <option value="female">Kadın</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Yaş</label>
+                    <input type="number" x-model.number="age" @input="recalculate()" min="14" max="90" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-mono font-bold text-white focus:border-orange-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Boy (cm)</label>
+                    <input type="number" x-model.number="heightCm" @input="recalculate()" min="120" max="230" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-mono font-bold text-white focus:border-orange-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Güncel Kilo (kg)</label>
+                    <input type="number" step="0.1" x-model.number="weightKg" @input="recalculate()" min="35" max="220" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-mono font-bold text-orange-400 focus:border-orange-500 outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Aktivite Seviyesi</label>
+                    <select x-model.number="activityMultiplier" @change="recalculate()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:border-orange-500 outline-none">
+                        <option value="1.2">Masa Başı (Az Hareket)</option>
+                        <option value="1.375">Haftada 2-3 Gün Spor</option>
+                        <option value="1.55">Haftada 4-5 Gün Ev Sporu</option>
+                        <option value="1.725">Her Gün Yoğun Antrenman</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Beslenme Hedefi</label>
+                    <select x-model="nutritionGoal" @change="recalculate()" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:border-orange-500 outline-none">
+                        <option value="cut">Yağ Yakımı (-400 kcal)</option>
+                        <option value="maintain">Form Koruma &amp; Sıkılaşma</option>
+                        <option value="leanbulk">Temiz Kas İnşası (+300 kcal)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tape Measurements (Bel, Göğüs, Kol) -->
+            <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80">
+                <span class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">📏 Mezura Vücut Ölçüleri (cm)</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <span class="text-[10px] text-zinc-500 font-bold block">Bel</span>
+                        <input type="number" x-model.number="waistCm" @change="recalculate()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-white">
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-zinc-500 font-bold block">Göğüs</span>
+                        <input type="number" x-model.number="chestCm" @change="recalculate()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-white">
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-zinc-500 font-bold block">Kol (Biceps)</span>
+                        <input type="number" x-model.number="armCm" @change="recalculate()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-white">
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" @click="logCurrentWeight()"
+                    class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all cursor-pointer">
+                ✓ Bugünkü Kilo &amp; Ölçüleri Kaydet
+            </button>
+        </div>
+
+        <!-- Right: Calculated TDEE, Macros, BMI & Weight Trend Log -->
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-5">
+            <!-- Top KPI Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-3.5 text-center">
+                    <span class="block text-[10px] font-bold uppercase text-zinc-500">Bazal (BMR)</span>
+                    <span class="text-xl font-mono font-black text-white" x-text="bmr + ' kcal'"></span>
+                </div>
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-3.5 text-center">
+                    <span class="block text-[10px] font-bold uppercase text-zinc-500">Günlük TDEE</span>
+                    <span class="text-xl font-mono font-black text-amber-400" x-text="tdee + ' kcal'"></span>
+                </div>
+                <div class="bg-orange-500/15 border border-orange-500/40 rounded-xl p-3.5 text-center">
+                    <span class="block text-[10px] font-black uppercase text-orange-300">Hedef Kalori</span>
+                    <span class="text-xl font-mono font-black text-orange-400" x-text="targetCalories + ' kcal'"></span>
+                </div>
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-3.5 text-center">
+                    <span class="block text-[10px] font-bold uppercase text-zinc-500">VKİ (BMI)</span>
+                    <span class="text-xl font-mono font-black text-emerald-400" x-text="bmi"></span>
+                    <span class="block text-[9px] font-bold text-zinc-400" x-text="bmiLabel"></span>
+                </div>
+            </div>
+
+            <!-- Macro Breakdown Bars (Protein / Carbs / Fat) -->
+            <div class="bg-zinc-900/70 border border-zinc-800/90 rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black uppercase tracking-wider text-white">🥗 Günlük Makro Besin Dağılımı</span>
+                    <span class="text-[11px] font-mono font-bold text-orange-400" x-text="targetCalories + ' kcal / gün'"></span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="p-3 rounded-xl bg-zinc-950 border border-red-500/30">
+                        <span class="text-[10px] font-black uppercase text-red-400 block">🥩 Protein</span>
+                        <span class="text-lg sm:text-xl font-mono font-black text-white" x-text="macros.protein + 'g'"></span>
+                        <span class="text-[10px] text-zinc-500 block" x-text="(macros.protein * 4) + ' kcal'"></span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-zinc-950 border border-amber-500/30">
+                        <span class="text-[10px] font-black uppercase text-amber-400 block">🍚 Karbonhidrat</span>
+                        <span class="text-lg sm:text-xl font-mono font-black text-white" x-text="macros.carbs + 'g'"></span>
+                        <span class="text-[10px] text-zinc-500 block" x-text="(macros.carbs * 4) + ' kcal'"></span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-zinc-950 border border-blue-500/30">
+                        <span class="text-[10px] font-black uppercase text-blue-400 block">🥑 Sağlıklı Yağ</span>
+                        <span class="text-lg sm:text-xl font-mono font-black text-white" x-text="macros.fat + 'g'"></span>
+                        <span class="text-[10px] text-zinc-500 block" x-text="(macros.fat * 9) + ' kcal'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weight Log History Strip -->
+            <div class="bg-zinc-900/70 border border-zinc-800/90 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-black uppercase tracking-wider text-zinc-300">📉 Son Kilo Kayıtların</span>
+                    <span class="text-[10px] font-bold text-zinc-500" x-text="weightHistory.length + ' kayıt'"></span>
+                </div>
+                <div class="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                    <template x-for="(entry, idx) in weightHistory" :key="idx">
+                        <div class="px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 shrink-0 text-center min-w-[88px]">
+                            <span class="block text-[10px] font-mono text-zinc-500" x-text="entry.date"></span>
+                            <span class="block text-sm font-mono font-black text-orange-400 mt-0.5" x-text="entry.weight + ' kg'"></span>
+                            <span class="block text-[9px] text-zinc-500" x-text="'Bel: ' + (entry.waist || '-') + 'cm'"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Feature 5: Personal Workout Analytics & 7-Day Chart -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 relative z-10 no-print">
     
@@ -821,6 +985,112 @@ function notificationsManager() {
                     });
                 }
             }, 3600000);
+        }
+    }
+}
+
+function bodyMetricsCalculator() {
+    return {
+        gender: 'male',
+        age: 28,
+        heightCm: 178,
+        weightKg: 76.5,
+        activityMultiplier: 1.55,
+        nutritionGoal: 'maintain',
+        waistCm: 82,
+        chestCm: 102,
+        armCm: 36,
+        bmr: 1750,
+        tdee: 2710,
+        targetCalories: 2710,
+        bmi: '24.1',
+        bmiLabel: 'İdeal Kilo',
+        macros: { protein: 153, carbs: 300, fat: 75 },
+        weightHistory: [],
+
+        init() {
+            const savedProfile = JSON.parse(localStorage.getItem('evdeSporBodyMetrics') || 'null');
+            if (savedProfile) {
+                this.gender = savedProfile.gender || 'male';
+                this.age = savedProfile.age || 28;
+                this.heightCm = savedProfile.heightCm || 178;
+                this.weightKg = savedProfile.weightKg || 76.5;
+                this.activityMultiplier = savedProfile.activityMultiplier || 1.55;
+                this.nutritionGoal = savedProfile.nutritionGoal || 'maintain';
+                this.waistCm = savedProfile.waistCm || 82;
+                this.chestCm = savedProfile.chestCm || 102;
+                this.armCm = savedProfile.armCm || 36;
+            }
+            const savedHistory = JSON.parse(localStorage.getItem('evdeSporWeightHistory') || 'null');
+            if (savedHistory && Array.isArray(savedHistory) && savedHistory.length > 0) {
+                this.weightHistory = savedHistory;
+            } else {
+                this.weightHistory = [
+                    { date: 'Başlangıç', weight: (this.weightKg + 1.2).toFixed(1), waist: this.waistCm + 2 },
+                    { date: 'Geçen Hafta', weight: (this.weightKg + 0.5).toFixed(1), waist: this.waistCm + 1 },
+                    { date: 'Bugün', weight: Number(this.weightKg).toFixed(1), waist: this.waistCm }
+                ];
+            }
+            this.recalculate();
+        },
+
+        recalculate() {
+            const w = Number(this.weightKg) || 70;
+            const h = Number(this.heightCm) || 175;
+            const a = Number(this.age) || 28;
+            const mult = Number(this.activityMultiplier) || 1.375;
+
+            // Mifflin-St Jeor Equation
+            let baseBmr = (10 * w) + (6.25 * h) - (5 * a) + (this.gender === 'male' ? 5 : -161);
+            this.bmr = Math.max(1000, Math.round(baseBmr));
+            this.tdee = Math.round(this.bmr * mult);
+
+            let goalDelta = 0;
+            if (this.nutritionGoal === 'cut') goalDelta = -400;
+            if (this.nutritionGoal === 'leanbulk') goalDelta = 300;
+            this.targetCalories = Math.max(1200, this.tdee + goalDelta);
+
+            // BMI calculation
+            const hMeters = h / 100;
+            const bmiVal = w / (hMeters * hMeters);
+            this.bmi = bmiVal.toFixed(1);
+            if (bmiVal < 18.5) this.bmiLabel = 'Zayıf';
+            else if (bmiVal < 25) this.bmiLabel = 'İdeal Atletik';
+            else if (bmiVal < 30) this.bmiLabel = 'Kaslı / Fazla Tartı';
+            else this.bmiLabel = 'Yüksek Tartı';
+
+            // Macros: 2.0g/kg protein, 25% calories fat, remainder carbs
+            const proteinG = Math.round(w * 2.0);
+            const fatG = Math.round((this.targetCalories * 0.26) / 9);
+            const remainingCal = Math.max(200, this.targetCalories - (proteinG * 4) - (fatG * 9));
+            const carbsG = Math.round(remainingCal / 4);
+
+            this.macros = { protein: proteinG, carbs: carbsG, fat: fatG };
+
+            localStorage.setItem('evdeSporBodyMetrics', JSON.stringify({
+                gender: this.gender,
+                age: this.age,
+                heightCm: this.heightCm,
+                weightKg: this.weightKg,
+                activityMultiplier: this.activityMultiplier,
+                nutritionGoal: this.nutritionGoal,
+                waistCm: this.waistCm,
+                chestCm: this.chestCm,
+                armCm: this.armCm
+            }));
+        },
+
+        logCurrentWeight() {
+            this.recalculate();
+            const now = new Date();
+            const dStr = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0');
+            this.weightHistory.unshift({
+                date: dStr,
+                weight: Number(this.weightKg).toFixed(1),
+                waist: this.waistCm
+            });
+            this.weightHistory = this.weightHistory.slice(0, 10);
+            localStorage.setItem('evdeSporWeightHistory', JSON.stringify(this.weightHistory));
         }
     }
 }

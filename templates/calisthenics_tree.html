@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Kalistenik Yetenek Ağacı & Kademe Haritası - Evde Spor{% endblock %}
+
+{% block content %}
+<div class="relative z-10 max-w-7xl mx-auto animate-fade-up" x-data="skillTreeManager()">
+    <!-- Hero Header -->
+    <div class="relative mb-10 pb-8 border-b border-zinc-800/80">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-wider mb-3">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                    <span>CALISTHENICS SKILL TREE &bull; 5 KADEMELİ USTALIK YOLU</span>
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
+                    Kalistenik <span class="text-gradient">Yetenek Ağacı</span>
+                </h1>
+                <p class="text-zinc-400 mt-2 text-base max-w-2xl font-medium">
+                    Temel vücut ağırlığı hareketlerinden elit jimnastik/kalistenik varyasyonlarına (Okçu Şınavı, Pistol Squat, Duvar Amutu, Nordic Curl, V-Up) adım adım ilerle. Ustalaştığın hareketleri işaretle!
+                </p>
+            </div>
+
+            <!-- User Mastery Counter Box -->
+            <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 flex items-center gap-5 shrink-0 shadow-xl">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-orange-500/20">
+                    🌳
+                </div>
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block">Kişisel Ustalık Skoru</span>
+                    <div class="text-2xl sm:text-3xl font-mono font-black text-white">
+                        <span x-text="masteredCount"></span> / <span>{{ total_skills }}</span>
+                        <span class="text-xs font-bold text-orange-400 uppercase ml-1">Hareket</span>
+                    </div>
+                    <div class="w-44 h-2 bg-zinc-800 rounded-full overflow-hidden mt-1.5">
+                        <div class="h-full bg-gradient-to-r from-orange-500 to-emerald-400 transition-all duration-500"
+                             :style="'width: ' + Math.min(100, Math.round((masteredCount / {{ total_skills or 60 }}) * 100)) + '%'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Track Filter Tabs -->
+        <div class="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <button @click="activeTrack = 'all'"
+                    class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer"
+                    :class="activeTrack === 'all' ? 'bg-accent text-white border-accent shadow-md shadow-orange-500/20' : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800'">
+                🌐 Tüm Yetenek Yolları (7 Dal)
+            </button>
+            {% for tree in trees %}
+            <button @click="activeTrack = '{{ tree.id }}'"
+                    class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer flex items-center gap-1.5"
+                    :class="activeTrack === '{{ tree.id }}' ? 'bg-accent text-white border-accent shadow-md shadow-orange-500/20' : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800'">
+                <span>{{ tree.icon }}</span>
+                <span>{{ tree.muscle_group }}</span>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Skill Trees Container -->
+    <div class="space-y-12">
+        {% for tree in trees %}
+        <div x-show="activeTrack === 'all' || activeTrack === '{{ tree.id }}'"
+             x-transition
+             class="athletic-card rounded-3xl border border-zinc-800/90 bg-zinc-950/95 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            
+            <!-- Track Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
+                <div class="flex items-start sm:items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-2xl shrink-0">
+                        {{ tree.icon }}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-zinc-900 border border-zinc-700 text-orange-400">
+                                {{ tree.muscle_group }}
+                            </span>
+                            <span class="text-xs font-bold text-zinc-500">{{ tree.nodes|length }} Kademeli Hareket</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mt-1">
+                            {{ tree.title }}
+                        </h2>
+                        <p class="text-xs sm:text-sm text-zinc-400">{{ tree.subtitle }}</p>
+                    </div>
+                </div>
+
+                <!-- Start Track as Custom Workout Button -->
+                {% set tree_slugs = tree.nodes|map(attribute='slug')|join(',') %}
+                <a href="/ozel-antrenman?title={{ tree.title|urlencode }}&slugs={{ tree_slugs }}"
+                   class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2 shrink-0 self-start sm:self-center">
+                    <span>⚡ Bu Seriyi Antrenman Olarak Başlat</span>
+                </a>
+            </div>
+
+            <!-- Progression Nodes Grid -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                {% for node in tree.nodes %}
+                <div class="rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden relative group"
+                     :class="isMastered('{{ node.slug }}') ? 'bg-emerald-950/20 border-emerald-500/50 shadow-lg shadow-emerald-500/5' : 'bg-zinc-900/70 border-zinc-800/90 hover:border-orange-500/50'">
+                    
+                    <!-- Step & Tier Header -->
+                    <div>
+                        <div class="relative h-36 w-full bg-black overflow-hidden"
+                             onmouseenter="const v = this.querySelector('video'); if(v) v.play();"
+                             onmouseleave="const v = this.querySelector('video'); if(v) { v.pause(); v.currentTime = 0; }">
+                            <img src="/static/images/{{ node.slug }}.jpg" alt="{{ node.name }}"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                 onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                            <video src="/static/animations/{{ node.slug }}.mp4" muted loop playsinline preload="none"
+                                   class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                                   onerror="this.style.display='none'"></video>
+                            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent"></div>
+
+                            <!-- Step Badge -->
+                            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                                <span class="w-6 h-6 rounded-lg font-mono font-black text-xs flex items-center justify-center shadow-md"
+                                      :class="isMastered('{{ node.slug }}') ? 'bg-emerald-500 text-white' : 'bg-orange-500 text-white'">
+                                    {{ node.step }}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-black/80 text-zinc-200 border border-white/10 backdrop-blur-md">
+                                    Sv.{{ node.tier }} &bull; {{ node.difficulty }}
+                                </span>
+                            </div>
+
+                            <!-- Mastery Check Toggle Button -->
+                            <button type="button"
+                                    @click="toggleMastery('{{ node.slug }}')"
+                                    class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer backdrop-blur-md border"
+                                    :class="isMastered('{{ node.slug }}') ? 'bg-emerald-500 text-white border-emerald-400 shadow-md' : 'bg-black/75 text-zinc-300 border-zinc-700 hover:border-orange-500 hover:text-white'">
+                                <span x-text="isMastered('{{ node.slug }}') ? '✓ Ustalaşıldı' : '○ İşaretle'"></span>
+                            </button>
+
+                            <!-- Tempo Pill -->
+                            <div class="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-bold">
+                                <span class="text-amber-400 bg-black/75 px-2 py-0.5 rounded border border-zinc-800">Tempo: {{ node.tempo }}</span>
+                                <span class="text-zinc-300 bg-black/75 px-2 py-0.5 rounded border border-zinc-800">~{{ node.calories }} kcal</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-orange-400 mb-0.5">
+                                {{ node.tier_label }}
+                            </div>
+                            <h3 class="text-base font-black text-white uppercase tracking-tight leading-snug group-hover:text-orange-400 transition-colors">
+                                {{ node.name }}
+                            </h3>
+                            <div class="mt-2 p-2 rounded-lg bg-zinc-950/80 border border-zinc-800/80 text-[11px] text-zinc-300 font-semibold flex items-center justify-between">
+                                <span class="text-zinc-500 uppercase font-bold text-[10px]">Hedef:</span>
+                                <span class="text-emerald-400 font-bold">{{ node.mastery_goal }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="px-4 pb-4 pt-2 flex items-center gap-2">
+                        <a href="/egzersizler/{{ node.slug }}"
+                           class="flex-1 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-bold uppercase tracking-wider text-center transition-colors border border-zinc-700/80">
+                            Rehber
+                        </a>
+                        <a href="/ai-koc?exercise={{ node.slug }}"
+                           class="flex-1 py-2 px-3 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/40 text-[11px] font-black uppercase tracking-wider text-center transition-all">
+                            🤖 AI Koç
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    const serverCompletedSlugs = [
+        {% for tree in trees %}
+            {% for node in tree.nodes %}
+                {% if node.completed %}{{ node.slug|tojson }},{% endif %}
+            {% endfor %}
+        {% endfor %}
+    ];
+
+    function skillTreeManager() {
+        return {
+            activeTrack: 'all',
+            masteredSlugs: [],
+
+            init() {
+                const saved = JSON.parse(localStorage.getItem('evdeSporMasteredSkills') || '[]');
+                const merged = Array.from(new Set([...serverCompletedSlugs, ...saved]));
+                this.masteredSlugs = merged;
+                localStorage.setItem('evdeSporMasteredSkills', JSON.stringify(this.masteredSlugs));
+            },
+
+            get masteredCount() {
+                return this.masteredSlugs.length;
+            },
+
+            isMastered(slug) {
+                return this.masteredSlugs.includes(slug);
+            },
+
+            toggleMastery(slug) {
+                if (this.masteredSlugs.includes(slug)) {
+                    this.masteredSlugs = this.masteredSlugs.filter(s => s !== slug);
+                } else {
+                    this.masteredSlugs.push(slug);
+                }
+                localStorage.setItem('evdeSporMasteredSkills', JSON.stringify(this.masteredSlugs));
+            }
+        }
+    }
+</script>
+{% endblock %}
