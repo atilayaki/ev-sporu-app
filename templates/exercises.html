@@ -50,68 +50,136 @@
             {% endfor %}
         </div>
 
-            <!-- Difficulty Pills -->
+            <!-- Difficulty & Home Places (GymMane Places) Pills -->
             <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-zinc-500 font-bold uppercase tracking-wider text-[11px] mr-1">Seviye:</span>
                 {% for diff in ['Tümü', 'Başlangıç', 'Orta', 'İleri'] %}
                     {% set is_diff_active = (selected_difficulty == diff) or (not selected_difficulty and diff == 'Tümü') %}
-                    <a href="/egzersizler?{% if selected_muscle and selected_muscle != 'Tümü' %}muscle={{ selected_muscle }}{% endif %}{% if diff != 'Tümü' %}&difficulty={{ diff }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
+                    <a href="/egzersizler?{% if selected_muscle and selected_muscle != 'Tümü' %}muscle={{ selected_muscle }}{% endif %}{% if diff != 'Tümü' %}&difficulty={{ diff }}{% endif %}{% if selected_place and selected_place != 'Tümü' %}&place={{ selected_place }}{% endif %}{% if query %}&q={{ query }}{% endif %}" 
                        class="px-3 py-1 rounded-lg font-semibold uppercase tracking-wider transition-all {{ 'bg-zinc-700 text-white font-bold' if is_diff_active else 'text-zinc-400 hover:text-white hover:bg-zinc-900' }}">
                         {{ diff }}
                     </a>
                 {% endfor %}
 
-                <div class="ml-auto flex items-center gap-3">
+                <span class="text-zinc-700 mx-1 hidden sm:inline">|</span>
+                <span class="text-zinc-500 font-bold uppercase tracking-wider text-[11px] mr-1">Ev Ortamı:</span>
+                {% set place_options = [
+                    ('Tümü', '🏠 Tüm Ev'),
+                    ('zemin', '🟢 Sadece Zemin'),
+                    ('sandalye', '🪑 Sandalye / Duvar'),
+                    ('havlu_kapi', '🧣 Havlu / Kapı')
+                ] %}
+                {% for p_key, p_label in place_options %}
+                    {% set is_place_active = (selected_place == p_key) or (not selected_place and p_key == 'Tümü') %}
+                    <a href="/egzersizler?{% if selected_muscle and selected_muscle != 'Tümü' %}muscle={{ selected_muscle }}{% endif %}{% if selected_difficulty and selected_difficulty != 'Tümü' %}&difficulty={{ selected_difficulty }}{% endif %}{% if p_key != 'Tümü' %}&place={{ p_key }}{% endif %}{% if query %}&q={{ query }}{% endif %}"
+                       class="px-3 py-1 rounded-lg font-semibold uppercase tracking-wider transition-all border {{ 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' if is_place_active else 'text-zinc-400 hover:text-white border-transparent hover:bg-zinc-900' }}">
+                        {{ p_label }}
+                    </a>
+                {% endfor %}
+
+                <div class="ml-auto flex flex-wrap items-center gap-2">
+                    <a href="/araclar" class="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-1.5">
+                        <span>🛠️ Sporcu Araçları</span>
+                    </a>
                     <a href="/kalistenik-agaci" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-1.5">
-                        <span>🌳 Kalistenik Yetenek Ağacı</span>
+                        <span>🌳 Yetenek Ağacı</span>
                     </a>
                     <a href="/antrenman-olustur" class="px-3 py-1.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/40 text-orange-400 font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-1.5">
                         <span>⚡ Akıllı Antrenman Üret</span>
                     </a>
                     <span class="text-xs text-zinc-500 hidden sm:inline">
-                        <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket listelendi
+                        <span class="text-orange-400 font-bold">{{ exercises|length }}</span> hareket
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- MODÜL 2: İnteraktif Ön/Arka Vücut Kas Haritası (wger & Lyftr SVG Anatomy Explorer) -->
+        <!-- MODÜL 2: İnteraktif Ön/Arka Vücut Kas Haritası + GymMane "Kaslara Dokun, Antrenmanın Hazır Olsun" -->
+        <script id="catalog-lite-json" type="application/json">{{ catalog_lite | tojson }}</script>
         <div class="mb-10 athletic-card rounded-3xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-5 sm:p-7 shadow-2xl"
              x-data="{
                 showMap: true,
+                mapMode: 'session',
                 hoveredMuscle: '',
                 selectedMuscle: {{ (selected_muscle or 'Tümü')|tojson }},
+                multiMuscles: {{ ([selected_muscle] if (selected_muscle and selected_muscle != 'Tümü') else ['Göğüs', 'Karın, Core']) | tojson }},
+                placeKitFilter: 'all',
+                catalogLite: JSON.parse(document.getElementById('catalog-lite-json').textContent || '[]'),
                 selectMuscle(m) {
-                    if (this.selectedMuscle === m) {
-                        window.location.href = '/egzersizler';
+                    if (this.mapMode === 'session') {
+                        const idx = this.multiMuscles.indexOf(m);
+                        if (idx > -1) {
+                            this.multiMuscles.splice(idx, 1);
+                        } else {
+                            this.multiMuscles.push(m);
+                        }
                     } else {
-                        window.location.href = '/egzersizler?muscle=' + encodeURIComponent(m);
+                        if (this.selectedMuscle === m) {
+                            window.location.href = '/egzersizler';
+                        } else {
+                            window.location.href = '/egzersizler?muscle=' + encodeURIComponent(m);
+                        }
                     }
                 },
                 isHighlighted(m) {
-                    return this.hoveredMuscle === m || this.selectedMuscle === m;
+                    if (this.hoveredMuscle === m) return true;
+                    if (this.mapMode === 'session') return this.multiMuscles.includes(m);
+                    return this.selectedMuscle === m;
+                },
+                get sessionPreviewExercises() {
+                    if (this.multiMuscles.length === 0) return [];
+                    let pool = this.catalogLite.filter(ex => {
+                        const mMatch = this.multiMuscles.some(sel => (ex.muscle_group || '').includes(sel));
+                        const pMatch = this.placeKitFilter === 'all' ? true : (this.placeKitFilter === 'zemin' ? ex.place_kit === 'zemin' : (ex.place_kit === 'zemin' || ex.place_kit === this.placeKitFilter));
+                        return mMatch && pMatch;
+                    });
+                    // Pick balanced across selected muscles (up to 6 exercises)
+                    let picked = [];
+                    let perMuscle = Math.max(2, Math.ceil(6 / this.multiMuscles.length));
+                    this.multiMuscles.forEach(m => {
+                        let mList = pool.filter(e => (e.muscle_group || '').includes(m));
+                        mList.slice(0, perMuscle).forEach(item => {
+                            if (!picked.some(p => p.slug === item.slug) && picked.length < 6) {
+                                picked.push(item);
+                            }
+                        });
+                    });
+                    return picked;
+                },
+                startMultiMuscleSession() {
+                    const list = this.sessionPreviewExercises;
+                    if (!list.length) return;
+                    const slugs = list.map(e => e.slug).join(',');
+                    const title = 'Kas Haritası Seansı (' + this.multiMuscles.join(' + ') + ')';
+                    window.location.href = '/ozel-antrenman?slugs=' + encodeURIComponent(slugs) + '&title=' + encodeURIComponent(title) + '&sets=3&reps=12&rest=45';
                 }
              }">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
                 <div>
                     <div class="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-orange-400 mb-1">
-                        <span>🧬 İNTERAKTİF ANATOMİ & KAS HARİTASI</span>
+                        <span>🧬 GYMMANE MODU: KASLARA DOKUN, ANTRENMANIN HAZIR OLSUN!</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
-                        Hedef Kas Bölgeni Vücut Üzerinden Seç
+                        İnteraktif Ön & Arka Kas Haritası
                     </h2>
-                    <p class="text-xs text-zinc-400 mt-0.5">
-                        Ön veya arka vücut haritasındaki kas gruplarına tıklayarak o bölgeyi çalıştıran hareketleri anında filtrele.
-                    </p>
+                    <p class="text-xs text-zinc-400 mt-0.5" x-text="mapMode === 'session' ? 'Vücut haritası üzerinde çalıştırmak istediğin birden fazla kasa dokun, sana özel antrenman seansı anında kurulsun!' : 'Tek bir kas grubuna tıklayarak aşağıdaki egzersiz kütüphanesini filtrele.'"></p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    {% if selected_muscle and selected_muscle != 'Tümü' %}
-                    <a href="/egzersizler" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider border border-zinc-700">
-                        ✕ Filtreyi Sıfırla ({{ selected_muscle }})
-                    </a>
-                    {% endif %}
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <!-- Mode Switcher: Multi-Muscle Session Builder vs Single Filter -->
+                    <div class="inline-flex rounded-xl bg-zinc-950 p-1 border border-zinc-800">
+                        <button type="button" @click="mapMode = 'session'"
+                                class="px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                :class="mapMode === 'session' ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow' : 'text-zinc-400 hover:text-white'">
+                            ⚡ Çoklu Kas Seç & Antrenman Kur
+                        </button>
+                        <button type="button" @click="mapMode = 'filter'"
+                                class="px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                :class="mapMode === 'filter' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'">
+                            🔍 Kütüphaneyi Filtrele
+                        </button>
+                    </div>
                     <button @click="showMap = !showMap" class="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wider cursor-pointer">
-                        <span x-text="showMap ? 'Haritayı Gizle ▲' : 'Kas Haritasını Aç ▼'"></span>
+                        <span x-text="showMap ? 'Gizle ▲' : 'Haritayı Aç ▼'"></span>
                     </button>
                 </div>
             </div>
@@ -279,11 +347,11 @@
                     </div>
                 </div>
 
-                <!-- Right: Interactive Muscle Region Selector Cards -->
+                <!-- Right: Interactive Muscle Region Selector Cards + Instant Session Builder -->
                 <div class="lg:col-span-5 space-y-2.5">
                     <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2 flex items-center justify-between">
-                        <span>Kas Bölgeleri & Hareket Sayısı</span>
-                        <span class="text-orange-400" x-text="hoveredMuscle || (selectedMuscle !== 'Tümü' ? selectedMuscle : 'Bölge Seç')"></span>
+                        <span x-text="mapMode === 'session' ? 'Çoklu Kas Seç (Dokunarak Ekle/Çıkar)' : 'Kas Bölgeleri & Hareket Sayısı'"></span>
+                        <span class="text-orange-400" x-text="hoveredMuscle || (mapMode === 'session' ? (multiMuscles.length + ' Bölge Seçili') : 'Bölge Seç')"></span>
                     </div>
 
                     {% set anatomy_regions = [
@@ -302,7 +370,7 @@
                                 @mouseenter="hoveredMuscle = '{{ reg.name }}'"
                                 @mouseleave="hoveredMuscle = ''"
                                 @click="selectMuscle('{{ reg.name }}')"
-                                class="w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer"
+                                class="w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between cursor-pointer"
                                 :class="isHighlighted('{{ reg.name }}') ? 'bg-orange-500/15 border-orange-500 text-white shadow-md shadow-orange-500/10' : 'bg-zinc-900/80 border-zinc-800/90 text-zinc-300 hover:border-zinc-700'">
                             <div class="flex items-center gap-3 min-w-0">
                                 <span class="text-lg shrink-0">{{ reg.icon }}</span>
@@ -313,10 +381,46 @@
                             </div>
                             <span class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-black shrink-0 ml-2"
                                   :class="isHighlighted('{{ reg.name }}') ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-orange-400'">
-                                {{ muscle_counts.get(reg.name, 0) if muscle_counts else '' }} Hareket
+                                <span x-show="mapMode === 'session' && multiMuscles.includes('{{ reg.name }}')">✓ SEÇİLİ</span>
+                                <span x-show="!(mapMode === 'session' && multiMuscles.includes('{{ reg.name }}'))">{{ muscle_counts.get(reg.name, 0) if muscle_counts else '' }} Hareket</span>
                             </span>
                         </button>
                         {% endfor %}
+                    </div>
+
+                    <!-- GymMane Instant "Tap the Muscle, Session Ready" Launch Box -->
+                    <div x-show="mapMode === 'session'" class="mt-4 p-4 rounded-2xl bg-gradient-to-br from-orange-500/15 via-zinc-900 to-zinc-950 border border-orange-500/40 shadow-xl">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-[11px] font-black uppercase tracking-widest text-orange-400">⚡ SEÇİLİ KAS SEANSI HAZIR</span>
+                            <select x-model="placeKitFilter" class="bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1 text-[10px] font-bold text-zinc-300">
+                                <option value="all">🏠 Tüm Ev Eşyaları</option>
+                                <option value="zemin">🟢 Sadece Zemin (Sıfır Eşya)</option>
+                                <option value="sandalye">🪑 Zemin + Sandalye/Duvar</option>
+                                <option value="havlu_kapi">🧣 Zemin + Havlu/Kapı</option>
+                            </select>
+                        </div>
+
+                        <div x-show="multiMuscles.length === 0" class="text-xs text-zinc-400 py-2">
+                            Haritadan veya listeden en az 1 kas grubuna dokunarak antrenmanını anında oluştur.
+                        </div>
+
+                        <div x-show="multiMuscles.length > 0">
+                            <div class="flex flex-wrap gap-1.5 mb-2.5">
+                                <template x-for="ex in sessionPreviewExercises" :key="ex.slug">
+                                    <span class="px-2 py-0.5 rounded-md bg-zinc-900/90 border border-zinc-700 text-[10px] font-bold text-zinc-200" x-text="ex.name"></span>
+                                </template>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" @click="startMultiMuscleSession()"
+                                        class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 cursor-pointer">
+                                    🚀 Hemen Başlat (<span x-text="sessionPreviewExercises.length"></span> Hareket)
+                                </button>
+                                <a :href="'/antrenman-olustur?muscles=' + encodeURIComponent(multiMuscles.join('|'))"
+                                   class="w-full py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs uppercase tracking-wider text-center border border-zinc-700">
+                                    ⚙️ Üreticide Özelleştir
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -378,6 +482,17 @@
                     <h2 class="text-lg font-black text-white uppercase tracking-tight group-hover:text-accent transition-colors leading-snug">
                         {{ exercise.name }}
                     </h2>
+                    {% set em = exercise_meta.get(exercise.slug, {}) if exercise_meta else {} %}
+                    {% if em %}
+                    <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-800/90 text-zinc-300 border border-zinc-700/80">
+                            {{ em.get('place_label', '🟢 Sadece Zemin') }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                            Tempo {{ em.get('tempo', '2-1-2') }}
+                        </span>
+                    </div>
+                    {% endif %}
                     <p class="text-xs text-zinc-400 mt-2 line-clamp-2 leading-relaxed">
                         {{ exercise.description }}
                     </p>

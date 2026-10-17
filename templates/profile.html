@@ -331,12 +331,15 @@
             </p>
         </div>
 
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
             <a href="/antrenman-olustur" class="px-3.5 py-2 rounded-xl bg-orange-500/15 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/30 text-xs font-black uppercase tracking-wider transition-all">
                 ⚡ Özel Antrenman Üret
             </a>
             <a href="/kalistenik-agaci" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-black uppercase tracking-wider transition-all">
                 🌳 Yetenek Ağacı
+            </a>
+            <a href="/araclar" class="px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 text-xs font-black uppercase tracking-wider transition-all">
+                🛠️ Sporcu Araçları &amp; Yedek
             </a>
         </div>
     </div>
@@ -409,6 +412,31 @@
                     class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all cursor-pointer">
                 ✓ Bugünkü Kilo &amp; Ölçüleri Kaydet
             </button>
+
+            <!-- GymMane Daily Supplement & Nutrition Checklist -->
+            <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                        <span>✅</span>
+                        <span>Günlük Sporcu &amp; Supplement Çetelesi</span>
+                    </span>
+                    <span class="text-[10px] font-mono font-bold text-zinc-400" x-text="completedChecklistCount() + '/5 Tamam'"></span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <template x-for="item in dailyChecklist" :key="item.id">
+                        <button type="button" @click="toggleChecklist(item.id)"
+                                class="flex items-center justify-between px-3 py-2 rounded-xl border text-left transition-all cursor-pointer"
+                                :class="item.done ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'">
+                            <span class="text-[11px] font-bold flex items-center gap-1.5">
+                                <span x-text="item.icon"></span>
+                                <span x-text="item.label"></span>
+                            </span>
+                            <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-black"
+                                  :class="item.done ? 'bg-emerald-500 text-zinc-950' : 'border border-zinc-700 text-transparent'">✓</span>
+                        </button>
+                    </template>
+                </div>
+            </div>
         </div>
 
         <!-- Right: Calculated TDEE, Macros, BMI & Weight Trend Log -->
@@ -434,11 +462,26 @@
                 </div>
             </div>
 
-            <!-- Macro Breakdown Bars (Protein / Carbs / Fat) -->
-            <div class="bg-zinc-900/70 border border-zinc-800/90 rounded-2xl p-4 sm:p-5 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-black uppercase tracking-wider text-white">🥗 Günlük Makro Besin Dağılımı</span>
-                    <span class="text-[11px] font-mono font-bold text-orange-400" x-text="targetCalories + ' kcal / gün'"></span>
+            <!-- Macro Breakdown Bars (Protein / Carbs / Fat) + GymMane Training vs Rest Day Toggle -->
+            <div class="bg-zinc-900/70 border border-zinc-800/90 rounded-2xl p-4 sm:p-5 space-y-3.5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-black uppercase tracking-wider text-white block">🥗 Günlük Makro Besin Dağılımı</span>
+                        <span class="text-[10px] text-zinc-400" x-text="dayType === 'training' ? '⚡ Antrenman Günü: Karbonhidrat & enerji artırıldı (+200 kcal)' : '🛋️ Dinlenme Günü: Karbonhidrat dengelendi, protein korundu (-150 kcal)'"></span>
+                    </div>
+                    <!-- GymMane Day Type Switcher -->
+                    <div class="inline-flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 shrink-0">
+                        <button type="button" @click="dayType = 'training'; recalculate()"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                :class="dayType === 'training' ? 'bg-orange-500 text-white shadow' : 'text-zinc-400 hover:text-white'">
+                            🏋️ Antrenman Günü
+                        </button>
+                        <button type="button" @click="dayType = 'rest'; recalculate()"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                :class="dayType === 'rest' ? 'bg-emerald-600 text-white shadow' : 'text-zinc-400 hover:text-white'">
+                            🛋️ Dinlenme Günü
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-3 text-center">
@@ -458,6 +501,28 @@
                         <span class="text-[10px] text-zinc-500 block" x-text="(macros.fat * 9) + ' kcal'"></span>
                     </div>
                 </div>
+
+                <!-- Ev İşi Pratik Sporcu Öğünleri (GymMane Nutrition Meals) -->
+                <div class="pt-2 border-t border-zinc-800/80">
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">🍳 Ev İşi Pratik Sporcu Öğün Önerileri</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left">
+                        <div class="p-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800/90">
+                            <span class="text-[10px] font-black uppercase text-orange-400 block">⚡ Antrenman Öncesi (60dk)</span>
+                            <p class="text-[11px] font-bold text-white mt-0.5">Yulaf + Muz + 1 Kaşık Fıstık Ezmesi + Kahve</p>
+                            <span class="text-[9px] font-mono text-zinc-500">~380 kcal &bull; 14g P / 55g K</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800/90">
+                            <span class="text-[10px] font-black uppercase text-emerald-400 block">💪 Antrenman Sonrası</span>
+                            <p class="text-[11px] font-bold text-white mt-0.5">200g Tavuk Göğsü / Ton Balığı + Pilav + Ayran</p>
+                            <span class="text-[9px] font-mono text-zinc-500">~540 kcal &bull; 48g P / 62g K</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800/90">
+                            <span class="text-[10px] font-black uppercase text-sky-400 block">🌙 Akşam / Toparlanma</span>
+                            <p class="text-[11px] font-bold text-white mt-0.5">3 Yumurta + Lor Peynirli Omlet + Yeşillik</p>
+                            <span class="text-[9px] font-mono text-zinc-500">~360 kcal &bull; 32g P / 6g K</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Weight Log History Strip -->
@@ -475,6 +540,123 @@
                         </div>
                     </template>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GymMane Feature #3: 6-Axis Muscle Balance Radar Chart & 72-Hour Muscle Recovery Map -->
+<div class="athletic-card rounded-2xl p-6 sm:p-8 mb-10 border border-zinc-800 relative z-10 no-print" x-data="muscleRadarRecovery()">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
+        <div>
+            <div class="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-orange-400 mb-1">
+                <span>🕸️ GYMMANE KAS DENGESİ RADARI &amp; 72 SAATLİK TOPARLANMA HARİTASI</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+                6 Eksenli Kas Simetrisi &amp; Canlı Kas Dinlenme Durumu
+            </h2>
+            <p class="text-xs text-zinc-400 mt-0.5">
+                Hangi kas grubunu ne kadar çalıştırdığını örümcek ağı (radar) grafiğinde gör ve 72 saatlik dinlenme durumuna göre bugün çalışmaya %100 hazır kaslarını seç.
+            </p>
+        </div>
+        <button type="button" @click="trainReadyMuscles()"
+                class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all cursor-pointer shrink-0">
+            ⚡ Dinlenmiş Kaslarla Antrenmana Başla
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 items-center">
+        <!-- Left: 6-Axis Spider/Radar SVG Chart -->
+        <div class="lg:col-span-5 flex flex-col items-center justify-center bg-zinc-900/60 border border-zinc-800/90 rounded-2xl p-5">
+            <svg viewBox="0 0 260 260" class="w-64 h-64 overflow-visible">
+                <!-- Background Hexagonal Web Rings (25%, 50%, 75%, 100%) -->
+                <polygon points="130,30 216.6,80 216.6,180 130,230 43.4,180 43.4,80" fill="none" stroke="#27272a" stroke-width="1.5"/>
+                <polygon points="130,55 194.9,92.5 194.9,167.5 130,205 65.1,167.5 65.1,92.5" fill="none" stroke="#27272a" stroke-width="1" stroke-dasharray="3,3"/>
+                <polygon points="130,80 173.3,105 173.3,155 130,180 86.7,155 86.7,105" fill="none" stroke="#27272a" stroke-width="1"/>
+                <polygon points="130,105 151.6,117.5 151.6,142.5 130,155 108.4,142.5 108.4,117.5" fill="none" stroke="#27272a" stroke-width="1" stroke-dasharray="2,2"/>
+
+                <!-- Axis Spokes -->
+                <line x1="130" y1="130" x2="130" y2="30" stroke="#3f3f46" stroke-width="1"/>
+                <line x1="130" y1="130" x2="216.6" y2="80" stroke="#3f3f46" stroke-width="1"/>
+                <line x1="130" y1="130" x2="216.6" y2="180" stroke="#3f3f46" stroke-width="1"/>
+                <line x1="130" y1="130" x2="130" y2="230" stroke="#3f3f46" stroke-width="1"/>
+                <line x1="130" y1="130" x2="43.4" y2="180" stroke="#3f3f46" stroke-width="1"/>
+                <line x1="130" y1="130" x2="43.4" y2="80" stroke="#3f3f46" stroke-width="1"/>
+
+                <!-- Dynamic Athlete Radar Polygon -->
+                <polygon :points="radarPolygonPoints()"
+                         fill="rgba(249, 115, 22, 0.28)"
+                         stroke="#f97316"
+                         stroke-width="2.5"/>
+
+                <!-- Vertex Dots -->
+                <template x-for="(pt, idx) in radarVertices()" :key="idx">
+                    <circle :cx="pt.x" :cy="pt.y" r="4.5" fill="#fb923c" stroke="#09090b" stroke-width="1.5"/>
+                </template>
+
+                <!-- Axis Labels -->
+                <text x="130" y="16" text-anchor="middle" fill="#f4f4f5" font-size="11" font-weight="800">GÖĞÜS</text>
+                <text x="232" y="82" text-anchor="start" fill="#f4f4f5" font-size="11" font-weight="800">SIRT</text>
+                <text x="232" y="186" text-anchor="start" fill="#f4f4f5" font-size="11" font-weight="800">OMUZ</text>
+                <text x="130" y="250" text-anchor="middle" fill="#f4f4f5" font-size="11" font-weight="800">KOL</text>
+                <text x="28" y="186" text-anchor="end" fill="#f4f4f5" font-size="11" font-weight="800">KARIN</text>
+                <text x="28" y="82" text-anchor="end" fill="#f4f4f5" font-size="11" font-weight="800">BACAK</text>
+            </svg>
+            <div class="mt-2 text-center">
+                <span class="text-[11px] font-bold text-zinc-400">Simetri Skoru: </span>
+                <span class="text-xs font-mono font-black text-orange-400" x-text="symmetryScore() + '/100'"></span>
+            </div>
+        </div>
+
+        <!-- Right: 72-Hour Muscle Recovery Status Cards -->
+        <div class="lg:col-span-7 space-y-3">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-black uppercase tracking-wider text-white">⏱️ 72 Saatlik Kas İyileşme &amp; Hazırlık Durumu</span>
+                <div class="flex items-center gap-2 text-[10px] font-bold">
+                    <span class="text-emerald-400">🟢 Hazır</span>
+                    <span class="text-amber-400">🟡 Toparlanıyor</span>
+                    <span class="text-red-400">🔴 Dinleniyor</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <template x-for="item in muscles" :key="item.label">
+                    <div class="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800/90 flex flex-col justify-between gap-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full"
+                                      :class="{
+                                          'bg-emerald-400 shadow-sm shadow-emerald-400/50': item.recovery_color === 'emerald',
+                                          'bg-amber-400 shadow-sm shadow-amber-400/50': item.recovery_color === 'amber',
+                                          'bg-red-500 animate-pulse': item.recovery_color === 'red'
+                                      }"></span>
+                                <span class="text-sm font-black uppercase text-white" x-text="item.label"></span>
+                            </div>
+                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border"
+                                  :class="{
+                                      'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': item.recovery_color === 'emerald',
+                                      'bg-amber-500/10 text-amber-300 border-amber-500/30': item.recovery_color === 'amber',
+                                      'bg-red-500/10 text-red-400 border-red-500/30': item.recovery_color === 'red'
+                                  }"
+                                  x-text="item.recovery_status"></span>
+                        </div>
+
+                        <div class="w-full bg-zinc-950 h-2 rounded-full overflow-hidden border border-zinc-800">
+                            <div class="h-full rounded-full transition-all duration-500"
+                                 :class="{
+                                     'bg-emerald-500': item.recovery_color === 'emerald',
+                                     'bg-amber-500': item.recovery_color === 'amber',
+                                     'bg-red-500': item.recovery_color === 'red'
+                                 }"
+                                 :style="'width: ' + item.recovery_pct + '%'"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-[10px] text-zinc-400 font-semibold">
+                            <span x-text="item.hours_ago !== null ? ('Son çalışma: ' + item.hours_ago + ' saat önce') : 'Yakın zamanda çalışılmadı'"></span>
+                            <span class="font-mono font-bold text-white" x-text="'%' + item.recovery_pct + ' Toparlanma'"></span>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -997,6 +1179,7 @@ function bodyMetricsCalculator() {
         weightKg: 76.5,
         activityMultiplier: 1.55,
         nutritionGoal: 'maintain',
+        dayType: 'training',
         waistCm: 82,
         chestCm: 102,
         armCm: 36,
@@ -1007,6 +1190,13 @@ function bodyMetricsCalculator() {
         bmiLabel: 'İdeal Kilo',
         macros: { protein: 153, carbs: 300, fat: 75 },
         weightHistory: [],
+        dailyChecklist: [
+            { id: 'protein', icon: '🥩', label: 'Protein Hedefi Tamam', done: false },
+            { id: 'creatine', icon: '⚡', label: 'Kreatin (5g) Alındı', done: false },
+            { id: 'water', icon: '💧', label: '2.5+ Litre Su İçildi', done: false },
+            { id: 'veggies', icon: '🥦', label: 'Sebze & Lif Tüketildi', done: false },
+            { id: 'sleep', icon: '😴', label: '7-8 Saat Kaliteli Uyku', done: false }
+        ],
 
         init() {
             const savedProfile = JSON.parse(localStorage.getItem('evdeSporBodyMetrics') || 'null');
@@ -1017,9 +1207,17 @@ function bodyMetricsCalculator() {
                 this.weightKg = savedProfile.weightKg || 76.5;
                 this.activityMultiplier = savedProfile.activityMultiplier || 1.55;
                 this.nutritionGoal = savedProfile.nutritionGoal || 'maintain';
+                this.dayType = savedProfile.dayType || 'training';
                 this.waistCm = savedProfile.waistCm || 82;
                 this.chestCm = savedProfile.chestCm || 102;
                 this.armCm = savedProfile.armCm || 36;
+            }
+            const todayKey = 'evdeSporChecklist_' + new Date().toISOString().slice(0, 10);
+            const savedCheck = JSON.parse(localStorage.getItem(todayKey) || 'null');
+            if (savedCheck && typeof savedCheck === 'object') {
+                this.dailyChecklist.forEach(it => {
+                    if (savedCheck[it.id] !== undefined) it.done = !!savedCheck[it.id];
+                });
             }
             const savedHistory = JSON.parse(localStorage.getItem('evdeSporWeightHistory') || 'null');
             if (savedHistory && Array.isArray(savedHistory) && savedHistory.length > 0) {
@@ -1032,6 +1230,19 @@ function bodyMetricsCalculator() {
                 ];
             }
             this.recalculate();
+        },
+
+        toggleChecklist(id) {
+            const item = this.dailyChecklist.find(x => x.id === id);
+            if (item) item.done = !item.done;
+            const todayKey = 'evdeSporChecklist_' + new Date().toISOString().slice(0, 10);
+            const map = {};
+            this.dailyChecklist.forEach(it => map[it.id] = it.done);
+            localStorage.setItem(todayKey, JSON.stringify(map));
+        },
+
+        completedChecklistCount() {
+            return this.dailyChecklist.filter(x => x.done).length;
         },
 
         recalculate() {
@@ -1048,7 +1259,8 @@ function bodyMetricsCalculator() {
             let goalDelta = 0;
             if (this.nutritionGoal === 'cut') goalDelta = -400;
             if (this.nutritionGoal === 'leanbulk') goalDelta = 300;
-            this.targetCalories = Math.max(1200, this.tdee + goalDelta);
+            const dayDelta = (this.dayType === 'training') ? 200 : -150;
+            this.targetCalories = Math.max(1200, this.tdee + goalDelta + dayDelta);
 
             // BMI calculation
             const hMeters = h / 100;
@@ -1060,7 +1272,7 @@ function bodyMetricsCalculator() {
             else this.bmiLabel = 'Yüksek Tartı';
 
             // Macros: 2.0g/kg protein, 25% calories fat, remainder carbs
-            const proteinG = Math.round(w * 2.0);
+            const proteinG = Math.round(w * (this.dayType === 'training' ? 2.1 : 2.0));
             const fatG = Math.round((this.targetCalories * 0.26) / 9);
             const remainingCal = Math.max(200, this.targetCalories - (proteinG * 4) - (fatG * 9));
             const carbsG = Math.round(remainingCal / 4);
@@ -1074,6 +1286,7 @@ function bodyMetricsCalculator() {
                 weightKg: this.weightKg,
                 activityMultiplier: this.activityMultiplier,
                 nutritionGoal: this.nutritionGoal,
+                dayType: this.dayType,
                 waistCm: this.waistCm,
                 chestCm: this.chestCm,
                 armCm: this.armCm
@@ -1093,6 +1306,78 @@ function bodyMetricsCalculator() {
             localStorage.setItem('evdeSporWeightHistory', JSON.stringify(this.weightHistory));
         }
     }
+}
+
+function muscleRadarRecovery() {
+    const serverRadar = {{ muscle_radar | tojson | safe }};
+    return {
+        muscles: serverRadar,
+
+        init() {
+            // Merge localStorage real-time recovery timestamps if available
+            try {
+                const localMap = JSON.parse(localStorage.getItem('ev_sporu_muscle_last_trained') || '{}');
+                const nowMs = Date.now();
+                this.muscles = this.muscles.map(item => {
+                    const ts = localMap[item.label];
+                    if (ts) {
+                        const localHours = Math.max(0, Math.round((nowMs - ts) / 3600000));
+                        if (item.hours_ago === null || localHours < item.hours_ago) {
+                            item.hours_ago = localHours;
+                            if (localHours < 24) {
+                                item.recovery_status = 'Dinleniyor';
+                                item.recovery_color = 'red';
+                                item.recovery_pct = Math.max(15, Math.round((localHours / 72) * 100));
+                            } else if (localHours < 48) {
+                                item.recovery_status = 'Toparlanıyor';
+                                item.recovery_color = 'amber';
+                                item.recovery_pct = Math.min(85, Math.round((localHours / 72) * 100));
+                            } else {
+                                item.recovery_status = '%100 Hazır';
+                                item.recovery_color = 'emerald';
+                                item.recovery_pct = 100;
+                            }
+                        }
+                    }
+                    return item;
+                });
+            } catch (e) {}
+        },
+
+        radarVertices() {
+            // 6 directions around center (130, 130) with max radius 100
+            const angles = [-90, -30, 30, 90, 150, 210];
+            return this.muscles.map((m, idx) => {
+                const rad = (angles[idx] * Math.PI) / 180;
+                const r = Math.max(20, Math.min(100, m.score || 30));
+                return {
+                    x: (130 + r * Math.cos(rad)).toFixed(1),
+                    y: (130 + r * Math.sin(rad)).toFixed(1)
+                };
+            });
+        },
+
+        radarPolygonPoints() {
+            return this.radarVertices().map(p => `${p.x},${p.y}`).join(' ');
+        },
+
+        symmetryScore() {
+            if (!this.muscles.length) return 85;
+            const scores = this.muscles.map(m => m.score || 25);
+            const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+            const variance = scores.reduce((acc, s) => acc + Math.abs(s - avg), 0) / scores.length;
+            return Math.max(60, Math.min(100, Math.round(100 - variance * 0.6)));
+        },
+
+        trainReadyMuscles() {
+            const ready = this.muscles
+                .filter(m => m.recovery_color === 'emerald' || m.recovery_pct >= 80)
+                .map(m => m.label)
+                .slice(0, 3);
+            const target = ready.length ? ready.join(',') : 'Göğüs,Karın';
+            window.location.href = '/antrenman-olustur?muscles=' + encodeURIComponent(target);
+        }
+    };
 }
 </script>
 {% endblock %}

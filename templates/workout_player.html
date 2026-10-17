@@ -18,8 +18,17 @@
         </a>
         {% endif %}
 
-        <!-- Voice Coach & Screen Wake Lock Options -->
+        <!-- Voice Coach, Superset & Screen Wake Lock Options -->
         <div class="flex flex-wrap items-center gap-2">
+            <!-- Superset Mode Toggle (GymMane 🔗) -->
+            <button type="button" @click="supersetEnabled = !supersetEnabled"
+                    class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1 cursor-pointer transition-all"
+                    :class="supersetEnabled ? 'bg-purple-500/20 border-purple-500 text-purple-300 shadow-sm' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'"
+                    title="İki hareketi birbirine bağlar ve aradaki dinlenmeyi otomatik atlar">
+                <span>🔗</span>
+                <span x-text="supersetEnabled ? 'Süperset Aktif' : 'Süperset Kapalı'"></span>
+            </button>
+
             <!-- Screen Wake Lock Indicator Badge -->
             <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1"
                   :class="wakeLockActive ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500'"
@@ -76,8 +85,12 @@
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                             ⏱️ Tempo: <span x-text="currentExerciseMeta.tempo || '2-1-2'"></span>
                         </span>
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-800 border border-zinc-700 text-zinc-300">
-                            ⚡ Vücut Ağırlığı
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-800 border border-zinc-700 text-zinc-300"
+                              x-text="currentExerciseMeta.place_label || '⚡ Vücut Ağırlığı'">
+                        </span>
+                        <span x-show="supersetEnabled && currentIndex % 2 === 0 && nextExercise"
+                              class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/20 border border-purple-500/40 text-purple-300">
+                            🔗 Süperset Çifti: + <span x-text="nextExercise ? nextExercise.name : ''"></span>
                         </span>
                     </div>
                 </div>
@@ -106,7 +119,7 @@
                         <h3 class="text-2xl font-black text-white uppercase tracking-tight mb-2">Günün Antrenmanına Başla</h3>
                         <p class="text-zinc-400 text-sm leading-relaxed">
                             Bugün programında <span class="text-orange-400 font-bold" x-text="exercises.length">{{ exercises|length }}</span> hareket seni bekliyor. 
-                            Her hareket için 3D animasyonlu form rehberi, canlı kademe değiştirici ve set sayacı aktif olacak.
+                            Her hareket için 3D animasyonlu form rehberi, canlı kademe değiştirici, set türü seçici ve paylaşım kartı aktif olacak.
                         </p>
                     </div>
 
@@ -192,10 +205,10 @@
                         <span class="font-medium text-emerald-400 text-[11px]" x-text="currentExerciseMeta.tempo_desc || '2 sn kontrollü iniş • 1 sn sıkıştırma • 2 sn çıkış'"></span>
                     </div>
 
-                    <!-- OpenGym Interactive Set Tracker Rows -->
+                    <!-- OpenGym + GymMane Interactive Set Tracker Rows (with Warm-up / Working / Drop / Failure Badges) -->
                     <div class="w-full max-w-lg mx-auto bg-zinc-900/60 rounded-2xl border border-zinc-800/80 p-3 sm:p-4 space-y-2">
                         <div class="flex items-center justify-between text-xs font-bold text-zinc-400 uppercase tracking-wider px-2 pb-1 border-b border-zinc-800/60">
-                            <span>Set</span>
+                            <span>Set &amp; Türü (Dokun Değiştir)</span>
                             <span>Hedef Tekrar</span>
                             <span>Durum</span>
                         </div>
@@ -208,11 +221,22 @@
                                           :class="s.done ? 'bg-emerald-500 text-white' : (sIdx === currentSetIndex ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400')"
                                           x-text="sIdx + 1"></span>
                                     <span class="font-bold text-sm text-white" x-text="'Set ' + (sIdx + 1)"></span>
+
+                                    <!-- GymMane Set Kind Badge (W / N / D / F) -->
+                                    <button type="button" @click="cycleSetKind(sIdx)"
+                                            class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border cursor-pointer transition-all"
+                                            :class="{
+                                                'bg-blue-500/20 text-blue-300 border-blue-500/40': s.kind === 'W',
+                                                'bg-zinc-800 text-zinc-300 border-zinc-700': s.kind === 'N',
+                                                'bg-purple-500/20 text-purple-300 border-purple-500/40': s.kind === 'D',
+                                                'bg-red-500/20 text-red-400 border-red-500/40': s.kind === 'F'
+                                            }"
+                                            x-text="s.kindLabel"></button>
                                 </div>
 
                                 <div class="font-mono font-black text-sm"
                                      :class="sIdx === currentSetIndex ? 'text-orange-400' : 'text-zinc-300'"
-                                     x-text="currentExercise.reps + ' Tekrar'"></div>
+                                     x-text="s.kind === 'F' ? (currentExercise.reps + '+ (Tükeniş)') : (currentExercise.reps + ' Tekrar')"></div>
 
                                 <div>
                                     <template x-if="s.done">
@@ -243,28 +267,67 @@
                     <button @click="completeSet(currentSetIndex)" 
                             class="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-3.5 rounded-full font-black text-base uppercase tracking-wider transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20 mx-auto flex items-center space-x-2 cursor-pointer">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                        <span x-text="currentSetIndex >= currentExercise.sets - 1 ? 'Son Seti Bitir & İlerle' : 'Bu Seti Tamamla (' + (currentSetIndex + 1) + '/' + currentExercise.sets + ')'"></span>
+                        <span x-text="currentSetIndex >= currentExercise.sets - 1 ? ((supersetEnabled && currentIndex % 2 === 0 && nextExercise) ? '🔗 Süperset: Dinlenmeden Sıradaki Harekete Geç!' : 'Son Seti Bitir & İlerle') : 'Bu Seti Tamamla (' + (currentSetIndex + 1) + '/' + currentExercise.sets + ')'"></span>
                     </button>
                 </div>
 
-                <!-- 3. Resting State (OpenGym Countdown + '+15s' and 'Skip' buttons) -->
-                <div x-show="status === 'resting'" class="space-y-6 w-full max-w-md py-4">
+                <!-- 3. Resting State (OpenGym Countdown + RPE Zorluk Seçici + '+15s' and 'Skip' buttons) -->
+                <div x-show="status === 'resting'" class="space-y-5 w-full max-w-md py-4">
                     <div class="inline-block px-3.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider">
-                        Derin Nefes Al & Dinlen
+                        Derin Nefes Al &amp; Dinlen
                     </div>
 
                     <!-- OpenGym Circular Progress Countdown -->
-                    <div class="relative w-44 h-44 mx-auto flex items-center justify-center">
+                    <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90">
-                            <circle cx="88" cy="88" r="76" stroke="currentColor" stroke-width="8" class="text-zinc-800" fill="transparent" />
-                            <circle cx="88" cy="88" r="76" stroke="currentColor" stroke-width="8" class="text-orange-500 transition-all duration-1000 ease-linear"
-                                    :stroke-dasharray="2 * Math.PI * 76"
-                                    :stroke-dashoffset="2 * Math.PI * 76 * (1 - (timeLeft / initialRestDuration))"
-                                    fill="transparent" />
+                            <circle cx="80" cy="80" r="68" stroke="currentColor" stroke-width="8" class="text-zinc-800" fill="transparent" />
+                            <circle cx="80" cy="80" r="68" stroke="currentColor" stroke-width="8" class="text-orange-500 transition-all duration-1000 ease-linear"
+                                     :stroke-dasharray="2 * Math.PI * 68"
+                                     :stroke-dashoffset="2 * Math.PI * 68 * (1 - (timeLeft / initialRestDuration))"
+                                     fill="transparent" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-5xl font-mono font-black text-white" x-text="timeLeft"></span>
                             <span class="text-[10px] uppercase font-bold text-zinc-400 tracking-wider mt-0.5">saniye</span>
+                        </div>
+                    </div>
+
+                    <!-- GymMane RPE (Set Zorluk Derecesi) Selector -->
+                    <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 text-left">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Az Önceki Set Nasıl Hissettirdi? (RPE)</span>
+                            <span class="text-[10px] font-bold text-orange-400" x-text="lastRpeLabel"></span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1.5">
+                            <button type="button" @click="selectRpe(6, '😌 Kolay (RPE 6)')"
+                                    class="py-1.5 px-2 rounded-lg text-[10px] font-black border transition-all cursor-pointer"
+                                    :class="lastRpe === 6 ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-zinc-950 text-zinc-300 border-zinc-800'">
+                                😌 Kolay
+                            </button>
+                            <button type="button" @click="selectRpe(8, '💪 İdeal (RPE 8)')"
+                                    class="py-1.5 px-2 rounded-lg text-[10px] font-black border transition-all cursor-pointer"
+                                    :class="lastRpe === 8 ? 'bg-blue-500 text-white border-blue-400' : 'bg-zinc-950 text-zinc-300 border-zinc-800'">
+                                💪 İdeal
+                            </button>
+                            <button type="button" @click="selectRpe(9, '🔥 Zor (RPE 9)')"
+                                    class="py-1.5 px-2 rounded-lg text-[10px] font-black border transition-all cursor-pointer"
+                                    :class="lastRpe === 9 ? 'bg-amber-500 text-black border-amber-400' : 'bg-zinc-950 text-zinc-300 border-zinc-800'">
+                                🔥 Zor
+                            </button>
+                            <button type="button" @click="selectRpe(10, '⚡ Tükeniş (RPE 10)')"
+                                    class="py-1.5 px-2 rounded-lg text-[10px] font-black border transition-all cursor-pointer"
+                                    :class="lastRpe === 10 ? 'bg-red-500 text-white border-red-400' : 'bg-zinc-950 text-zinc-300 border-zinc-800'">
+                                ⚡ Tükeniş
+                            </button>
+                        </div>
+                        <!-- Smart RPE Adaptation Suggestion -->
+                        <div x-show="lastRpe === 6 && currentExerciseMeta.harder" class="mt-2 pt-2 border-t border-zinc-800 flex items-center justify-between text-[11px]">
+                            <span class="text-zinc-400">Çok kolay mı geldi?</span>
+                            <button type="button" @click="replaceCurrentExercise(currentExerciseMeta.harder, 'RPE 6 sonrası zorlaştırıldı')" class="text-amber-400 font-black uppercase hover:underline cursor-pointer">⬆️ Üst Kademeye Zorlaştır</button>
+                        </div>
+                        <div x-show="lastRpe === 10 && currentExerciseMeta.easier" class="mt-2 pt-2 border-t border-zinc-800 flex items-center justify-between text-[11px]">
+                            <span class="text-zinc-400">Form bozuluyor mu?</span>
+                            <button type="button" @click="replaceCurrentExercise(currentExerciseMeta.easier, 'RPE 10 sonrası kolaylaştırıldı')" class="text-emerald-400 font-black uppercase hover:underline cursor-pointer">⬇️ Alt Kademeye Kolaylaştır</button>
                         </div>
                     </div>
                     
@@ -298,29 +361,76 @@
                     </div>
                 </div>
                 
-                <!-- 4. Completed State -->
-                <div x-show="status === 'completed'" class="space-y-6 max-w-md py-4">
-                    <div class="w-24 h-24 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-bounce">
-                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                <!-- 4. Completed State + GymMane Share Card & Selfie Sticker Studio -->
+                <div x-show="status === 'completed'" class="space-y-6 w-full max-w-xl py-4">
+                    <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-bounce">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                     <div>
                         <h3 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Efsane Antrenman!</h3>
-                        <p class="text-zinc-400 text-sm mt-1">Günün antrenmanını tamamladın. Disiplinin seni hedefine adım adım ulaştırıyor.</p>
+                        <p class="text-zinc-400 text-sm mt-1">Günün antrenmanını tamamladın. Aşağıdan **Instagram Story Paylaşım Kartını** veya **Şeffaf Selfie Sticker'ını** indirebilirsin!</p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 py-2">
-                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3.5">
-                            <div class="text-zinc-500 text-xs font-bold uppercase">Toplam Süre</div>
-                            <div class="text-white font-mono font-black text-xl" x-text="formatTime(totalSeconds)"></div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
+                            <div class="text-zinc-500 text-[10px] font-bold uppercase">Toplam Süre</div>
+                            <div class="text-white font-mono font-black text-lg" x-text="formatTime(totalSeconds)"></div>
                         </div>
-                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3.5">
-                            <div class="text-zinc-500 text-xs font-bold uppercase">Yakılan Kalori</div>
-                            <div class="text-orange-400 font-mono font-black text-xl" x-text="Math.floor(totalCalories) + ' kcal'"></div>
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
+                            <div class="text-zinc-500 text-[10px] font-bold uppercase">Yakılan Kalori</div>
+                            <div class="text-orange-400 font-mono font-black text-lg" x-text="Math.floor(totalCalories) + ' kcal'"></div>
+                        </div>
+                        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
+                            <div class="text-zinc-500 text-[10px] font-bold uppercase">Hareket Sayısı</div>
+                            <div class="text-emerald-400 font-mono font-black text-lg" x-text="exercises.length + ' Hareket'"></div>
+                        </div>
+                    </div>
+
+                    <!-- GymMane Share Card & Selfie Sticker Generator Studio -->
+                    <div class="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-4 sm:p-5 text-left space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">📸 GYMMANE PAYLAŞIM STÜDYOSU</span>
+                                <h4 class="text-sm font-black text-white uppercase">Antrenman Özeti Kartı &amp; Selfie Sticker</h4>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" @click="cardStyle = 'dark'; renderShareCard()"
+                                        class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer border"
+                                        :class="cardStyle === 'dark' ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-950 text-zinc-400 border-zinc-800'">
+                                    🔥 Koyu Story
+                                </button>
+                                <button type="button" @click="cardStyle = 'sticker'; renderShareCard()"
+                                        class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer border"
+                                        :class="cardStyle === 'sticker' ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-950 text-zinc-400 border-zinc-800'">
+                                    ✨ Şeffaf Sticker
+                                </button>
+                                <label class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer border bg-zinc-950 hover:bg-zinc-800 text-emerald-400 border-emerald-500/40">
+                                    📷 Selfie Ekle
+                                    <input type="file" accept="image/*" class="hidden" @change="handleSelfieUpload($event)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Preview Container -->
+                        <div class="relative mx-auto max-w-[270px] rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl"
+                             :class="cardStyle === 'sticker' ? 'bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:12px_12px] bg-zinc-950' : 'bg-black'">
+                            <canvas id="gymmane-share-canvas" width="1080" height="1350" class="w-full h-auto block"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button type="button" @click="downloadShareCard()"
+                                    class="py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+                                <span>📥 PNG Olarak İndir</span>
+                            </button>
+                            <button type="button" @click="shareCardNative()"
+                                    class="py-3 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+                                <span>📤 Story / WhatsApp Paylaş</span>
+                            </button>
                         </div>
                     </div>
 
                     <button @click="finishWorkout()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white w-full py-4 rounded-xl font-black text-base uppercase tracking-widest transition-transform transform hover:scale-[1.02] shadow-xl shadow-orange-500/30 cursor-pointer">
-                        Antrenmanı Kaydet & Rozetini Kap
+                        Antrenmanı Kaydet &amp; Rozetini Kap
                     </button>
                 </div>
 
@@ -336,23 +446,28 @@
     </div>
 </div>
 
+<script id="player-exercises-json" type="application/json">
+[
+    {% for pe in exercises %}
+    {
+        "name": {{ pe.exercise.name|tojson }},
+        "slug": {{ pe.exercise.slug|tojson }},
+        "muscle_group": {{ pe.exercise.muscle_group|tojson }},
+        "difficulty": {{ pe.exercise.difficulty|tojson }},
+        "sets": {{ pe.sets or 3 }},
+        "reps": {{ pe.reps or 12 }},
+        "rest": {{ pe.rest_seconds if pe.rest_seconds else 30 }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+]
+</script>
+<script id="player-catalog-json" type="application/json">{{ (exercise_catalog or {})|tojson }}</script>
 <script>
-    const exercisesData = [
-        {% for pe in exercises %}
-        {
-            name: {{ pe.exercise.name|tojson }},
-            slug: {{ pe.exercise.slug|tojson }},
-            muscle_group: {{ pe.exercise.muscle_group|tojson }},
-            difficulty: {{ pe.exercise.difficulty|tojson }},
-            sets: {{ pe.sets or 3 }},
-            reps: {{ pe.reps or 12 }},
-            rest: {{ pe.rest_seconds if pe.rest_seconds else 30 }}
-        }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
-
-    const exerciseCatalogMap = {{ (exercise_catalog or {})|tojson }};
+    const exercisesData = JSON.parse(document.getElementById('player-exercises-json').textContent || '[]');
+    const exerciseCatalogMap = JSON.parse(document.getElementById('player-catalog-json').textContent || '{}');
     const isCustomWorkoutMode = {{ 'true' if is_custom_workout else 'false' }};
+    const defaultSupersetFlag = {{ 'true' if superset_default else 'false' }};
+    const programTitleText = {{ program.title|tojson }};
     
     function workoutPlayer() {
         return {
@@ -373,10 +488,17 @@
             audioCtx: null,
             isVideoPaused: false,
 
-            selectedVoice: 'bella', // Default to Bella (ElevenLabs high quality studio voice)
+            selectedVoice: 'bella',
             activeAudio: null,
             wakeLockSentinel: null,
             wakeLockActive: false,
+
+            // GymMane Enhancements: Superset, RPE, Share Card & Sticker Studio
+            supersetEnabled: defaultSupersetFlag,
+            lastRpe: 8,
+            lastRpeLabel: '💪 İdeal (RPE 8)',
+            cardStyle: 'dark', // 'dark', 'sticker', 'selfie'
+            selfieImgObj: null,
 
             get currentExercise() {
                 if (!this.exercises || this.exercises.length === 0) return { name: "Egzersiz", sets: 3, reps: 10, rest: 30, slug: "standart-air-squat", muscle_group: "Tüm Vücut" };
@@ -454,9 +576,39 @@
                 const count = this.currentExercise.sets || 3;
                 this.exerciseSets = [];
                 for (let i = 0; i < count; i++) {
-                    this.exerciseSets.push({ setNum: i + 1, done: false });
+                    let k = 'N';
+                    let kl = '💪 Normal (N)';
+                    if (count >= 3 && i === 0) {
+                        k = 'W';
+                        kl = '🔥 Isınma (W)';
+                    } else if (i === count - 1) {
+                        k = 'F';
+                        kl = '⚡ Tükeniş (F)';
+                    }
+                    this.exerciseSets.push({ setNum: i + 1, done: false, kind: k, kindLabel: kl });
                 }
                 this.currentSetIndex = 0;
+            },
+
+            cycleSetKind(sIdx) {
+                const s = this.exerciseSets[sIdx];
+                if (!s) return;
+                const order = [
+                    { k: 'W', l: '🔥 Isınma (W)' },
+                    { k: 'N', l: '💪 Normal (N)' },
+                    { k: 'D', l: '🔻 Drop (D)' },
+                    { k: 'F', l: '⚡ Tükeniş (F)' }
+                ];
+                const curPos = order.findIndex(o => o.k === s.kind);
+                const next = order[(curPos + 1) % order.length];
+                s.kind = next.k;
+                s.kindLabel = next.l;
+            },
+
+            selectRpe(val, label) {
+                this.lastRpe = val;
+                this.lastRpeLabel = label;
+                this.playBeep(580, 0.08);
             },
 
             setVoice(voice) {
@@ -484,7 +636,6 @@
                 }
             },
 
-            // Play Studio ElevenLabs Audio with Fallback
             playVoiceAudio(filename, fallbackText) {
                 if (!this.voiceEnabled) return;
                 try {
@@ -610,7 +761,6 @@
                 this.restInterval = setInterval(() => {
                     this.timeLeft--;
 
-                    // 3-2-1 Countdown audio
                     if (this.timeLeft === 3) {
                         this.playBeep(440, 0.1);
                         this.playVoiceAudio("count_3.mp3", "Üç");
@@ -639,12 +789,10 @@
                 this.playBeep(880, 0.15);
                 this.playVoiceAudio("skip_rest.mp3", "Dinlenmeyi geçtin.");
 
-                // If sets remain in current exercise, resume active
                 if (this.currentSetIndex < this.currentExercise.sets && !this.exerciseSets[this.currentSetIndex].done) {
                     this.status = 'active';
                     this.coachComment = `Set ${this.currentSetIndex + 1} için hazır ol!`;
                 } else {
-                    // Move to next exercise
                     this.currentIndex++;
                     this.startExercise();
                 }
@@ -659,16 +807,246 @@
                     clearInterval(this.restInterval);
                     this.playVictoryFanfare();
                     this.playVoiceAudio("finished.mp3", "Tebrikler! Bugünkü antrenmanı harika bir disiplinle bitirdin. Şimdi sonuçlarını kaydet!");
+                    this.recordMuscleRecoveryLocal();
+                    setTimeout(() => this.renderShareCard(), 150);
+                    return;
+                }
+
+                // GymMane Superset Check: If superset is enabled and this is the first exercise of a pair, skip rest!
+                if (this.supersetEnabled && this.currentIndex % 2 === 0 && (this.currentIndex + 1) < this.exercises.length) {
+                    this.currentIndex++;
+                    this.startExercise();
+                    this.coachComment = `🔗 SÜPERSET GEÇİŞİ! Dinlenmeden ${this.currentExercise.name} hareketine devam!`;
                     return;
                 }
                 
-                // Inter-exercise rest
-                this.currentSetIndex = this.currentExercise.sets; // mark all sets done
+                this.currentSetIndex = this.currentExercise.sets;
                 this.startRestTimer(this.currentExercise.rest || 45);
                 this.playVoiceAudio("rest.mp3", `Egzersiz tamamlandı! ${this.timeLeft} saniye dinlen ve bir sonrakine hazırlan.`);
             },
+
+            recordMuscleRecoveryLocal() {
+                try {
+                    const stored = JSON.parse(localStorage.getItem('ev_sporu_muscle_last_trained') || '{}');
+                    const nowIso = new Date().toISOString();
+                    this.exercises.forEach(ex => {
+                        const mg = ex.muscle_group || '';
+                        if (mg.includes('Göğüs')) stored['Göğüs'] = nowIso;
+                        if (mg.includes('Sırt')) stored['Sırt'] = nowIso;
+                        if (mg.includes('Omuz') || mg.includes('Kol')) stored['Omuz, Kol'] = nowIso;
+                        if (mg.includes('Bacak') || mg.includes('Kalça') || mg.includes('Baldır')) stored['Bacak & Kalça'] = nowIso;
+                        if (mg.includes('Karın') || mg.includes('Core')) stored['Karın, Core'] = nowIso;
+                        if (mg.includes('Kardiyo')) stored['Kardiyo'] = nowIso;
+                    });
+                    localStorage.setItem('ev_sporu_muscle_last_trained', JSON.stringify(stored));
+                } catch (e) {}
+            },
+
+            handleSelfieUpload(event) {
+                const file = event.target.files && event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.selfieImgObj = img;
+                        this.cardStyle = 'selfie';
+                        this.renderShareCard();
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            renderShareCard() {
+                const canvas = document.getElementById('gymmane-share-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const W = canvas.width;
+                const H = canvas.height;
+                ctx.clearRect(0, 0, W, H);
+
+                // Determine worked muscle groups
+                const workedMuscles = [...new Set(this.exercises.map(e => e.muscle_group || 'Tüm Vücut'))];
+                const hasChest = workedMuscles.some(m => m.includes('Göğüs'));
+                const hasShoulders = workedMuscles.some(m => m.includes('Omuz') || m.includes('Kol'));
+                const hasCore = workedMuscles.some(m => m.includes('Karın') || m.includes('Core'));
+                const hasLegs = workedMuscles.some(m => m.includes('Bacak') || m.includes('Kalça') || m.includes('Baldır'));
+                const hasBack = workedMuscles.some(m => m.includes('Sırt'));
+
+                // 1. Background
+                if (this.cardStyle === 'selfie' && this.selfieImgObj) {
+                    const img = this.selfieImgObj;
+                    const scale = Math.max(W / img.width, H / img.height);
+                    const nw = img.width * scale;
+                    const nh = img.height * scale;
+                    ctx.drawImage(img, (W - nw) / 2, (H - nh) / 2, nw, nh);
+                    const grad = ctx.createLinearGradient(0, 0, 0, H);
+                    grad.addColorStop(0, 'rgba(9,9,11,0.55)');
+                    grad.addColorStop(0.5, 'rgba(9,9,11,0.35)');
+                    grad.addColorStop(1, 'rgba(9,9,11,0.92)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, W, H);
+                } else if (this.cardStyle === 'dark') {
+                    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+                    bgGrad.addColorStop(0, '#09090b');
+                    bgGrad.addColorStop(0.5, '#18181b');
+                    bgGrad.addColorStop(1, '#09090b');
+                    ctx.fillStyle = bgGrad;
+                    ctx.fillRect(0, 0, W, H);
+
+                    // Radial Orange Glow
+                    const rad = ctx.createRadialGradient(W * 0.5, H * 0.32, 30, W * 0.5, H * 0.32, 520);
+                    rad.addColorStop(0, 'rgba(234, 88, 12, 0.28)');
+                    rad.addColorStop(1, 'rgba(234, 88, 12, 0)');
+                    ctx.fillStyle = rad;
+                    ctx.fillRect(0, 0, W, H);
+                }
+
+                // 2. Card Frame (Glassmorphic container for sticker or dark mode)
+                ctx.save();
+                ctx.fillStyle = this.cardStyle === 'sticker' ? 'rgba(9, 9, 11, 0.82)' : 'rgba(24, 24, 27, 0.78)';
+                ctx.strokeStyle = 'rgba(234, 88, 12, 0.55)';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.roundRect(60, 70, W - 120, H - 140, 48);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                // 3. Top Brand Header
+                ctx.fillStyle = '#fb923c';
+                ctx.font = '900 28px sans-serif';
+                ctx.fillText('⚡ EVDE SPOR PRO • ANTRENMAN RAPORU', 115, 150);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 54px sans-serif';
+                const shortTitle = programTitleText.length > 26 ? programTitleText.slice(0, 26) + '...' : programTitleText;
+                ctx.fillText(shortTitle.toUpperCase(), 115, 225);
+
+                const todayStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+                ctx.fillStyle = '#a1a1aa';
+                ctx.font = '700 26px sans-serif';
+                ctx.fillText('📅 ' + todayStr + ' • %100 Vücut Ağırlığı', 115, 272);
+
+                // 4. Mini Anatomy Body Map (Front & Back) highlighting worked muscles
+                const drawMiniBody = (cx, cy, isBack) => {
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    // Head
+                    ctx.fillStyle = '#3f3f46';
+                    ctx.beginPath();
+                    ctx.arc(0, -145, 26, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Shoulders & Arms
+                    ctx.fillStyle = hasShoulders ? '#f97316' : '#3f3f46';
+                    ctx.beginPath();
+                    ctx.roundRect(-86, -108, 32, 115, 14);
+                    ctx.roundRect(54, -108, 32, 115, 14);
+                    ctx.fill();
+                    // Upper Torso (Chest on Front / Back on Posterior)
+                    ctx.fillStyle = (!isBack && hasChest) || (isBack && hasBack) ? '#ea580c' : '#52525b';
+                    ctx.beginPath();
+                    ctx.roundRect(-50, -110, 100, 66, 14);
+                    ctx.fill();
+                    // Core / Lower Torso
+                    ctx.fillStyle = (!isBack && hasCore) || (isBack && hasBack) ? '#fb923c' : '#3f3f46';
+                    ctx.beginPath();
+                    ctx.roundRect(-44, -40, 88, 70, 12);
+                    ctx.fill();
+                    // Legs
+                    ctx.fillStyle = hasLegs ? '#ea580c' : '#52525b';
+                    ctx.beginPath();
+                    ctx.roundRect(-46, 36, 40, 145, 16);
+                    ctx.roundRect(6, 36, 40, 145, 16);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#a1a1aa';
+                    ctx.font = '700 20px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(isBack ? 'ARKA KASLAR' : 'ÖN KASLAR', 0, 215);
+                    ctx.restore();
+                };
+
+                drawMiniBody(360, 520, false);
+                drawMiniBody(720, 520, true);
+
+                // 5. Worked Muscles Pills
+                ctx.fillStyle = '#fdba74';
+                ctx.font = '800 26px sans-serif';
+                ctx.fillText('🎯 ÇALIŞAN BÖLGELER: ' + workedMuscles.join(' • '), 115, 815);
+
+                // 6. 3 Big Metric Boxes
+                const totalSetsDone = this.exercises.reduce((acc, e) => acc + (e.sets || 3), 0);
+                const metrics = [
+                    { label: 'SÜRE', val: this.formatTime(this.totalSeconds), color: '#ffffff' },
+                    { label: 'KALORİ', val: Math.floor(this.totalCalories) + ' KCAL', color: '#fb923c' },
+                    { label: 'TOPLAM SET', val: totalSetsDone + ' SET', color: '#34d399' }
+                ];
+                metrics.forEach((m, i) => {
+                    const bx = 115 + i * 290;
+                    const by = 860;
+                    ctx.fillStyle = 'rgba(9, 9, 11, 0.85)';
+                    ctx.strokeStyle = 'rgba(63, 63, 70, 0.9)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, 265, 155, 28);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#a1a1aa';
+                    ctx.font = '800 22px sans-serif';
+                    ctx.fillText(m.label, bx + 28, by + 52);
+
+                    ctx.fillStyle = m.color;
+                    ctx.font = '900 46px monospace';
+                    ctx.fillText(m.val, bx + 28, by + 118);
+                });
+
+                // 7. Exercise List Summary Footer
+                ctx.fillStyle = '#d4d4d8';
+                ctx.font = '700 24px sans-serif';
+                const exNames = this.exercises.slice(0, 4).map(e => '✓ ' + e.name).join('   ');
+                ctx.fillText(exNames.slice(0, 58), 115, 1085);
+
+                ctx.fillStyle = '#f97316';
+                ctx.font = '900 26px sans-serif';
+                ctx.fillText('🔥 ev-sporu-app.vercel.app • #EvdeSpor #Calisthenics', 115, 1165);
+            },
+
+            downloadShareCard() {
+                this.renderShareCard();
+                const canvas = document.getElementById('gymmane-share-canvas');
+                if (!canvas) return;
+                const link = document.createElement('a');
+                link.download = `evde-spor-antrenman-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            },
+
+            async shareCardNative() {
+                this.renderShareCard();
+                const canvas = document.getElementById('gymmane-share-canvas');
+                if (!canvas) return;
+                canvas.toBlob(async (blob) => {
+                    if (!blob) return;
+                    const file = new File([blob], 'evde-spor-ozet.png', { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                title: 'Evde Spor Antrenman Özeti',
+                                text: `Bugünkü antrenmanımı tamamladım! (${this.formatTime(this.totalSeconds)} • ${Math.floor(this.totalCalories)} kcal) 🔥`,
+                                files: [file]
+                            });
+                            return;
+                        } catch (err) {}
+                    }
+                    this.downloadShareCard();
+                }, 'image/png');
+            },
             
             finishWorkout() {
+                this.recordMuscleRecoveryLocal();
                 const targetEndpoint = isCustomWorkoutMode ? '/api/ozel-antrenman-tamamla' : '/programlar/{{ program.slug }}/tamamla';
                 const fallbackRedirect = isCustomWorkoutMode ? '/antrenman-olustur' : '/programlar/{{ program.slug }}';
 

@@ -248,6 +248,7 @@ def create_app():
         query = request.args.get('q', '').strip()
         muscle = request.args.get('muscle', '').strip()
         difficulty = request.args.get('difficulty', '').strip()
+        place = request.args.get('place', '').strip()
 
         q = Exercise.query
         if query:
@@ -258,15 +259,31 @@ def create_app():
             q = q.filter(Exercise.difficulty == difficulty)
 
         all_exercises = q.all()
+        if place and place != 'Tümü':
+            all_exercises = [e for e in all_exercises if get_exercise_meta(e.slug).get('place_kit') == place]
+
         muscle_groups = ['Tümü', 'Göğüs', 'Karın, Core', 'Ön Bacak, Kalça', 'Arka Bacak, Baldır', 'Sırt', 'Omuz, Kol', 'Kardiyo, Kondisyon']
         total_count = Exercise.query.count()
 
-        # Muscle group counts for interactive SVG anatomy explorer
+        # Muscle group counts & full catalog for interactive SVG multi-muscle session builder
         all_db_exercises = Exercise.query.all()
         muscle_counts = {}
+        full_meta = {}
+        catalog_lite = []
         for ex_item in all_db_exercises:
             mg_key = ex_item.muscle_group or 'Tümü'
             muscle_counts[mg_key] = muscle_counts.get(mg_key, 0) + 1
+            m = get_exercise_meta(ex_item.slug)
+            full_meta[ex_item.slug] = m
+            catalog_lite.append({
+                'slug': ex_item.slug,
+                'name': ex_item.name,
+                'muscle_group': ex_item.muscle_group,
+                'difficulty': ex_item.difficulty,
+                'tier': m['tier'],
+                'place_kit': m['place_kit'],
+                'place_label': m['place_label']
+            })
 
         return render_template(
             'exercises.html',
@@ -274,10 +291,12 @@ def create_app():
             query=query,
             selected_muscle=muscle,
             selected_difficulty=difficulty,
+            selected_place=place,
             muscle_groups=muscle_groups,
             total_count=total_count,
             muscle_counts=muscle_counts,
-            exercise_meta=EXERCISE_META
+            exercise_meta=full_meta,
+            catalog_lite=catalog_lite
         )
 
     @app.route('/egzersizler/<slug>')
@@ -369,6 +388,7 @@ def create_app():
     @app.route('/antrenman-olustur')
     def workout_builder():
         all_exercises = Exercise.query.all()
+        preselected_muscles = request.args.get('muscles', '').strip()
         catalog = []
         for e in all_exercises:
             m = get_exercise_meta(e.slug)
@@ -391,9 +411,12 @@ def create_app():
                 'easier': m['easier'],
                 'harder': m['harder'],
                 'swaps': m['swaps'],
-                'mastery_goal': m['mastery_goal']
+                'mastery_goal': m['mastery_goal'],
+                'place_kit': m['place_kit'],
+                'place_label': m['place_label'],
+                'equipment_needed': m['equipment_needed']
             })
-        return render_template('workout_builder.html', catalog=catalog)
+        return render_template('workout_builder.html', catalog=catalog, preselected_muscles=preselected_muscles)
 
     @app.route('/ozel-antrenman')
     def custom_workout_player():
@@ -403,6 +426,7 @@ def create_app():
         sets_param = request.args.get('sets', 3, type=int)
         reps_param = request.args.get('reps', 12, type=int)
         rest_param = request.args.get('rest', 45, type=int)
+        superset_param = request.args.get('superset', '0').strip() == '1'
 
         slug_list = [s.strip() for s in slugs_param.split(',') if s.strip()]
         all_exercises = Exercise.query.all()
@@ -455,7 +479,9 @@ def create_app():
                 'secondary_muscles': m['secondary_muscles'],
                 'easier': m['easier'],
                 'harder': m['harder'],
-                'swaps': m['swaps']
+                'swaps': m['swaps'],
+                'place_label': m['place_label'],
+                'equipment_needed': m['equipment_needed']
             }
 
         return render_template(
@@ -465,6 +491,7 @@ def create_app():
             exercises=day_exercises,
             active_day=1,
             is_custom_workout=True,
+            superset_default=superset_param,
             exercise_catalog=catalog_dict
         )
 
@@ -573,7 +600,9 @@ def create_app():
                 'secondary_muscles': m['secondary_muscles'],
                 'easier': m['easier'],
                 'harder': m['harder'],
-                'swaps': m['swaps']
+                'swaps': m['swaps'],
+                'place_label': m['place_label'],
+                'equipment_needed': m['equipment_needed']
             }
             
         return render_template(
@@ -583,6 +612,7 @@ def create_app():
             exercises=day_exercises,
             active_day=target_day,
             is_custom_workout=False,
+            superset_default=False,
             exercise_catalog=catalog_dict
         )
 
@@ -744,6 +774,73 @@ def create_app():
             mg = p.exercise.muscle_group if (p.exercise and p.exercise.muscle_group) else 'Tüm Vücut'
             muscle_distribution[mg] = muscle_distribution.get(mg, 0) + 1
 
+        # GymMane 6-Axis Muscle Radar & 72-Hour Muscle Recovery Status
+        radar_raw = {
+            'Göğüs': 0,
+            'Sırt': 0,
+            'Omuz, Kol': 0,
+            'Bacak & Kalça': 0,
+            'Karın, Core': 0,
+            'Kardiyo': 0
+        }
+        last_trained_hours = {}
+        now_dt = datetime.utcnow()
+
+        for p in all_progress:
+            hours_ago = (now_dt - p.completed_at).total_seconds() / 3600.0 if p.completed_at else 999
+            if p.exercise and p.exercise.muscle_group:
+                mg = p.exercise.muscle_group
+                if 'Göğüs' in mg:
+                    radar_raw['Göğüs'] += 2
+                    last_trained_hours['Göğüs'] = min(last_trained_hours.get('Göğüs', 999), hours_ago)
+                elif 'Sırt' in mg:
+                    radar_raw['Sırt'] += 2
+                    last_trained_hours['Sırt'] = min(last_trained_hours.get('Sırt', 999), hours_ago)
+                elif 'Omuz' in mg or 'Kol' in mg:
+                    radar_raw['Omuz, Kol'] += 2
+                    last_trained_hours['Omuz, Kol'] = min(last_trained_hours.get('Omuz, Kol', 999), hours_ago)
+                elif 'Bacak' in mg or 'Kalça' in mg or 'Baldır' in mg:
+                    radar_raw['Bacak & Kalça'] += 2
+                    last_trained_hours['Bacak & Kalça'] = min(last_trained_hours.get('Bacak & Kalça', 999), hours_ago)
+                elif 'Karın' in mg or 'Core' in mg:
+                    radar_raw['Karın, Core'] += 2
+                    last_trained_hours['Karın, Core'] = min(last_trained_hours.get('Karın, Core', 999), hours_ago)
+                elif 'Kardiyo' in mg:
+                    radar_raw['Kardiyo'] += 2
+                    last_trained_hours['Kardiyo'] = min(last_trained_hours.get('Kardiyo', 999), hours_ago)
+            else:
+                # Full-body / Program session contributes across primary groups
+                for k in radar_raw:
+                    radar_raw[k] += 1
+                    last_trained_hours[k] = min(last_trained_hours.get(k, 999), hours_ago)
+
+        max_radar = max(list(radar_raw.values()) + [6])
+        muscle_radar = []
+        for axis_label, raw_val in radar_raw.items():
+            pct = min(100, int(round((raw_val / max_radar) * 85)) + (15 if raw_val > 0 else 20))
+            hrs = last_trained_hours.get(axis_label, 999)
+            if hrs <= 24:
+                rec_status = 'Dinleniyor (Yorgun)'
+                rec_color = 'red'
+                rec_pct = 35
+            elif hrs <= 48:
+                rec_status = 'Toparlanıyor (%70)'
+                rec_color = 'amber'
+                rec_pct = 70
+            else:
+                rec_status = 'Antrenmana Hazır (%100)'
+                rec_color = 'emerald'
+                rec_pct = 100
+            muscle_radar.append({
+                'label': axis_label,
+                'raw': raw_val,
+                'score': pct,
+                'hours_ago': int(hrs) if hrs < 900 else None,
+                'recovery_status': rec_status,
+                'recovery_color': rec_color,
+                'recovery_pct': rec_pct
+            })
+
         # OpenGym 52-Week Activity Heatmap (similar to GitHub / openGym)
         workout_counts_by_date = {}
         for p in all_progress:
@@ -820,9 +917,48 @@ def create_app():
             total_calories=total_calories,
             total_minutes=total_minutes,
             muscle_distribution=muscle_distribution,
+            muscle_radar=muscle_radar,
             heatmap_days=heatmap_days,
             personal_records=personal_records
         )
+
+    @app.route('/araclar')
+    def tools():
+        all_exercises = Exercise.query.all()
+        return render_template('tools.html', total_exercises=len(all_exercises))
+
+    @app.route('/api/yedek-indir')
+    def export_backup():
+        payload = {
+            'app': 'Evde Spor Pro (GymMane Edition)',
+            'exported_at': datetime.utcnow().isoformat() + 'Z',
+            'authenticated': current_user.is_authenticated,
+            'user': None,
+            'workout_history': [],
+            'favorites': [],
+            'badges': []
+        }
+        if current_user.is_authenticated:
+            payload['user'] = {
+                'name': current_user.name,
+                'email': current_user.email,
+                'current_streak': current_user.current_streak or 0,
+                'longest_streak': current_user.longest_streak or 0,
+                'goal': current_user.goal,
+                'fitness_level': current_user.fitness_level
+            }
+            payload['favorites'] = [e.slug for e in current_user.favorites]
+            payload['badges'] = [ub.badge.name for ub in current_user.badges if ub.badge]
+            all_prog = UserProgress.query.filter_by(user_id=current_user.id).order_by(UserProgress.completed_at.desc()).all()
+            for p in all_prog:
+                payload['workout_history'].append({
+                    'completed_at': p.completed_at.isoformat() if p.completed_at else None,
+                    'duration_spent': p.duration_spent,
+                    'calories_burned': p.calories_burned,
+                    'exercise_slug': p.exercise.slug if p.exercise else None,
+                    'program_id': p.program_id
+                })
+        return jsonify(payload)
 
     @app.route('/favori-ekle/<int:exercise_id>', methods=['POST'])
     @login_required

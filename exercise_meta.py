@@ -953,8 +953,29 @@ CALISTHENICS_TREES = [
 ]
 
 
+# GymMane 'Places' Mantığı: Ev Ortamı & Ekipman Sınıflandırması
+CHAIR_OR_WALL_EXERCISES = {
+    'incline-push-up-eller-yuksekte-sinav': 'Koltuk / Sandalye / Yatak Kenarı',
+    'decline-push-up-ayaklar-yuksekte-sinav': 'Koltuk / Sandalye',
+    'chair-dips-sandalye-arkasi-dips': 'Sağlam Sandalye / Koltuk Kenarı',
+    'bulgarian-split-squat': 'Sandalye / Koltuk',
+    'elevated-glute-bridge': 'Koltuk / Sandalye',
+    'feet-elevated-pike-push-up': 'Koltuk / Sandalye',
+    'wall-sit-duvar-oturusu': 'Düz Duvar',
+    'wall-handstand-hold': 'Boş Duvar'
+}
+
+TOWEL_OR_DOOR_EXERCISES = {
+    'towel-lat-pulldown': 'Banyo Havlusu',
+    'doorframe-table-inverted-row': 'Sağlam Masa Altı / Kapı Kenarı',
+    'doorframe-biceps-curl': 'Kapı Pervazı / Direk',
+    'sliding-leg-curl-havlu-ile-arka-bacak': 'Kaygan Zemin + Havlu',
+    'nordic-curl-ayaklar-sabitli-hamstring-bukusu': 'Koltuk Altı / Ayak Sabitleyici'
+}
+
+
 def get_exercise_meta(slug):
-    """Return metadata dict for an exercise slug with safe defaults."""
+    """Return metadata dict for an exercise slug with safe defaults + GymMane Places & Superset metadata."""
     default_meta = {
         'tier': 2,
         'tier_label': 'Seviye 2 • Temel Hareket',
@@ -969,8 +990,22 @@ def get_exercise_meta(slug):
         'mastery_goal': '3 Set × 15 Nizami Tekrar'
     }
     meta = EXERCISE_META.get(slug)
-    if not meta:
-        return default_meta
     merged = default_meta.copy()
-    merged.update(meta)
+    if meta:
+        merged.update(meta)
+
+    if slug in CHAIR_OR_WALL_EXERCISES:
+        merged['place_kit'] = 'sandalye'
+        merged['place_label'] = '🪑 Sandalye / Duvar'
+        merged['equipment_needed'] = CHAIR_OR_WALL_EXERCISES[slug]
+    elif slug in TOWEL_OR_DOOR_EXERCISES:
+        merged['place_kit'] = 'havlu_kapi'
+        merged['place_label'] = '🧣 Havlu / Kapı Kenarı'
+        merged['equipment_needed'] = TOWEL_OR_DOOR_EXERCISES[slug]
+    else:
+        merged['place_kit'] = 'zemin'
+        merged['place_label'] = '🟢 Sadece Zemin (Sıfır Eşya)'
+        merged['equipment_needed'] = 'Ekipmansız (Sadece Zemin/Mat)'
+
     return merged
+

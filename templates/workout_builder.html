@@ -100,10 +100,27 @@
 
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-black uppercase tracking-widest text-orange-400">04 / Hareket Sayısı & Süre</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-orange-400">04 / Ev Ortamı & Ekipman (Places)</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <template x-for="pl in places" :key="pl.id">
+                            <button type="button"
+                                    @click="selectedPlace = pl.id; generateWorkout()"
+                                    class="p-2.5 rounded-xl text-left border transition-all cursor-pointer"
+                                    :class="selectedPlace === pl.id ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 font-black' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'">
+                                <div class="text-[11px] font-black uppercase" x-text="pl.label"></div>
+                                <div class="text-[10px] text-zinc-400 truncate" x-text="pl.desc"></div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black uppercase tracking-widest text-orange-400">05 / Hareket Sayısı & Süperset</span>
                         <span class="font-mono text-xs font-black text-white" x-text="exerciseCount + ' Hareket (~' + estimatedMinutes + ' Dk)'"></span>
                     </div>
-                    <div class="grid grid-cols-4 gap-2">
+                    <div class="grid grid-cols-4 gap-2 mb-3">
                         <template x-for="cnt in [4, 5, 6, 8]" :key="cnt">
                             <button type="button"
                                     @click="exerciseCount = cnt; generateWorkout()"
@@ -113,6 +130,20 @@
                             </button>
                         </template>
                     </div>
+
+                    <!-- GymMane Superset Mode Toggle -->
+                    <button type="button"
+                            @click="supersetMode = !supersetMode"
+                            class="w-full p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer"
+                            :class="supersetMode ? 'bg-purple-500/20 border-purple-500 text-purple-200' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'">
+                        <div class="text-left">
+                            <div class="text-xs font-black uppercase tracking-wider">🔗 Süperset Modu (İkili Bağla)</div>
+                            <div class="text-[10px] text-zinc-400">Ardışık iki hareketi dinlenmeden arka arkaya oynatır</div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase"
+                              :class="supersetMode ? 'bg-purple-500 text-white' : 'bg-zinc-800 text-zinc-400'"
+                              x-text="supersetMode ? 'AKTİF' : 'KAPALI'"></span>
+                    </button>
                 </div>
 
                 <button type="button"
@@ -129,9 +160,10 @@
                 <!-- Generated Header -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-500/20 text-orange-400 border border-orange-500/30" x-text="selectedSplit.label"></span>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30" x-text="selectedGoal.label"></span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-500/20 text-orange-400 border border-orange-500/30" x-text="selectedSplit ? selectedSplit.label : ''"></span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-400 border border-emerald-500/30" x-text="selectedGoal ? selectedGoal.label : ''"></span>
+                            <span x-show="supersetMode" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-purple-500/20 text-purple-300 border border-purple-500/40">🔗 Süperset Şeması</span>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mt-2" x-text="workoutTitle"></h2>
                     </div>
@@ -149,57 +181,68 @@
                     </div>
                 </div>
 
-                <!-- Exercise List with Easier / Harder / Swap Controls -->
+                <!-- Exercise List with Easier / Harder / Swap Controls + Superset Link Badge -->
                 <div class="space-y-3.5">
                     <template x-for="(item, idx) in generatedList" :key="item.slug + '-' + idx">
-                        <div class="bg-zinc-900/75 border border-zinc-800/90 hover:border-orange-500/40 rounded-2xl p-4 transition-all">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <!-- Thumbnail & Info -->
-                                <div class="flex items-center gap-3.5 min-w-0">
-                                    <div class="relative w-16 h-16 rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0">
-                                        <img :src="'/static/images/' + item.slug + '.jpg'" :alt="item.name" class="w-full h-full object-cover" onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
-                                        <span class="absolute top-1 left-1 w-5 h-5 rounded-md bg-orange-500 text-white font-mono font-black text-[10px] flex items-center justify-center" x-text="idx + 1"></span>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
-                                            <span class="text-[10px] font-black uppercase tracking-wider text-orange-400" x-text="item.muscle_group"></span>
-                                            <span class="text-zinc-700">&bull;</span>
-                                            <span class="text-[10px] font-bold text-zinc-400" x-text="'Sv.' + item.tier + ' (' + item.difficulty + ')'"></span>
-                                            <span class="text-zinc-700">&bull;</span>
-                                            <span class="text-[10px] font-mono font-bold text-emerald-400" x-text="'Tempo ' + item.tempo"></span>
+                        <div>
+                            <div class="bg-zinc-900/75 border border-zinc-800/90 hover:border-orange-500/40 rounded-2xl p-4 transition-all">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <!-- Thumbnail & Info -->
+                                    <div class="flex items-center gap-3.5 min-w-0">
+                                        <div class="relative w-16 h-16 rounded-xl overflow-hidden bg-black border border-zinc-800 shrink-0">
+                                            <img :src="'/static/images/' + item.slug + '.jpg'" :alt="item.name" class="w-full h-full object-cover" onerror="this.src='/static/images/standart-push-up-normal-sinav.jpg'">
+                                            <span class="absolute top-1 left-1 w-5 h-5 rounded-md bg-orange-500 text-white font-mono font-black text-[10px] flex items-center justify-center" x-text="idx + 1"></span>
                                         </div>
-                                        <a :href="'/egzersizler/' + item.slug" class="text-sm sm:text-base font-black text-white hover:text-orange-400 uppercase tracking-tight block truncate" x-text="item.name"></a>
-                                        <div class="text-xs font-mono font-bold text-zinc-300 mt-0.5">
-                                            <span class="text-orange-400" x-text="selectedGoal.sets + ' Set'"></span> &times;
-                                            <span x-text="selectedGoal.reps + ' Tekrar'"></span> &bull;
-                                            <span class="text-zinc-400" x-text="selectedGoal.rest + 'sn Dinlenme'"></span>
+                                        <div class="min-w-0">
+                                            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                                <span class="text-[10px] font-black uppercase tracking-wider text-orange-400" x-text="item.muscle_group"></span>
+                                                <span class="text-zinc-700">&bull;</span>
+                                                <span class="text-[10px] font-bold text-zinc-300" x-text="item.place_label || '🟢 Zemin'"></span>
+                                                <span class="text-zinc-700">&bull;</span>
+                                                <span class="text-[10px] font-mono font-bold text-emerald-400" x-text="'Tempo ' + item.tempo"></span>
+                                            </div>
+                                            <a :href="'/egzersizler/' + item.slug" class="text-sm sm:text-base font-black text-white hover:text-orange-400 uppercase tracking-tight block truncate" x-text="item.name"></a>
+                                            <div class="text-xs font-mono font-bold text-zinc-300 mt-0.5 flex flex-wrap items-center gap-1.5">
+                                                <span class="text-orange-400" x-text="selectedGoal.sets + ' Set'"></span> &times;
+                                                <span x-text="selectedGoal.reps + ' Tekrar'"></span> &bull;
+                                                <span class="text-zinc-400" x-text="(supersetMode && idx % 2 === 0 && idx + 1 < generatedList.length) ? '🔗 0sn (Süperset Geçişi)' : (selectedGoal.rest + 'sn Dinlenme')"></span>
+                                                <span class="px-1.5 py-0.5 rounded bg-zinc-800 text-[9px] text-amber-400">1 Isınma + Normal + 🔥 Son Set Tükeniş</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Quick Scaling & Swap Buttons -->
-                                <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
-                                    <button type="button"
-                                            x-show="item.easier"
-                                            @click="scaleExercise(idx, item.easier)"
-                                            title="Çok mu zor? Bir alt kademeye kolaylaştır"
-                                            class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
-                                        ⬇️ Kolaylaştır
-                                    </button>
-                                    <button type="button"
-                                            x-show="item.harder"
-                                            @click="scaleExercise(idx, item.harder)"
-                                            title="Çok mu kolay? Bir üst kademeye zorlaştır"
-                                            class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
-                                        ⬆️ Zorlaştır
-                                    </button>
-                                    <button type="button"
-                                            @click="swapExercise(idx)"
-                                            title="Aynı bölgeyi çalıştıran başka bir hareketle değiştir"
-                                            class="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
-                                        🔄 Değiştir
-                                    </button>
+                                    <!-- Quick Scaling & Swap Buttons -->
+                                    <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                                        <button type="button"
+                                                x-show="item.easier"
+                                                @click="scaleExercise(idx, item.easier)"
+                                                title="Çok mu zor? Bir alt kademeye kolaylaştır"
+                                                class="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                            ⬇️ Kolaylaştır
+                                        </button>
+                                        <button type="button"
+                                                x-show="item.harder"
+                                                @click="scaleExercise(idx, item.harder)"
+                                                title="Çok mu kolay? Bir üst kademeye zorlaştır"
+                                                class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                            ⬆️ Zorlaştır
+                                        </button>
+                                        <button type="button"
+                                                @click="swapExercise(idx)"
+                                                title="Aynı bölgeyi çalıştıran başka bir hareketle değiştir"
+                                                class="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                            🔄 Değiştir
+                                        </button>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <!-- Superset Connector Visual -->
+                            <div x-show="supersetMode && idx % 2 === 0 && idx + 1 < generatedList.length"
+                                 class="flex items-center justify-center -my-1.5 relative z-10">
+                                <span class="px-3 py-0.5 rounded-full bg-purple-950 border border-purple-500/60 text-purple-300 text-[10px] font-black uppercase tracking-widest shadow">
+                                    🔗 Süperset Bağlantısı (Arada Dinlenme Yok)
+                                </span>
                             </div>
                         </div>
                     </template>
@@ -218,12 +261,21 @@
     </div>
 </div>
 
+<script id="builder-catalog-json" type="application/json">{{ catalog|tojson }}</script>
+<script id="builder-preselected-json" type="application/json">{{ (preselected_muscles or '')|tojson }}</script>
 <script>
-    const FULL_CATALOG = {{ catalog|tojson }};
+    const FULL_CATALOG = JSON.parse(document.getElementById('builder-catalog-json').textContent || '[]');
+    const PRESELECTED_MUSCLES_RAW = JSON.parse(document.getElementById('builder-preselected-json').textContent || '""');
 
     function smartWorkoutBuilder() {
         return {
             catalog: FULL_CATALOG,
+            places: [
+                { id: 'all', label: '🏠 Tüm Ev', desc: 'Zemin + Sandalye + Havlu' },
+                { id: 'zemin', label: '🟢 Sadece Zemin', desc: 'Sıfır eşya, sadece mat/halı' },
+                { id: 'sandalye', label: '🪑 Sandalye / Duvar', desc: 'Koltuk, sandalye ve duvar' },
+                { id: 'havlu_kapi', label: '🧣 Havlu / Kapı', desc: 'Banyo havlusu ve kapı kenarı' }
+            ],
             splits: [
                 { id: 'full', label: 'Tüm Vücut (Full Body)', icon: '⚡', desc: 'Göğüs, Sırt, Bacak ve Core dengeli', muscles: ['Göğüs', 'Sırt', 'Ön Bacak, Kalça', 'Karın, Core', 'Kardiyo, Kondisyon'] },
                 { id: 'upper', label: 'Üst Vücut Zırhı', icon: '💪', desc: 'Göğüs, Sırt, Omuz ve Kollar', muscles: ['Göğüs', 'Sırt', 'Omuz, Kol'] },
@@ -240,10 +292,25 @@
             selectedSplit: null,
             selectedGoal: null,
             selectedLevel: 'Tümü',
+            selectedPlace: 'all',
+            supersetMode: false,
             exerciseCount: 5,
             generatedList: [],
 
             init() {
+                if (PRESELECTED_MUSCLES_RAW) {
+                    const parsedMuscles = PRESELECTED_MUSCLES_RAW.split('|').map(s => s.trim()).filter(Boolean);
+                    if (parsedMuscles.length > 0) {
+                        const customSp = {
+                            id: 'custom_map',
+                            label: 'Kas Haritası Özel (' + parsedMuscles.length + ' Bölge)',
+                            icon: '🧬',
+                            desc: parsedMuscles.join(' + '),
+                            muscles: parsedMuscles
+                        };
+                        this.splits.unshift(customSp);
+                    }
+                }
                 this.selectedSplit = this.splits[0];
                 this.selectedGoal = this.goals[0];
                 this.generateWorkout();
@@ -267,14 +334,16 @@
             get estimatedMinutes() {
                 if (!this.selectedGoal) return 20;
                 const sets = this.selectedGoal.sets;
-                const workAndRestMin = (sets * (40 + this.selectedGoal.rest)) / 60;
-                return Math.max(10, Math.round(this.generatedList.length * workAndRestMin));
+                const effectiveRest = this.supersetMode ? Math.round(this.selectedGoal.rest * 0.65) : this.selectedGoal.rest;
+                const workAndRestMin = (sets * (40 + effectiveRest)) / 60;
+                return Math.max(8, Math.round(this.generatedList.length * workAndRestMin));
             },
 
             get estimatedCalories() {
                 if (!this.selectedGoal) return 150;
                 const base = this.generatedList.reduce((acc, ex) => acc + (ex.calories_estimate || 8), 0);
-                return Math.round(base * this.selectedGoal.sets * 1.15);
+                const mult = this.supersetMode ? 1.25 : 1.15;
+                return Math.round(base * this.selectedGoal.sets * mult);
             },
 
             get launchUrl() {
@@ -284,7 +353,8 @@
                     slugs: slugs,
                     sets: this.selectedGoal ? this.selectedGoal.sets : 3,
                     reps: this.selectedGoal ? this.selectedGoal.reps : 12,
-                    rest: this.selectedGoal ? this.selectedGoal.rest : 45
+                    rest: this.selectedGoal ? this.selectedGoal.rest : 45,
+                    superset: this.supersetMode ? '1' : '0'
                 });
                 return `/ozel-antrenman?${params.toString()}`;
             },
@@ -293,6 +363,16 @@
                 if (!this.selectedSplit) return;
                 const targetMuscles = this.selectedSplit.muscles;
                 let pool = this.catalog.filter(e => targetMuscles.includes(e.muscle_group));
+
+                if (this.selectedPlace !== 'all') {
+                    const placePool = pool.filter(e => {
+                        if (this.selectedPlace === 'zemin') return e.place_kit === 'zemin';
+                        return e.place_kit === 'zemin' || e.place_kit === this.selectedPlace;
+                    });
+                    if (placePool.length >= 2) {
+                        pool = placePool;
+                    }
+                }
 
                 if (this.selectedLevel !== 'Tümü') {
                     const levelPool = pool.filter(e => e.difficulty === this.selectedLevel);
