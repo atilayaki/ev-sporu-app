@@ -4165,70 +4165,24 @@
         }
     }
 
-    // Strict Human Body Verification Gate
+    // Robust Human Body Verification (Allows front, profile, floor and standing poses)
     function validateHumanPose(lm) {
         if (!lm || lm.length < 33) return false;
-
-        const ls = lm[11], rs = lm[12];
-        const lh = lm[23], rh = lm[24];
-        const nose = lm[0];
-
-        const sVisL = (ls && ls.visibility) || 0;
-        const sVisR = (rs && rs.visibility) || 0;
-        const hVisL = (lh && lh.visibility) || 0;
-        const hVisR = (rh && rh.visibility) || 0;
-        const noseVis = (nose && nose.visibility) || 0;
-
-        const hasShoulders = (sVisL > 0.55 && sVisR > 0.55);
-        const hasTorsoSpan = (sVisL > 0.55 || sVisR > 0.55) && (hVisL > 0.50 || hVisR > 0.50);
-        const hasUpperBody = (sVisL > 0.55 || sVisR > 0.55) && (noseVis > 0.60);
-
-        if (!hasShoulders && !hasTorsoSpan && !hasUpperBody) {
-            return false;
-        }
-
-        if (ls && rs && sVisL > 0.45 && sVisR > 0.45) {
-            const shoulderSpan = Math.hypot(ls.x - rs.x, ls.y - rs.y);
-            if (shoulderSpan < 0.035 || shoulderSpan > 0.88) {
-                return false;
+        // Check if at least 2 reference body anchors (shoulders, hips, knees, or nose) are detected
+        const keyIndices = [0, 11, 12, 23, 24, 25, 26];
+        let visibleCount = 0;
+        for (const idx of keyIndices) {
+            const p = lm[idx];
+            if (p && (p.visibility === undefined || p.visibility > 0.25)) {
+                visibleCount++;
             }
         }
-
-        if ((sVisL > 0.5 || sVisR > 0.5) && (hVisL > 0.5 || hVisR > 0.5)) {
-            const midSx = (ls.x + rs.x) / 2;
-            const midSy = (ls.y + rs.y) / 2;
-            const midHx = (lh.x + rh.x) / 2;
-            const midHy = (lh.y + rh.y) / 2;
-            const torsoDist = Math.hypot(midSx - midHx, midSy - midHy);
-            if (torsoDist < 0.04 || torsoDist > 0.92) {
-                return false;
-            }
-        }
-
-        let coreSum = sVisL + sVisR + hVisL + hVisR;
-        let coreCount = 4;
-        if (noseVis > 0.5) { coreSum += noseVis; coreCount++; }
-        if ((coreSum / coreCount) < 0.48) {
-            return false;
-        }
-
-        let outliers = 0;
-        for (let i = 0; i < 33; i++) {
-            const p = lm[i];
-            if (p && (p.x < -0.3 || p.x > 1.3 || p.y < -0.3 || p.y > 1.3)) {
-                outliers++;
-            }
-        }
-        if (outliers > 8) {
-            return false;
-        }
-
-        return true;
+        return visibleCount >= 2;
     }
 
     // High-Precision Lightweight Custom AR Skeleton Renderer (Zero Stall)
     function drawCustomARSkeleton(ctx, lm, width, height) {
-        const VIS_THRESHOLD = 0.52;
+        const VIS_THRESHOLD = 0.22;
         const activeJoints = getActiveExerciseJoints(currentExercise);
 
         ctx.save();
@@ -4237,10 +4191,11 @@
         ctx.lineJoin = 'round';
         ctx.strokeStyle = '#f97316';
 
+        // 1. Draw Kinematic Bones
         for (const [i, j] of AR_KINEMATIC_CONNECTIONS) {
             const p1 = lm[i];
             const p2 = lm[j];
-            if (p1 && p2 && p1.visibility >= VIS_THRESHOLD && p2.visibility >= VIS_THRESHOLD) {
+            if (p1 && p2 && (p1.visibility === undefined || p1.visibility >= VIS_THRESHOLD) && (p2.visibility === undefined || p2.visibility >= VIS_THRESHOLD)) {
                 ctx.beginPath();
                 ctx.moveTo(p1.x * width, p1.y * height);
                 ctx.lineTo(p2.x * width, p2.y * height);
@@ -4248,8 +4203,9 @@
             }
         }
 
+        // 2. Head Connection (Midpoint of shoulders to nose)
         const nose = lm[0], ls = lm[11], rs = lm[12];
-        if (nose && ls && rs && nose.visibility >= 0.55 && ls.visibility >= VIS_THRESHOLD && rs.visibility >= VIS_THRESHOLD) {
+        if (nose && ls && rs && (nose.visibility === undefined || nose.visibility >= VIS_THRESHOLD)) {
             const midX = ((ls.x + rs.x) / 2) * width;
             const midY = ((ls.y + rs.y) / 2) * height;
             ctx.beginPath();
@@ -4258,28 +4214,34 @@
             ctx.stroke();
         }
 
+        // 3. Draw Nodes (Joints)
         const KEY_JOINTS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
         for (const idx of KEY_JOINTS) {
             const p = lm[idx];
-            if (p && p.visibility >= VIS_THRESHOLD) {
+            if (p && (p.visibility === undefined || p.visibility >= VIS_THRESHOLD)) {
                 const x = p.x * width;
                 const y = p.y * height;
                 const isActive = activeJoints.includes(idx);
 
                 if (isActive) {
                     ctx.beginPath();
-                    ctx.arc(x, y, 7.5, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+                    ctx.arc(x, y, 9, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.4)';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5.5, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#10b981';
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#f97316';
                     ctx.fill();
                 }
 
                 ctx.beginPath();
-                ctx.arc(x, y, isActive ? 5 : 3.5, 0, 2 * Math.PI);
-                ctx.fillStyle = isActive ? '#10b981' : '#f97316';
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(x, y, 1.8, 0, 2 * Math.PI);
+                ctx.arc(x, y, 2, 0, 2 * Math.PI);
                 ctx.fillStyle = '#ffffff';
                 ctx.fill();
             }
@@ -4291,6 +4253,7 @@
     let humanDetectionStreak = 0;
     let humanLostStreak = 0;
     let isHumanConfirmed = false;
+    let lastKnownLandmarks = null;
 
     // MediaPipe Pose Main Callback (Runs transparently over hardware video)
     function onResults(results) {
@@ -4301,47 +4264,48 @@
         if (hasValidPose) {
             humanDetectionStreak++;
             humanLostStreak = 0;
-            if (humanDetectionStreak >= 2) {
-                isHumanConfirmed = true;
-            }
+            isHumanConfirmed = true;
+            lastKnownLandmarks = results.poseLandmarks;
         } else {
             humanLostStreak++;
-            humanDetectionStreak = 0;
-            if (humanLostStreak >= 4) {
+            // Grace period: keep tracking active for 18 frames (~600ms) during motion blur or fast turns
+            if (humanLostStreak >= 18) {
                 isHumanConfirmed = false;
+                humanDetectionStreak = 0;
+                lastKnownLandmarks = null;
             }
         }
 
-        if (isHumanConfirmed && results.poseLandmarks) {
-            const lm = results.poseLandmarks;
+        const activeLm = (hasValidPose && results.poseLandmarks) ? results.poseLandmarks : (isHumanConfirmed ? lastKnownLandmarks : null);
 
+        if (activeLm) {
             if (showSkeleton) {
-                drawCustomARSkeleton(canvasCtx, lm, canvasElement.width, canvasElement.height);
+                drawCustomARSkeleton(canvasCtx, activeLm, canvasElement.width, canvasElement.height);
             }
 
-            updateFramingGuide(lm, true);
+            updateFramingGuide(activeLm, true);
 
             const conf = exerciseConfig[currentExercise];
             const mType = conf ? conf.motionType : 'squat';
 
             // Dispatch to Biomechanical Motion Analyzer for all 60 Exercises
             switch(mType) {
-                case 'squat': handleSquat(lm); break;
-                case 'pushup': handlePushup(lm); break;
-                case 'plank_hold': handlePlank(lm); break;
-                case 'jumping_jack': handleJumpingJack(lm); break;
-                case 'lunge': handleLunge(lm); break;
-                case 'crunch': handleCrunch(lm); break;
-                case 'glute_bridge': handleGluteBridge(lm); break;
-                case 'curl_pull': handleCurlPull(lm); break;
-                case 'back_raise': handleBackRaise(lm); break;
-                case 'hip_hinge': handleHipHinge(lm); break;
-                case 'calf_raise': handleCalfRaise(lm); break;
-                case 'high_knees': handleHighKnees(lm); break;
-                case 'mountain_climber': handleMountainClimber(lm); break;
-                case 'wall_sit': handleWallSit(lm); break;
-                case 'burpee': handleBurpee(lm); break;
-                default: handleSquat(lm); break;
+                case 'squat': handleSquat(activeLm); break;
+                case 'pushup': handlePushup(activeLm); break;
+                case 'plank_hold': handlePlank(activeLm); break;
+                case 'jumping_jack': handleJumpingJack(activeLm); break;
+                case 'lunge': handleLunge(activeLm); break;
+                case 'crunch': handleCrunch(activeLm); break;
+                case 'glute_bridge': handleGluteBridge(activeLm); break;
+                case 'curl_pull': handleCurlPull(activeLm); break;
+                case 'back_raise': handleBackRaise(activeLm); break;
+                case 'hip_hinge': handleHipHinge(activeLm); break;
+                case 'calf_raise': handleCalfRaise(activeLm); break;
+                case 'high_knees': handleHighKnees(activeLm); break;
+                case 'mountain_climber': handleMountainClimber(activeLm); break;
+                case 'wall_sit': handleWallSit(activeLm); break;
+                case 'burpee': handleBurpee(activeLm); break;
+                default: handleSquat(activeLm); break;
             }
         } else {
             updateFramingGuide(null, false);
@@ -4383,20 +4347,24 @@
         const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
         const hip = side === 'right' ? lm[24] : lm[23];
         const knee = side === 'right' ? lm[26] : lm[25];
-        const ankle = side === 'right' ? lm[28] : lm[27];
+        let ankle = side === 'right' ? lm[28] : lm[27];
 
-        if (!hip || !knee || !ankle || hip.visibility < 0.50 || knee.visibility < 0.50 || ankle.visibility < 0.40) return;
+        if (!hip || !knee || hip.visibility < 0.25 || knee.visibility < 0.25) return;
+        // Resilient fallback if room bounds cut off feet
+        if (!ankle || ankle.visibility < 0.20) {
+            ankle = { x: knee.x, y: Math.min(1.0, knee.y + 0.35), z: knee.z, visibility: 0.3 };
+        }
         const angle = Math.round(calculateAngle(hip, knee, ankle));
         if (angleText) angleText.innerText = `Diz: ${angle}°`;
 
-        if (angle < 100) {
+        if (angle < 112) {
             if (!isDown) {
                 formFeedback.innerText = "Harika derinlik! Şimdi kalk ⬆";
                 formFeedback.className = "text-orange-400 font-bold";
             }
             isDown = true;
         }
-        if (angle > 158 && isDown) {
+        if (angle > 152 && isDown) {
             completeRep("Tekrar");
         }
     }
@@ -4406,20 +4374,24 @@
         const side = getBestSide(lm, [11, 13, 15], [12, 14, 16]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
         const elbow = side === 'right' ? lm[14] : lm[13];
-        const wrist = side === 'right' ? lm[16] : lm[15];
+        let wrist = side === 'right' ? lm[16] : lm[15];
 
-        if (!shoulder || !elbow || !wrist || shoulder.visibility < 0.50 || elbow.visibility < 0.50 || wrist.visibility < 0.40) return;
+        if (!shoulder || !elbow || shoulder.visibility < 0.25 || elbow.visibility < 0.25) return;
+        // Wrist fallback if close to floor/frame bottom
+        if (!wrist || wrist.visibility < 0.20) {
+            wrist = { x: elbow.x, y: Math.min(1.0, elbow.y + 0.25), z: elbow.z, visibility: 0.3 };
+        }
         const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
         if (angleText) angleText.innerText = `Dirsek: ${angle}°`;
 
-        if (angle < 95) {
+        if (angle < 105) {
             if (!isDown) {
                 formFeedback.innerText = "Alt nokta tamam, yukarı it! ⬆";
                 formFeedback.className = "text-orange-400 font-bold";
             }
             isDown = true;
         }
-        if (angle > 155 && isDown) {
+        if (angle > 148 && isDown) {
             completeRep("Tekrar");
         }
     }
@@ -4431,13 +4403,13 @@
         const hip = side === 'right' ? lm[24] : lm[23];
         const ankle = side === 'right' ? lm[28] : lm[27];
 
-        if (!shoulder || !hip || shoulder.visibility < 0.50 || hip.visibility < 0.50) return;
-        const bodyAngle = (ankle && ankle.visibility >= 0.40)
+        if (!shoulder || !hip || shoulder.visibility < 0.25 || hip.visibility < 0.25) return;
+        const bodyAngle = (ankle && ankle.visibility >= 0.25)
             ? Math.round(calculateAngle(shoulder, hip, ankle))
             : 175;
         if (angleText) angleText.innerText = `Hiza: ${bodyAngle}°`;
 
-        if (bodyAngle >= 140 && bodyAngle <= 200) {
+        if (bodyAngle >= 135 && bodyAngle <= 215) {
             formFeedback.innerText = "Mükemmel sabit duruş!";
             formFeedback.className = "text-emerald-400 font-bold";
 
@@ -4464,16 +4436,21 @@
         const lw = lm[15], rw = lm[16], nose = lm[0];
         const la = lm[27], ra = lm[28], ls = lm[11], rs = lm[12];
 
-        if (lw && rw && la && ra && lw.visibility > 0.45 && rw.visibility > 0.45) {
-            const handsUp = (lw.y < (nose ? nose.y : 0.4)) && (rw.y < (nose ? nose.y : 0.4));
-            const ankleDist = Math.abs(la.x - ra.x);
-            const shoulderDist = (ls && rs) ? Math.abs(ls.x - rs.x) : 0.2;
-            const feetApart = ankleDist > (shoulderDist * 1.2);
-
-            if (angleText) angleText.innerText = `Açıklık: ${(ankleDist / (shoulderDist || 0.2)).toFixed(1)}x`;
+        if (lw && rw && lw.visibility > 0.25 && rw.visibility > 0.25) {
+            const headRefY = nose ? nose.y : ((ls && rs) ? (ls.y + rs.y) / 2 - 0.15 : 0.4);
+            const handsUp = (lw.y < headRefY) || (rw.y < headRefY);
+            let feetApart = false;
+            if (la && ra && la.visibility > 0.25 && ra.visibility > 0.25) {
+                const ankleDist = Math.abs(la.x - ra.x);
+                const shoulderDist = (ls && rs && ls.visibility > 0.25 && rs.visibility > 0.25) ? Math.abs(ls.x - rs.x) : 0.18;
+                feetApart = ankleDist > (shoulderDist * 1.1);
+                if (angleText) angleText.innerText = `Açıklık: ${(ankleDist / (shoulderDist || 0.18)).toFixed(1)}x`;
+            } else {
+                feetApart = handsUp;
+            }
 
             if (handsUp && feetApart) isDown = true;
-            if (!handsUp && !feetApart && isDown) {
+            if (!handsUp && isDown) {
                 completeRep("Zıplama");
             }
         }
@@ -4484,18 +4461,21 @@
         const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
         const hip = side === 'right' ? lm[24] : lm[23];
         const knee = side === 'right' ? lm[26] : lm[25];
-        const ankle = side === 'right' ? lm[28] : lm[27];
+        let ankle = side === 'right' ? lm[28] : lm[27];
 
-        if (hip && knee && ankle && hip.visibility > 0.50 && knee.visibility > 0.50 && ankle.visibility > 0.40) {
+        if (hip && knee && hip.visibility > 0.25 && knee.visibility > 0.25) {
+            if (!ankle || ankle.visibility < 0.20) {
+                ankle = { x: knee.x, y: Math.min(1.0, knee.y + 0.35), z: knee.z, visibility: 0.3 };
+            }
             const angle = Math.round(calculateAngle(hip, knee, ankle));
             if (angleText) angleText.innerText = `Diz: ${angle}°`;
 
-            if (angle < 105) {
+            if (angle < 115) {
                 isDown = true;
                 formFeedback.innerText = "Güzel iniş! Doğrul ⬆";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (angle > 155 && isDown) {
+            if (angle > 148 && isDown) {
                 completeRep("Tekrar");
             }
         }
@@ -4506,18 +4486,21 @@
         const side = getBestSide(lm, [11, 23, 25], [12, 24, 26]);
         const shoulder = side === 'right' ? lm[12] : lm[11];
         const hip = side === 'right' ? lm[24] : lm[23];
-        const knee = side === 'right' ? lm[26] : lm[25];
+        let knee = side === 'right' ? lm[26] : lm[25];
 
-        if (shoulder && hip && knee && shoulder.visibility > 0.50 && hip.visibility > 0.50) {
+        if (shoulder && hip && shoulder.visibility > 0.25 && hip.visibility > 0.25) {
+            if (!knee || knee.visibility < 0.20) {
+                knee = { x: hip.x + 0.15, y: hip.y - 0.1, z: hip.z, visibility: 0.3 };
+            }
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
             if (angleText) angleText.innerText = `Core Açısı: ${angle}°`;
 
-            if (angle < 120) {
+            if (angle < 130) {
                 isDown = true;
                 formFeedback.innerText = "Karnı sık! Şimdi açıl.";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (angle > 142 && isDown) {
+            if (angle > 140 && isDown) {
                 completeRep("Core");
             }
         }
@@ -4530,16 +4513,16 @@
         const hip = side === 'right' ? lm[24] : lm[23];
         const knee = side === 'right' ? lm[26] : lm[25];
 
-        if (shoulder && hip && knee && shoulder.visibility > 0.50 && hip.visibility > 0.50 && knee.visibility > 0.45) {
+        if (shoulder && hip && knee && shoulder.visibility > 0.25 && hip.visibility > 0.25 && knee.visibility > 0.25) {
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
             if (angleText) angleText.innerText = `Köprü: ${angle}°`;
 
-            if (angle > 155) {
+            if (angle > 145) {
                 isDown = true;
                 formFeedback.innerText = "Kalçayı sık! Kontrollü in.";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (angle < 135 && isDown) {
+            if (angle < 138 && isDown) {
                 completeRep("Köprü");
             }
         }
@@ -4552,16 +4535,16 @@
         const elbow = side === 'right' ? lm[14] : lm[13];
         const wrist = side === 'right' ? lm[16] : lm[15];
 
-        if (shoulder && elbow && wrist && shoulder.visibility > 0.50 && elbow.visibility > 0.50 && wrist.visibility > 0.45) {
+        if (shoulder && elbow && wrist && shoulder.visibility > 0.25 && elbow.visibility > 0.25 && wrist.visibility > 0.25) {
             const angle = Math.round(calculateAngle(shoulder, elbow, wrist));
             if (angleText) angleText.innerText = `Çekiş Açısı: ${angle}°`;
 
-            if (angle < 75) {
+            if (angle < 85) {
                 isDown = true;
                 formFeedback.innerText = "Kasları sık! Kontrollü uzat.";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (angle > 145 && isDown) {
+            if (angle > 138 && isDown) {
                 completeRep("Çekiş");
             }
         }
@@ -4574,16 +4557,17 @@
         const shoulder = side === 'right' ? lm[12] : lm[11];
         const hip = side === 'right' ? lm[24] : lm[23];
 
-        if (wrist && shoulder && hip && shoulder.visibility > 0.50 && hip.visibility > 0.50) {
-            const angle = Math.round(calculateAngle(wrist, shoulder, hip));
+        if (shoulder && hip && shoulder.visibility > 0.25 && hip.visibility > 0.25) {
+            const wristRef = (wrist && wrist.visibility > 0.25) ? wrist : { x: shoulder.x, y: shoulder.y - 0.2, z: shoulder.z };
+            const angle = Math.round(calculateAngle(wristRef, shoulder, hip));
             if (angleText) angleText.innerText = `Omuz-Sırt: ${angle}°`;
 
-            if (angle > 125) {
+            if (angle > 115) {
                 isDown = true;
                 formFeedback.innerText = "Sırtı sıkıştır! Şimdi indir.";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (angle < 95 && isDown) {
+            if (angle < 100 && isDown) {
                 completeRep("Tekrar");
             }
         }
@@ -4596,16 +4580,16 @@
         const hip = side === 'right' ? lm[24] : lm[23];
         const knee = side === 'right' ? lm[26] : lm[25];
 
-        if (shoulder && hip && knee && shoulder.visibility > 0.50 && hip.visibility > 0.50) {
+        if (shoulder && hip && knee && shoulder.visibility > 0.25 && hip.visibility > 0.25) {
             const angle = Math.round(calculateAngle(shoulder, hip, knee));
             if (angleText) angleText.innerText = `Kalça Açısı: ${angle}°`;
 
-            if (angle < 120) {
+            if (angle < 125) {
                 isDown = true;
                 formFeedback.innerText = "Arka bacak gerildi! Doğrul ⬆";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (angle > 158 && isDown) {
+            if (angle > 152 && isDown) {
                 completeRep("Tekrar");
             }
         }
@@ -4619,17 +4603,17 @@
         const ankle = side === 'right' ? lm[28] : lm[27];
         const nose = lm[0];
 
-        if (knee && ankle && nose && ankle.visibility > 0.45) {
+        if (nose && nose.visibility > 0.25) {
             if (baselineAnkleY === null) baselineAnkleY = nose.y;
             const liftDelta = baselineAnkleY - nose.y;
             if (angleText) angleText.innerText = `Yükseliş: ${Math.max(0, Math.round(liftDelta * 100))}%`;
 
-            if (liftDelta > 0.025) {
+            if (liftDelta > 0.02) {
                 isDown = true;
                 formFeedback.innerText = "Parmak ucunda yüksel! ⬆";
                 formFeedback.className = "text-orange-400 font-bold";
             }
-            if (liftDelta < 0.008 && isDown) {
+            if (liftDelta < 0.007 && isDown) {
                 completeRep("Baldır");
             }
             // Slowly adapt baseline when standing relaxed
@@ -4642,9 +4626,9 @@
     // 12. High Knees
     function handleHighKnees(lm) {
         const lh = lm[23], rh = lm[24], lk = lm[25], rk = lm[26];
-        if (lh && rh && lh.visibility > 0.50 && rh.visibility > 0.50) {
-            const leftUp = lk && lk.visibility > 0.45 && (lk.y < lh.y + 0.05);
-            const rightUp = rk && rk.visibility > 0.45 && (rk.y < rh.y + 0.05);
+        if (lh && rh && lh.visibility > 0.25 && rh.visibility > 0.25) {
+            const leftUp = lk && lk.visibility > 0.25 && (lk.y < lh.y + 0.08);
+            const rightUp = rk && rk.visibility > 0.25 && (rk.y < rh.y + 0.08);
 
             if (leftUp || rightUp) {
                 if (!isDown) {
@@ -4664,8 +4648,9 @@
         const hip = side === 'right' ? lm[24] : lm[23];
         const knee = side === 'right' ? lm[26] : lm[25];
 
-        if (wrist && hip && knee && wrist.visibility > 0.45 && hip.visibility > 0.45 && knee.visibility > 0.45) {
-            const kneeToChest = Math.abs(knee.x - wrist.x) < 0.26;
+        if (hip && knee && hip.visibility > 0.25 && knee.visibility > 0.25) {
+            const wristX = (wrist && wrist.visibility > 0.25) ? wrist.x : hip.x - 0.35;
+            const kneeToChest = Math.abs(knee.x - wristX) < 0.30;
 
             if (kneeToChest && !isDown) {
                 completeRep("Tırmanış");
@@ -4681,13 +4666,16 @@
         const side = getBestSide(lm, [23, 25, 27], [24, 26, 28]);
         const hip = side === 'right' ? lm[24] : lm[23];
         const knee = side === 'right' ? lm[26] : lm[25];
-        const ankle = side === 'right' ? lm[28] : lm[27];
+        let ankle = side === 'right' ? lm[28] : lm[27];
 
-        if (hip && knee && ankle && hip.visibility > 0.50 && knee.visibility > 0.50 && ankle.visibility > 0.40) {
+        if (hip && knee && hip.visibility > 0.25 && knee.visibility > 0.25) {
+            if (!ankle || ankle.visibility < 0.20) {
+                ankle = { x: knee.x, y: Math.min(1.0, knee.y + 0.35), z: knee.z, visibility: 0.3 };
+            }
             const angle = Math.round(calculateAngle(hip, knee, ankle));
             if (angleText) angleText.innerText = `Diz: ${angle}°`;
 
-            if (angle >= 75 && angle <= 110) {
+            if (angle >= 70 && angle <= 115) {
                 formFeedback.innerText = "Pozisyonu bozma!";
                 formFeedback.className = "text-emerald-400 font-bold";
 
@@ -4718,9 +4706,9 @@
         const wrist = side === 'right' ? lm[16] : lm[15];
         const nose = lm[0];
 
-        if (shoulder && hip && wrist && shoulder.visibility > 0.50 && hip.visibility > 0.50 && wrist.visibility > 0.45) {
-            const isPlank = Math.abs(shoulder.y - hip.y) < 0.22;
-            const isJump = nose && (wrist.y < nose.y);
+        if (shoulder && hip && shoulder.visibility > 0.25 && hip.visibility > 0.25) {
+            const isPlank = Math.abs(shoulder.y - hip.y) < 0.28;
+            const isJump = nose && wrist && (wrist.y < nose.y);
 
             if (isPlank) {
                 isStageTwo = true;
@@ -4770,7 +4758,7 @@
                 facingMode: currentFacingMode,
                 width: { ideal: 1280, max: 1920 },
                 height: { ideal: 720, max: 1080 },
-                frameRate: { ideal: 60, min: 30 }
+                frameRate: { ideal: 30, max: 60 }
             }
         };
 
@@ -4785,6 +4773,12 @@
                 });
             } catch (fatal) {
                 console.warn("Camera access denied or unavailable:", fatal.message);
+                const titleEl = document.getElementById('loading-title');
+                const descEl = document.getElementById('loading-desc');
+                const btnTextEl = document.getElementById('start-btn-text');
+                if (titleEl) titleEl.innerText = "Kamera İzni Gerekli";
+                if (descEl) descEl.innerText = "Yapay zeka koçunun duruşunu analiz edebilmesi için kamera iznine ihtiyaç var. Lütfen tarayıcı ayarlarından kameraya izin ver ve tekrar dene.";
+                if (btnTextEl) btnTextEl.innerText = "İzni Yenile ve Başlat";
                 loadingOverlay.classList.remove('hidden');
                 return;
             }
@@ -4896,8 +4890,8 @@
         smoothLandmarks: true,
         enableSegmentation: false,
         smoothSegmentation: false,
-        minDetectionConfidence: 0.65,
-        minTrackingConfidence: 0.65
+        minDetectionConfidence: 0.45,
+        minTrackingConfidence: 0.45
     });
     
     pose.onResults(onResults);
