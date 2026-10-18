@@ -3,90 +3,114 @@
 {% block title %}Antrenman Programları ve Kamplar - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="relative z-10 max-w-7xl mx-auto animate-fade-up">
+<div class="relative z-10 max-w-7xl mx-auto space-y-6">
+
+    <!-- Top Segmented Hub (4 Core Training Modes with 3D Icons) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="/programlar" class="p-3.5 rounded-2xl bg-orange-500/15 border border-orange-500/50 flex items-center gap-3 shadow-lg shadow-orange-500/10">
+            <img src="/static/images/home_gym_icon.jpg" alt="Hazır Kamplar" class="w-11 h-11 rounded-xl object-cover border border-orange-500/40 shrink-0">
+            <div class="min-w-0">
+                <span class="text-xs font-black text-white uppercase tracking-tight block truncate">Hazır Kamplar</span>
+                <span class="text-[10px] text-orange-300 font-semibold block truncate">7 - 30 Günlük Planlar</span>
+            </div>
+        </a>
+
+        <a href="/antrenman-olustur" class="athletic-card p-3.5 rounded-2xl flex items-center gap-3 hover:border-orange-500/50 group">
+            <img src="/static/images/workout_builder_icon.jpg" alt="Antrenman Kur" class="w-11 h-11 rounded-xl object-cover border border-zinc-800 shrink-0">
+            <div class="min-w-0">
+                <span class="text-xs font-black text-white group-hover:text-orange-400 uppercase tracking-tight block truncate">Antrenman Kur</span>
+                <span class="text-[10px] text-zinc-400 block truncate">Kendi Seansını Oluştur</span>
+            </div>
+        </a>
+
+        <a href="/kalistenik-agaci" class="athletic-card p-3.5 rounded-2xl flex items-center gap-3 hover:border-orange-500/50 group">
+            <img src="/static/images/skill_tree_icon.jpg" alt="Yetenek Ağacı" class="w-11 h-11 rounded-xl object-cover border border-zinc-800 shrink-0">
+            <div class="min-w-0">
+                <span class="text-xs font-black text-white group-hover:text-orange-400 uppercase tracking-tight block truncate">Yetenek Ağacı</span>
+                <span class="text-[10px] text-zinc-400 block truncate">Kalistenik Kademeler</span>
+            </div>
+        </a>
+
+        <a href="/challenges" class="athletic-card p-3.5 rounded-2xl flex items-center gap-3 hover:border-orange-500/50 group">
+            <img src="/static/images/challenges_trophy_icon.jpg" alt="Meydan Okuma" class="w-11 h-11 rounded-xl object-cover border border-zinc-800 shrink-0">
+            <div class="min-w-0">
+                <span class="text-xs font-black text-white group-hover:text-orange-400 uppercase tracking-tight block truncate">Meydan Okuma</span>
+                <span class="text-[10px] text-zinc-400 block truncate">Görevler &amp; Liderlik</span>
+            </div>
+        </a>
+    </div>
+
     <!-- Header -->
-    <div class="mb-12 pb-6 border-b border-zinc-800/80">
-        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-wider mb-3">
-            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-            <span>BİLİMSEL GELİŞİM KAMPLARI</span>
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-zinc-800/80">
+        <div>
+            <span class="text-[11px] font-black uppercase tracking-widest text-orange-400 block mb-1">ADIM ADIM EV PROGRAMLARI</span>
+            <h1 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+                Hazır Antrenman Kampları
+            </h1>
         </div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
-            Antrenman <span class="text-gradient">Programları</span>
-        </h1>
-        <p class="text-zinc-400 mt-2 text-base max-w-2xl font-medium">
-            Seviyene ve hedefine uygun özel programını seç. Gün gün planlanmış hareketlerle evinde disiplinle ilerle.
-        </p>
+        <a href="/test" class="text-xs font-black uppercase tracking-wider text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
+            <span>Hangi Kamp Bana Uygun? (2 Dk Test)</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </a>
     </div>
 
     <!-- Programs Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for program in programs %}
-        <div class="athletic-card rounded-3xl overflow-hidden relative border border-zinc-800/80 bg-zinc-950 flex flex-col justify-between group hover:border-orange-500/50 transition-all shadow-2xl">
+        <div class="athletic-card rounded-3xl overflow-hidden flex flex-col justify-between group hover:border-orange-500/50 transition-all shadow-xl">
             <div>
-                <!-- Cover Image Box -->
-                <div class="relative h-60 w-full overflow-hidden bg-black">
+                <a href="/programlar/{{ program.slug }}" class="relative h-52 w-full overflow-hidden bg-black block">
                     <img src="/static/images/{{ program.slug }}.jpg" 
                          alt="{{ program.title }}"
                          class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                          onerror="this.src='/static/images/home_gym_icon.jpg'">
                     
-                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/35 to-transparent"></div>
 
                     <!-- Duration Badge -->
-                    <div class="absolute top-4 left-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-black/70 text-orange-400 border border-orange-500/40 backdrop-blur-md">
-                            ⚡ {{ program.duration_days }} Günlük Kamp
+                    <div class="absolute top-3.5 left-3.5">
+                        <span class="px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider bg-black/80 text-orange-400 border border-orange-500/40 backdrop-blur-md">
+                            {{ program.duration_days }} Günlük Kamp
                         </span>
                     </div>
 
                     <!-- Level Badge -->
-                    <div class="absolute top-4 right-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-900/80 text-zinc-300 border border-zinc-700 backdrop-blur-md">
+                    <div class="absolute top-3.5 right-3.5">
+                        <span class="px-3 py-1 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-zinc-900/85 text-zinc-200 border border-zinc-700 backdrop-blur-md">
                             {{ program.level }}
                         </span>
                     </div>
 
                     <!-- Goal Badge on Bottom -->
-                    <div class="absolute bottom-4 left-4">
-                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg backdrop-blur-md">
-                            🎯 {{ program.goal }}
+                    <div class="absolute bottom-3.5 left-3.5">
+                        <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg backdrop-blur-md">
+                            Hedef: {{ program.goal }}
                         </span>
                     </div>
-                </div>
+                </a>
 
-                <!-- Text Info -->
-                <div class="p-6 sm:p-8 space-y-4">
-                    <h2 class="text-2xl font-black text-white uppercase tracking-tight group-hover:text-accent transition-colors">
+                <div class="p-5 space-y-2">
+                    <a href="/programlar/{{ program.slug }}" class="block text-xl font-black text-white uppercase tracking-tight group-hover:text-orange-400 transition-colors">
                         {{ program.title }}
-                    </h2>
-                    <p class="text-sm text-zinc-400 line-clamp-3 leading-relaxed">
+                    </a>
+                    <p class="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
                         {{ program.description }}
                     </p>
                 </div>
             </div>
 
-            <!-- Footer Action -->
-            <div class="p-6 sm:p-8 pt-0">
-                <a href="/programlar/{{ program.slug }}" class="w-full bg-zinc-800 hover:bg-accent text-white font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 border border-zinc-700/80 hover:border-accent shadow-md">
-                    <span>Programı İncele & Başla</span>
-                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            <!-- Dual Action Footer: Direct Start or View Schedule -->
+            <div class="p-5 pt-0 grid grid-cols-2 gap-2.5">
+                <a href="/programlar/{{ program.slug }}" class="py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-extrabold text-xs uppercase tracking-wider text-center transition-all">
+                    Takvimi Gör
+                </a>
+                <a href="/programlar/{{ program.slug }}/antrenman" class="py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                    <span>Hemen Başla</span>
                 </a>
             </div>
         </div>
         {% endfor %}
-    </div>
-
-    <!-- AI Personalized Recommendation Banner -->
-    <div class="mt-16 athletic-card rounded-3xl p-8 sm:p-12 border border-orange-500/30 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
-        <div class="space-y-2 text-center md:text-left">
-            <span class="text-xs font-black uppercase tracking-widest text-orange-400">KARARSIZ MISIN?</span>
-            <h3 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Sana Özel Planı 2 Dakikada Çıkaralım</h3>
-            <p class="text-zinc-400 text-sm max-w-xl">Yaş, kilo, fitness seviyen ve hedefine göre en verimli antrenman rutini algoritma tarafından belirlensin.</p>
-        </div>
-
-        <a href="/quiz" class="btn-primary whitespace-nowrap !py-3.5 !px-8 text-xs shrink-0">
-            <span>🎯 Kişisel Testi Çöz</span>
-        </a>
     </div>
 </div>
 {% endblock %}

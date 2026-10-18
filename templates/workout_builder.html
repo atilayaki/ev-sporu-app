@@ -4,25 +4,57 @@
 
 {% block content %}
 <div class="relative z-10 max-w-6xl mx-auto animate-fade-up" x-data="smartWorkoutBuilder()">
-    <!-- Header -->
-    <div class="mb-10 pb-6 border-b border-zinc-800/80 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-        <div>
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-wider mb-3">
-                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                <span>SWOLEY ALGORİTMİK ANTRENMAN MOTORU &bull; %100 VÜCUT AĞIRLIĞI</span>
+    <!-- Header & Segmented Navigation Hub -->
+    <div class="mb-6 pb-6 border-b border-zinc-800/80 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <img src="/static/images/workout_builder_icon.jpg" alt="Antrenman Kur" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-orange-500/40 shadow-lg shadow-orange-500/10 shrink-0">
+                <div>
+                    <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider mb-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                        <span>ALGORİTMİK ANTRENMAN MOTORU</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight leading-none">
+                        Akıllı Antrenman <span class="text-gradient">Kurucu</span>
+                    </h1>
+                    <p class="text-zinc-400 mt-1 text-xs sm:text-sm max-w-xl">
+                        Hedef bölgeni, amacını ve ev ortamını seç; biyomekanik motorumuz sana özel set ve tempo şemasını hazırlasın.
+                    </p>
+                </div>
             </div>
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
-                Akıllı Antrenman <span class="text-gradient">Oluşturucu</span>
-            </h1>
-            <p class="text-zinc-400 mt-2 text-base max-w-2xl font-medium">
-                Hedef bölgeni, antrenman amacını ve süreni seç; biyomekanik motorumuz sana özel set, tekrar, dinlenme ve tempo şemasını saniyeler içinde hazırlasın!
-            </p>
         </div>
 
-        <a href="/kalistenik-agaci" class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 self-start lg:self-end">
-            <span>🌳 Kalistenik Yetenek Ağacı</span>
-            <span>➔</span>
-        </a>
+        <!-- 4-Way Segmented Hub -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <a href="/programlar" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white transition-all">
+                <img src="/static/images/home_gym_icon.jpg" alt="Kamplar" class="w-9 h-9 rounded-xl object-cover border border-zinc-700 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Hazır Kamplar</span>
+                    <span class="text-[10px] text-zinc-400 block truncate">Haftalık Planlar</span>
+                </div>
+            </a>
+            <a href="/antrenman-olustur" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-orange-500/15 border border-orange-500/50 text-white shadow-lg shadow-orange-500/10 transition-all">
+                <img src="/static/images/workout_builder_icon.jpg" alt="Antrenman Kur" class="w-9 h-9 rounded-xl object-cover border border-orange-500/40 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Antrenman Kur</span>
+                    <span class="text-[10px] text-orange-300 font-bold block truncate">Aktif Sekme</span>
+                </div>
+            </a>
+            <a href="/kalistenik-agaci" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white transition-all">
+                <img src="/static/images/skill_tree_icon.jpg" alt="Yetenek Ağacı" class="w-9 h-9 rounded-xl object-cover border border-zinc-700 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Yetenek Ağacı</span>
+                    <span class="text-[10px] text-zinc-400 block truncate">7 Ustalık Yolu</span>
+                </div>
+            </a>
+            <a href="/challenges" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white transition-all">
+                <img src="/static/images/challenges_trophy_icon.jpg" alt="Meydan Okuma" class="w-9 h-9 rounded-xl object-cover border border-zinc-700 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Meydan Okuma</span>
+                    <span class="text-[10px] text-zinc-400 block truncate">30 Günlük Seriler</span>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- Step 1, 2, 3 Configuration Grid -->

@@ -1,395 +1,358 @@
 {% extends 'base.html' %}
 
-{% block title %}Sporcu Araçları Merkezi & Veri Yedekleme - Evde Spor{% endblock %}
+{% block title %}Sporcu Araçları & Kronometre Merkezi - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8" x-data="athleteToolsHub()">
+<div class="max-w-5xl mx-auto space-y-6" x-data="athleteToolsHub()">
 
-    <!-- Hero Banner -->
-    <div class="relative rounded-3xl overflow-hidden border border-zinc-800/90 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black p-6 sm:p-8 shadow-2xl">
-        <div class="absolute -top-24 -right-24 w-72 h-72 bg-orange-500/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Compact Header with Custom 3D Icon -->
+    <div class="athletic-card rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <img src="/static/images/athlete_tools_icon.jpg" alt="Sporcu Araçları" class="w-14 h-14 rounded-2xl object-cover border border-zinc-800 shrink-0 shadow-lg">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[11px] font-black uppercase tracking-widest mb-3">
-                    <span>🛠️ GYMMANE 6'LI SPORCU ARAÇLARI MERKEZİ</span>
-                </div>
-                <h1 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">
-                    Sporcu Laboratuvarı &amp; Akıllı Araçlar
+                <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">6'LI SPORCU LABORATUVARI</span>
+                <h1 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+                    Sporcu Araçları &amp; Kronometre Merkezi
                 </h1>
-                <p class="text-xs sm:text-sm text-zinc-400 mt-1.5 max-w-2xl">
-                    Donanma (Navy) vücut yağ oranı ölçümü, sesli Tabata/HIIT kronometresi, dinamik ısınma üretici, kalistenik güç testi, sporcu öğün rehberi ve tam veri yedekleme merkezi.
-                </p>
+                <p class="text-xs text-zinc-400 mt-0.5">İhtiyacın olan aracı aşağıdan seç ve anında kullan.</p>
             </div>
-            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                <a href="/antrenman-olustur" class="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-orange-500/25 transition-all">
-                    ⚡ Antrenman Kurucu
-                </a>
-                <a href="/profil" class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-black uppercase tracking-wider transition-all">
-                    👤 Profilim &amp; Radar
-                </a>
-            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="/breathe" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-extrabold uppercase tracking-wider transition-all">
+                Nefes Egzersizi
+            </a>
+            <a href="/antrenman-olustur" class="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-wider transition-all">
+                Antrenman Kur
+            </a>
         </div>
     </div>
 
-    <!-- Quick Tool Navigation Tabs -->
+    <!-- 6-Tab Tool Selector Grid (No Emojis - Clean Vector & Numbered Tabs) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-        <button type="button" @click="scrollToSection('tool-bodyfat')" class="p-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/50 text-left transition-all cursor-pointer group">
-            <span class="text-xl block mb-1">📏</span>
-            <span class="text-xs font-black uppercase text-white group-hover:text-orange-400 block">1. Yağ Oranı (%)</span>
-            <span class="text-[10px] text-zinc-500">Navy Method &amp; Kas Kütlesi</span>
+        <button type="button" @click="activeTool = 'tabata'"
+                class="p-3 rounded-2xl border text-left transition-all cursor-pointer"
+                :class="activeTool === 'tabata' ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'athletic-card text-zinc-400 hover:text-white'">
+            <span class="text-[10px] font-mono font-black uppercase block" :class="activeTool === 'tabata' ? 'text-orange-400' : 'text-zinc-500'">ARAÇ 01</span>
+            <span class="text-xs font-black uppercase block mt-0.5">Tabata / HIIT</span>
+            <span class="text-[10px] text-zinc-500 block truncate">Sesli Sayaç</span>
         </button>
-        <button type="button" @click="scrollToSection('tool-tabata')" class="p-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/50 text-left transition-all cursor-pointer group">
-            <span class="text-xl block mb-1">⏱️</span>
-            <span class="text-xs font-black uppercase text-white group-hover:text-orange-400 block">2. Tabata / HIIT</span>
-            <span class="text-[10px] text-zinc-500">Sesli Interval Kronometre</span>
+
+        <button type="button" @click="activeTool = 'bodyfat'"
+                class="p-3 rounded-2xl border text-left transition-all cursor-pointer"
+                :class="activeTool === 'bodyfat' ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'athletic-card text-zinc-400 hover:text-white'">
+            <span class="text-[10px] font-mono font-black uppercase block" :class="activeTool === 'bodyfat' ? 'text-orange-400' : 'text-zinc-500'">ARAÇ 02</span>
+            <span class="text-xs font-black uppercase block mt-0.5">Yağ Oranı (%)</span>
+            <span class="text-[10px] text-zinc-500 block truncate">Navy &amp; Kas Kütlesi</span>
         </button>
-        <button type="button" @click="scrollToSection('tool-warmup')" class="p-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/50 text-left transition-all cursor-pointer group">
-            <span class="text-xl block mb-1">🔥</span>
-            <span class="text-xs font-black uppercase text-white group-hover:text-orange-400 block">3. Dinamik Isınma</span>
-            <span class="text-[10px] text-zinc-500">5 Dk Mobilite Serisi</span>
+
+        <button type="button" @click="activeTool = 'warmup'"
+                class="p-3 rounded-2xl border text-left transition-all cursor-pointer"
+                :class="activeTool === 'warmup' ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'athletic-card text-zinc-400 hover:text-white'">
+            <span class="text-[10px] font-mono font-black uppercase block" :class="activeTool === 'warmup' ? 'text-orange-400' : 'text-zinc-500'">ARAÇ 03</span>
+            <span class="text-xs font-black uppercase block mt-0.5">Dinamik Isınma</span>
+            <span class="text-[10px] text-zinc-500 block truncate">5 Dk Mobilite</span>
         </button>
-        <button type="button" @click="scrollToSection('tool-strength')" class="p-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/50 text-left transition-all cursor-pointer group">
-            <span class="text-xl block mb-1">💪</span>
-            <span class="text-xs font-black uppercase text-white group-hover:text-orange-400 block">4. Güç &amp; Seviye Testi</span>
-            <span class="text-[10px] text-zinc-500">Kalistenik Atlet Skoru</span>
+
+        <button type="button" @click="activeTool = 'strength'"
+                class="p-3 rounded-2xl border text-left transition-all cursor-pointer"
+                :class="activeTool === 'strength' ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'athletic-card text-zinc-400 hover:text-white'">
+            <span class="text-[10px] font-mono font-black uppercase block" :class="activeTool === 'strength' ? 'text-orange-400' : 'text-zinc-500'">ARAÇ 04</span>
+            <span class="text-xs font-black uppercase block mt-0.5">Güç Seviyesi</span>
+            <span class="text-[10px] text-zinc-500 block truncate">Kalistenik Rütbe</span>
         </button>
-        <button type="button" @click="scrollToSection('tool-meals')" class="p-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/50 text-left transition-all cursor-pointer group">
-            <span class="text-xl block mb-1">🍳</span>
-            <span class="text-xs font-black uppercase text-white group-hover:text-orange-400 block">5. Sporcu Mutfağı</span>
-            <span class="text-[10px] text-zinc-500">Ekonomik Ev Öğünleri</span>
+
+        <button type="button" @click="activeTool = 'meals'"
+                class="p-3 rounded-2xl border text-left transition-all cursor-pointer"
+                :class="activeTool === 'meals' ? 'bg-orange-500/15 border-orange-500 text-white shadow-lg shadow-orange-500/10' : 'athletic-card text-zinc-400 hover:text-white'">
+            <span class="text-[10px] font-mono font-black uppercase block" :class="activeTool === 'meals' ? 'text-orange-400' : 'text-zinc-500'">ARAÇ 05</span>
+            <span class="text-xs font-black uppercase block mt-0.5">Sporcu Mutfağı</span>
+            <span class="text-[10px] text-zinc-500 block truncate">Ev Öğün Planı</span>
         </button>
-        <button type="button" @click="scrollToSection('tool-backup')" class="p-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/50 text-left transition-all cursor-pointer group">
-            <span class="text-xl block mb-1">💾</span>
-            <span class="text-xs font-black uppercase text-white group-hover:text-emerald-400 block">6. Veri Yedekleme</span>
-            <span class="text-[10px] text-zinc-500">JSON İndir &amp; Geri Yükle</span>
+
+        <button type="button" @click="activeTool = 'backup'"
+                class="p-3 rounded-2xl border text-left transition-all cursor-pointer"
+                :class="activeTool === 'backup' ? 'bg-emerald-500/15 border-emerald-500 text-white shadow-lg shadow-emerald-500/10' : 'athletic-card text-zinc-400 hover:text-white'">
+            <span class="text-[10px] font-mono font-black uppercase block" :class="activeTool === 'backup' ? 'text-emerald-400' : 'text-zinc-500'">ARAÇ 06</span>
+            <span class="text-xs font-black uppercase block mt-0.5">Veri Yedekle</span>
+            <span class="text-[10px] text-zinc-500 block truncate">JSON İndir/Yükle</span>
         </button>
     </div>
 
-    <!-- Main Grid of Tools -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        <!-- TOOL 1: US Navy Body Fat % & Lean Body Mass Calculator -->
-        <div id="tool-bodyfat" class="athletic-card rounded-2xl p-6 sm:p-7 border border-zinc-800 flex flex-col justify-between space-y-5">
+    <!-- =================================================== -->
+    <!-- TOOL 1: TABATA / HIIT / EMOM INTERVAL CHRONOMETER   -->
+    <!-- =================================================== -->
+    <div x-show="activeTool === 'tabata'" x-transition class="athletic-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-widest">
-                        ARAÇ 01 &bull; US NAVY FORMÜLÜ
-                    </span>
-                    <span class="text-xs font-mono font-bold text-zinc-400">Mezura Ölçümü</span>
-                </div>
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">📏 Vücut Yağ Oranı (%) &amp; Kas Kütlesi Hesaplayıcı</h2>
-                <p class="text-xs text-zinc-400 mt-1">Boyun, bel ve boy ölçülerinle klinik doğruluğa en yakın vücut yağ yüzdesini ve yağsız kas kütleni (LBM) öğren.</p>
-
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Cinsiyet</label>
-                        <select x-model="bf.gender" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none focus:border-orange-500">
-                            <option value="male">Erkek</option>
-                            <option value="female">Kadın</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Boy (cm)</label>
-                        <input type="number" x-model.number="bf.height" min="130" max="230" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none focus:border-orange-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Kilo (kg)</label>
-                        <input type="number" step="0.5" x-model.number="bf.weight" min="35" max="220" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-orange-400 outline-none focus:border-orange-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Boyun Çevresi (cm)</label>
-                        <input type="number" step="0.5" x-model.number="bf.neck" min="25" max="65" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none focus:border-orange-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Bel Çevresi (cm)</label>
-                        <input type="number" step="0.5" x-model.number="bf.waist" min="50" max="160" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none focus:border-orange-500">
-                    </div>
-                    <div x-show="bf.gender === 'female'">
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Kalça Çevresi (cm)</label>
-                        <input type="number" step="0.5" x-model.number="bf.hip" min="60" max="170" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none focus:border-orange-500">
-                    </div>
-                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">SESLİ INTERVAL KRONOMETRE</span>
+                <h2 class="text-xl font-black text-white uppercase">Tabata / HIIT / EMOM Antrenman Sayacı</h2>
             </div>
-
-            <!-- Results Box -->
-            <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
-                <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="p-3 rounded-xl bg-zinc-950 border border-orange-500/30">
-                        <span class="block text-[10px] font-black uppercase text-orange-400">Yağ Oranı</span>
-                        <span class="text-2xl font-mono font-black text-white" x-text="'%' + calcBodyFat().pct"></span>
-                        <span class="block text-[10px] font-bold text-zinc-400 mt-0.5" x-text="calcBodyFat().category"></span>
-                    </div>
-                    <div class="p-3 rounded-xl bg-zinc-950 border border-emerald-500/30">
-                        <span class="block text-[10px] font-black uppercase text-emerald-400">Yağsız Kütle (LBM)</span>
-                        <span class="text-2xl font-mono font-black text-white" x-text="calcBodyFat().lbm + ' kg'"></span>
-                        <span class="block text-[10px] text-zinc-500 mt-0.5">Saf Kas &amp; İskelet</span>
-                    </div>
-                    <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                        <span class="block text-[10px] font-black uppercase text-zinc-400">Yağ Kütlesi</span>
-                        <span class="text-2xl font-mono font-black text-amber-400" x-text="calcBodyFat().fatMass + ' kg'"></span>
-                        <span class="block text-[10px] text-zinc-500 mt-0.5">Toplam Yağ</span>
-                    </div>
-                </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" @click="applyTimerPreset(20, 10, 8)" class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-200 cursor-pointer">Tabata (20/10 x 8)</button>
+                <button type="button" @click="applyTimerPreset(40, 20, 6)" class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-200 cursor-pointer">HIIT (40/20 x 6)</button>
+                <button type="button" @click="applyTimerPreset(45, 15, 10)" class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-200 cursor-pointer">EMOM (45/15 x 10)</button>
             </div>
         </div>
 
-        <!-- TOOL 2: Interactive Tabata / HIIT / EMOM Interval Timer -->
-        <div id="tool-tabata" class="athletic-card rounded-2xl p-6 sm:p-7 border border-zinc-800 flex flex-col justify-between space-y-5">
+        <div class="grid grid-cols-3 gap-4">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest">
-                        ARAÇ 02 &bull; SESLİ INTERVAL KRONOMETRE
-                    </span>
-                    <div class="flex gap-1.5">
-                        <button type="button" @click="applyTimerPreset(20, 10, 8)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-[10px] font-bold text-zinc-300 cursor-pointer">Tabata (20/10x8)</button>
-                        <button type="button" @click="applyTimerPreset(40, 20, 6)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-[10px] font-bold text-zinc-300 cursor-pointer">HIIT (40/20x6)</button>
-                        <button type="button" @click="applyTimerPreset(45, 15, 10)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-[10px] font-bold text-zinc-300 cursor-pointer">EMOM (45/15x10)</button>
-                    </div>
-                </div>
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">⏱️ Tabata / HIIT / EMOM Antrenman Sayacı</h2>
-                <p class="text-xs text-zinc-400 mt-1">Serbest ev antrenmanlarında çalışma ve dinlenme turlarını sesli uyarılarla takip et.</p>
-
-                <div class="grid grid-cols-3 gap-3 mt-4">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Çalışma (sn)</label>
-                        <input type="number" x-model.number="timer.workSec" :disabled="timer.running" min="5" max="300" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Dinlenme (sn)</label>
-                        <input type="number" x-model.number="timer.restSec" :disabled="timer.running" min="0" max="180" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Toplam Tur</label>
-                        <input type="number" x-model.number="timer.totalRounds" :disabled="timer.running" min="1" max="30" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white">
-                    </div>
-                </div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Çalışma Süresi (sn)</label>
+                <input type="number" x-model.number="timer.workSec" :disabled="timer.running" min="5" max="300" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-emerald-400">
             </div>
-
-            <!-- Live Digital Display -->
-            <div class="p-5 rounded-2xl border text-center transition-all"
-                 :class="timer.phase === 'work' ? 'bg-emerald-950/30 border-emerald-500/40' : (timer.phase === 'rest' ? 'bg-amber-950/30 border-amber-500/40' : 'bg-zinc-900/90 border-zinc-800')">
-                <div class="flex items-center justify-between text-xs font-black uppercase tracking-wider mb-1">
-                    <span :class="timer.phase === 'work' ? 'text-emerald-400' : (timer.phase === 'rest' ? 'text-amber-400' : 'text-zinc-400')"
-                          x-text="timer.phase === 'work' ? '🔥 BAS! ÇALIŞMA TURU' : (timer.phase === 'rest' ? '😮‍💨 NEFESLEN / DİNLENME' : '⏳ HAZIR')"></span>
-                    <span class="font-mono text-white" x-text="'TUR ' + timer.currentRound + ' / ' + timer.totalRounds"></span>
-                </div>
-                <div class="text-5xl font-mono font-black text-white my-2 tracking-tight" x-text="formatSeconds(timer.remainingSec)"></div>
-                <div class="flex items-center justify-center gap-3 mt-3">
-                    <button type="button" @click="toggleTabataTimer()"
-                            class="px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-white transition-all cursor-pointer"
-                            :class="timer.running ? 'bg-amber-600 hover:bg-amber-500' : 'bg-emerald-600 hover:bg-emerald-500'">
-                        <span x-text="timer.running ? '⏸ Duraklat' : '▶ Başlat'"></span>
-                    </button>
-                    <button type="button" @click="resetTabataTimer()"
-                            class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black text-xs uppercase tracking-wider transition-all cursor-pointer">
-                        ↺ Sıfırla
-                    </button>
-                </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Dinlenme Süresi (sn)</label>
+                <input type="number" x-model.number="timer.restSec" :disabled="timer.running" min="0" max="180" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-amber-400">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Toplam Tur</label>
+                <input type="number" x-model.number="timer.totalRounds" :disabled="timer.running" min="1" max="30" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-white">
             </div>
         </div>
 
-        <!-- TOOL 3: 5-Minute Dynamic Warm-Up & Joint Mobility Generator -->
-        <div id="tool-warmup" class="athletic-card rounded-2xl p-6 sm:p-7 border border-zinc-800 flex flex-col justify-between space-y-5">
+        <div class="p-6 sm:p-8 rounded-3xl border text-center transition-all"
+             :class="timer.phase === 'work' ? 'bg-emerald-950/30 border-emerald-500/40' : (timer.phase === 'rest' ? 'bg-amber-950/30 border-amber-500/40' : 'bg-zinc-950 border-zinc-800')">
+            <div class="flex items-center justify-between text-xs font-black uppercase tracking-wider mb-2">
+                <span :class="timer.phase === 'work' ? 'text-emerald-400' : (timer.phase === 'rest' ? 'text-amber-400' : 'text-zinc-400')"
+                      x-text="timer.phase === 'work' ? 'ÇALIŞMA TURU AKTİF' : (timer.phase === 'rest' ? 'DİNLENME MOLASI' : 'BAŞLAMAYA HAZIR')"></span>
+                <span class="font-mono text-white" x-text="'TUR ' + timer.currentRound + ' / ' + timer.totalRounds"></span>
+            </div>
+            <div class="text-6xl sm:text-7xl font-mono font-black text-white my-4 tracking-tight" x-text="formatSeconds(timer.remainingSec)"></div>
+            <div class="flex items-center justify-center gap-3 mt-4">
+                <button type="button" @click="toggleTabataTimer()"
+                        class="px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider text-white transition-all cursor-pointer"
+                        :class="timer.running ? 'bg-amber-600 hover:bg-amber-500' : 'bg-emerald-600 hover:bg-emerald-500'">
+                    <span x-text="timer.running ? 'Duraklat' : 'Sayacı Başlat'"></span>
+                </button>
+                <button type="button" @click="resetTabataTimer()"
+                        class="px-5 py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 font-black text-xs uppercase tracking-wider transition-all cursor-pointer">
+                    Sıfırla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- TOOL 2: US NAVY BODY FAT % & LEAN BODY MASS         -->
+    <!-- =================================================== -->
+    <div x-show="activeTool === 'bodyfat'" x-cloak x-transition class="athletic-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="border-b border-zinc-800 pb-4">
+            <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">US NAVY MEZURA FORMÜLÜ</span>
+            <h2 class="text-xl font-black text-white uppercase">Vücut Yağ Oranı (%) &amp; Kas Kütlesi Hesaplayıcı</h2>
+            <p class="text-xs text-zinc-400 mt-1">Boyun, bel ve boy ölçülerinle vücut yağ yüzdesini ve yağsız kas kütleni (LBM) hesapla.</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-widest">
-                        ARAÇ 03 &bull; SAKATLIK ÖNLEYİCİ SERİ
-                    </span>
-                    <span class="text-xs font-mono font-bold text-zinc-400">5 Dakika</span>
-                </div>
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">🔥 Dinamik Isınma &amp; Eklem Mobilite Üretici</h2>
-                <p class="text-xs text-zinc-400 mt-1">Antrenman öncesi eklemlerini yağlamak ve nabzını yükseltmek için bugünkü odağını seç.</p>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Cinsiyet</label>
+                <select x-model="bf.gender" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white outline-none">
+                    <option value="male">Erkek</option>
+                    <option value="female">Kadın</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Boy (cm)</label>
+                <input type="number" x-model.number="bf.height" min="130" max="230" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-white outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Kilo (kg)</label>
+                <input type="number" step="0.5" x-model.number="bf.weight" min="35" max="220" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-orange-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Boyun Çevresi (cm)</label>
+                <input type="number" step="0.5" x-model.number="bf.neck" min="25" max="65" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-white outline-none">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Bel Çevresi (cm)</label>
+                <input type="number" step="0.5" x-model.number="bf.waist" min="50" max="160" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-white outline-none">
+            </div>
+            <div x-show="bf.gender === 'female'">
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Kalça Çevresi (cm)</label>
+                <input type="number" step="0.5" x-model.number="bf.hip" min="60" max="170" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-white outline-none">
+            </div>
+        </div>
 
-                <div class="flex flex-wrap gap-2 mt-4">
-                    <template x-for="cat in warmupCategories" :key="cat.id">
-                        <button type="button" @click="selectedWarmup = cat.id"
-                                class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer"
-                                :class="selectedWarmup === cat.id ? 'bg-orange-500 text-white border-orange-400 shadow' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'">
-                            <span x-text="cat.label"></span>
-                        </button>
-                    </template>
-                </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+            <div class="p-4 rounded-2xl bg-zinc-950 border border-orange-500/30">
+                <span class="block text-[10px] font-black uppercase text-orange-400">Yağ Oranı</span>
+                <span class="text-3xl font-mono font-black text-white block my-1" x-text="'%' + calcBodyFat().pct"></span>
+                <span class="block text-xs font-bold text-zinc-400" x-text="calcBodyFat().category"></span>
+            </div>
+            <div class="p-4 rounded-2xl bg-zinc-950 border border-emerald-500/30">
+                <span class="block text-[10px] font-black uppercase text-emerald-400">Yağsız Kütle (LBM)</span>
+                <span class="text-3xl font-mono font-black text-white block my-1" x-text="calcBodyFat().lbm + ' kg'"></span>
+                <span class="block text-xs text-zinc-500">Saf Kas &amp; İskelet</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800">
+                <span class="block text-[10px] font-black uppercase text-zinc-400">Yağ Kütlesi</span>
+                <span class="text-3xl font-mono font-black text-amber-400 block my-1" x-text="calcBodyFat().fatMass + ' kg'"></span>
+                <span class="block text-xs text-zinc-500">Toplam Yağ Ağırlığı</span>
+            </div>
+        </div>
+    </div>
 
-                <div class="space-y-2 mt-4">
-                    <template x-for="(step, idx) in currentWarmupRoutine()" :key="idx">
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-900/90 border border-zinc-800/90">
-                            <div class="flex items-center gap-3">
-                                <span class="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-400 text-xs font-mono font-black flex items-center justify-center" x-text="idx + 1"></span>
-                                <div>
-                                    <span class="text-xs font-black text-white uppercase block" x-text="step.name"></span>
-                                    <span class="text-[11px] text-zinc-400" x-text="step.focus"></span>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono font-bold text-orange-400" x-text="step.duration"></span>
+    <!-- =================================================== -->
+    <!-- TOOL 3: 5-MINUTE DYNAMIC WARM-UP GENERATOR          -->
+    <!-- =================================================== -->
+    <div x-show="activeTool === 'warmup'" x-cloak x-transition class="athletic-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
+            <div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">SAKATLIK ÖNLEYİCİ SERİ</span>
+                <h2 class="text-xl font-black text-white uppercase">5 Dakikalık Dinamik Isınma &amp; Mobilite</h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="cat in warmupCategories" :key="cat.id">
+                    <button type="button" @click="selectedWarmup = cat.id"
+                            class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer"
+                            :class="selectedWarmup === cat.id ? 'bg-orange-500 text-white border-orange-400' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white'">
+                        <span x-text="cat.label"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div class="space-y-2.5">
+            <template x-for="(step, idx) in currentWarmupRoutine()" :key="idx">
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+                    <div class="flex items-center gap-3.5">
+                        <span class="w-7 h-7 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400 text-xs font-mono font-black flex items-center justify-center" x-text="idx + 1"></span>
+                        <div>
+                            <span class="text-xs sm:text-sm font-black text-white uppercase block" x-text="step.name"></span>
+                            <span class="text-xs text-zinc-400" x-text="step.focus"></span>
                         </div>
-                    </template>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono font-bold text-orange-400" x-text="step.duration"></span>
+                </div>
+            </template>
+        </div>
+
+        <button type="button" @click="applyTimerPreset(45, 15, 5); activeTool = 'tabata'; toggleTabataTimer()"
+                class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 text-white font-black text-xs uppercase tracking-wider cursor-pointer">
+            Bu 5 Hareketlik Isınma Sayacını Başlat (5 Tur x 45sn)
+        </button>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- TOOL 4: CALISTHENICS STRENGTH LEVEL TEST            -->
+    <!-- =================================================== -->
+    <div x-show="activeTool === 'strength'" x-cloak x-transition class="athletic-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="border-b border-zinc-800 pb-4">
+            <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">KALİSTENİK PERFORMANS ÖLÇÜMÜ</span>
+            <h2 class="text-xl font-black text-white uppercase">Kalistenik Güç &amp; Kondisyon Seviye Testi</h2>
+            <p class="text-xs text-zinc-400 mt-1">Tek sette durmaksızın çıkarabildiğin maksimum tekrar sayılarını gir, atletik rütbeni öğren.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Max Şınav (Tekrar)</label>
+                <input type="number" x-model.number="strength.pushups" min="0" max="150" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-white">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Max Squat (Tekrar)</label>
+                <input type="number" x-model.number="strength.squats" min="0" max="300" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-white">
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Max Plank (Saniye)</label>
+                <input type="number" x-model.number="strength.plankSec" min="0" max="600" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-white">
+            </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-black uppercase text-zinc-500 block">Atletik Kalistenik Rütben</span>
+                    <span class="text-xl font-black uppercase text-orange-400" x-text="calcStrengthRank().title"></span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] font-black uppercase text-zinc-500 block">Güç İndeksi</span>
+                    <span class="text-2xl font-mono font-black text-white" x-text="calcStrengthRank().score + ' / 100'"></span>
                 </div>
             </div>
+            <div class="w-full bg-zinc-900 h-2.5 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-500"
+                     :style="'width: ' + calcStrengthRank().score + '%'"></div>
+            </div>
+            <p class="text-xs text-zinc-300 font-medium" x-text="calcStrengthRank().advice"></p>
+        </div>
+    </div>
 
-            <button type="button" @click="applyTimerPreset(45, 15, 5); scrollToSection('tool-tabata'); toggleTabataTimer()"
-                    class="w-full py-3 rounded-xl bg-zinc-900 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/40 font-black text-xs uppercase tracking-wider transition-all cursor-pointer">
-                ⏱️ Bu 5 Hareketlik Isınma Sayacını Başlat (5 Tur x 45sn)
+    <!-- =================================================== -->
+    <!-- TOOL 5: PRACTICAL HOME ATHLETE MEAL PLANNER         -->
+    <!-- =================================================== -->
+    <div x-show="activeTool === 'meals'" x-cloak x-transition class="athletic-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
+            <div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block">PRATİK EV BESLENMESİ</span>
+                <h2 class="text-xl font-black text-white uppercase">Ekonomik Türk Mutfağı Sporcu Öğün Planı</h2>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" @click="mealGoal = 'cut'" class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer" :class="mealGoal === 'cut' ? 'bg-orange-500 text-white' : 'bg-zinc-950 border border-zinc-800 text-zinc-400'">Yağ Yakımı Menüsü</button>
+                <button type="button" @click="mealGoal = 'bulk'" class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer" :class="mealGoal === 'bulk' ? 'bg-orange-500 text-white' : 'bg-zinc-950 border border-zinc-800 text-zinc-400'">Kas İnşası Menüsü</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <template x-for="(meal, idx) in currentMealPlan()" :key="idx">
+                <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 flex flex-col justify-between gap-3">
+                    <div>
+                        <span class="text-[10px] font-black uppercase text-orange-400 block" x-text="meal.time"></span>
+                        <span class="text-sm font-bold text-white block mt-1" x-text="meal.menu"></span>
+                    </div>
+                    <div class="flex items-center justify-between pt-2.5 border-t border-zinc-800/80">
+                        <span class="text-xs font-mono font-black text-emerald-400" x-text="meal.protein + 'g Protein'"></span>
+                        <span class="text-xs font-mono text-zinc-400" x-text="meal.kcal + ' kcal'"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- TOOL 6: FULL JSON DATA BACKUP & RESTORE             -->
+    <!-- =================================================== -->
+    <div x-show="activeTool === 'backup'" x-cloak x-transition class="athletic-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="border-b border-zinc-800 pb-4">
+            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400 block">VERİ GÜVENLİĞİ &amp; TAŞINABİLİRLİK</span>
+            <h2 class="text-xl font-black text-white uppercase">Tek Tıkla Tam Veri Yedekleme &amp; Geri Yükleme</h2>
+            <p class="text-xs text-zinc-400 mt-1">
+                Antrenman geçmişini, kalistenik yetenek ağacı ilerlemeni, kilo ölçülerini ve özel antrenmanlarını cihazına JSON olarak indir veya başka bir cihaza aktar.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button type="button" @click="exportAllUserData()"
+                    class="p-5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500 text-emerald-300 hover:text-white border border-emerald-500/40 text-left transition-all cursor-pointer">
+                <span class="text-sm font-black uppercase block">Tam Yedeği İndir (.JSON)</span>
+                <span class="text-xs opacity-80 block mt-1">Sunucu + Cihaz Kayıtlarını İndir</span>
             </button>
+
+            <label class="p-5 rounded-2xl bg-zinc-950 hover:bg-zinc-900 border border-zinc-700 hover:border-orange-500/50 text-left transition-all cursor-pointer block">
+                <span class="text-sm font-black text-white uppercase block">Yedeği Geri Yükle</span>
+                <span class="text-xs text-zinc-400 block mt-1">Daha önce indirdiğin .json dosyasını seç</span>
+                <input type="file" accept=".json,application/json" class="hidden" @change="importUserData($event)">
+            </label>
         </div>
 
-        <!-- TOOL 4: Calisthenics Relative Strength & Endurance Level Test -->
-        <div id="tool-strength" class="athletic-card rounded-2xl p-6 sm:p-7 border border-zinc-800 flex flex-col justify-between space-y-5">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-black uppercase tracking-widest">
-                        ARAÇ 04 &bull; KALİSTENİK SEVİYE ANALİZİ
-                    </span>
-                    <span class="text-xs font-mono font-bold text-zinc-400">Tek Set Maksimum</span>
-                </div>
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">💪 Kalistenik Güç &amp; Kondisyon Seviye Testi</h2>
-                <p class="text-xs text-zinc-400 mt-1">Durmaksızın tek sette çıkarabildiğin maksimum tekrar sayılarını gir, atletik rütbeni öğren.</p>
-
-                <div class="grid grid-cols-3 gap-3 mt-5">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Max Şınav (Tekrar)</label>
-                        <input type="number" x-model.number="strength.pushups" min="0" max="150" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono font-bold text-white">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Max Squat (Tekrar)</label>
-                        <input type="number" x-model.number="strength.squats" min="0" max="300" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono font-bold text-white">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Max Plank (Saniye)</label>
-                        <input type="number" x-model.number="strength.plankSec" min="0" max="600" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-mono font-bold text-white">
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-black uppercase text-zinc-500 block">Atletik Kalistenik Rütben</span>
-                        <span class="text-xl font-black uppercase text-orange-400" x-text="calcStrengthRank().title"></span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] font-black uppercase text-zinc-500 block">Güç İndeksi</span>
-                        <span class="text-2xl font-mono font-black text-white" x-text="calcStrengthRank().score + ' / 100'"></span>
-                    </div>
-                </div>
-                <div class="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-800">
-                    <div class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-500"
-                         :style="'width: ' + calcStrengthRank().score + '%'"></div>
-                </div>
-                <p class="text-xs text-zinc-300 font-medium" x-text="calcStrengthRank().advice"></p>
-            </div>
-        </div>
-
-        <!-- TOOL 5: Practical Home Athlete Meal & Grocery Guide -->
-        <div id="tool-meals" class="athletic-card rounded-2xl p-6 sm:p-7 border border-zinc-800 flex flex-col justify-between space-y-5">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                        ARAÇ 05 &bull; EV İŞİ SPORCU MUTFAĞI
-                    </span>
-                    <div class="flex gap-1.5">
-                        <button type="button" @click="mealGoal = 'cut'" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer" :class="mealGoal === 'cut' ? 'bg-orange-500 text-white' : 'bg-zinc-900 text-zinc-400'">Yağ Yakımı</button>
-                        <button type="button" @click="mealGoal = 'bulk'" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase cursor-pointer" :class="mealGoal === 'bulk' ? 'bg-orange-500 text-white' : 'bg-zinc-900 text-zinc-400'">Kas İnşası</button>
-                    </div>
-                </div>
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">🍳 Ekonomik Türk Mutfağı Sporcu Öğün Planlayıcı</h2>
-                <p class="text-xs text-zinc-400 mt-1">Karmaşık tarifler olmadan evde 10 dakikada hazırlayabileceğin yüksek proteinli tam gün menüsü.</p>
-
-                <div class="space-y-2.5 mt-4">
-                    <template x-for="(meal, idx) in currentMealPlan()" :key="idx">
-                        <div class="p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800/90 flex items-center justify-between gap-3">
-                            <div>
-                                <span class="text-[10px] font-black uppercase text-orange-400 block" x-text="meal.time"></span>
-                                <span class="text-xs font-bold text-white block mt-0.5" x-text="meal.menu"></span>
-                            </div>
-                            <div class="text-right shrink-0">
-                                <span class="text-xs font-mono font-black text-emerald-400 block" x-text="meal.protein + 'g Protein'"></span>
-                                <span class="text-[10px] font-mono text-zinc-400" x-text="meal.kcal + ' kcal'"></span>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-
-        <!-- TOOL 6: One-Click Full Data Backup & Restore (JSON Export / Import) -->
-        <div id="tool-backup" class="athletic-card rounded-2xl p-6 sm:p-7 border border-emerald-500/30 flex flex-col justify-between space-y-5">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="px-2.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                        ARAÇ 06 &bull; VERİ GÜVENLİĞİ &amp; TAŞINABİLİRLİK
-                    </span>
-                    <span class="text-xs font-mono font-bold text-emerald-400">JSON Formatı</span>
-                </div>
-                <h2 class="text-xl font-black text-white uppercase tracking-tight">💾 Tek Tıkla Veri Yedekleme &amp; Geri Yükleme</h2>
-                <p class="text-xs text-zinc-400 mt-1">
-                    Antrenman geçmişini, kalistenik yetenek ağacı ilerlemeni, kilo ölçülerini, su/oruç kayıtlarını ve özel antrenman şablonlarını cihazına yedekle veya başka bir cihaza aktar.
-                </p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
-                    <!-- Export Button -->
-                    <button type="button" @click="exportAllUserData()"
-                            class="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/20 hover:from-emerald-500 hover:to-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-left transition-all cursor-pointer group">
-                        <span class="text-2xl block mb-1">📥</span>
-                        <span class="text-sm font-black uppercase block">Tam Yedeği İndir (.JSON)</span>
-                        <span class="text-[11px] opacity-80 block mt-0.5">Sunucu + Tarayıcı Kayıtları</span>
-                    </button>
-
-                    <!-- Import File Trigger -->
-                    <label class="p-4 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 hover:border-orange-500/50 text-left transition-all cursor-pointer block">
-                        <span class="text-2xl block mb-1">📤</span>
-                        <span class="text-sm font-black text-white uppercase block">Yedeği Geri Yükle</span>
-                        <span class="text-[11px] text-zinc-400 block mt-0.5">.json yedek dosyasını seç</span>
-                        <input type="file" accept=".json,application/json" class="hidden" @change="importUserData($event)">
-                    </label>
-                </div>
-            </div>
-
-            <div x-show="backupMessage" x-transition class="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold" x-text="backupMessage"></div>
-        </div>
-
+        <div x-show="backupMessage" x-transition class="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold" x-text="backupMessage"></div>
     </div>
+
 </div>
 
 <script>
 function athleteToolsHub() {
     return {
-        bf: {
-            gender: 'male',
-            height: 178,
-            weight: 76,
-            neck: 39,
-            waist: 82,
-            hip: 96
-        },
-        timer: {
-            workSec: 20,
-            restSec: 10,
-            totalRounds: 8,
-            currentRound: 1,
-            remainingSec: 20,
-            phase: 'idle', // 'idle' | 'work' | 'rest'
-            running: false,
-            intervalId: null
-        },
+        activeTool: 'tabata',
+        bf: { gender: 'male', height: 178, weight: 76, neck: 39, waist: 82, hip: 96 },
+        timer: { workSec: 20, restSec: 10, totalRounds: 8, currentRound: 1, remainingSec: 20, phase: 'idle', running: false, intervalId: null },
         selectedWarmup: 'upper',
         warmupCategories: [
-            { id: 'upper', label: '💪 Üst Vücut & Omuz' },
-            { id: 'lower', label: '🦵 Alt Vücut & Kalça' },
-            { id: 'full', label: '⚡ Tüm Vücut & Kardiyo' },
-            { id: 'posture', label: '🧘 Masa Başı Postür Açıcı' }
+            { id: 'upper', label: 'Üst Vücut & Omuz' },
+            { id: 'lower', label: 'Alt Vücut & Kalça' },
+            { id: 'full', label: 'Tüm Vücut & Kardiyo' },
+            { id: 'posture', label: 'Postür Açıcı' }
         ],
-        strength: {
-            pushups: 25,
-            squats: 45,
-            plankSec: 90
-        },
+        strength: { pushups: 25, squats: 45, plankSec: 90 },
         mealGoal: 'cut',
         backupMessage: '',
-
-        scrollToSection(id) {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        },
 
         calcBodyFat() {
             const h = Math.max(120, Number(this.bf.height) || 175);
@@ -421,12 +384,7 @@ function athleteToolsHub() {
                 else category = 'Yağ Yakımı Önerilir';
             }
 
-            return {
-                pct: bfPct.toFixed(1),
-                fatMass: fatMass.toFixed(1),
-                lbm: lbm.toFixed(1),
-                category
-            };
+            return { pct: bfPct.toFixed(1), fatMass: fatMass.toFixed(1), lbm: lbm.toFixed(1), category };
         },
 
         playBeep(freq = 880, durationMs = 180) {
@@ -522,7 +480,7 @@ function athleteToolsHub() {
                 ],
                 full: [
                     { name: 'Jumping Jacks', focus: 'Nabız yükseltme ve tüm vücut ısınma', duration: '45 sn' },
-                    { name: 'Dünyanın En İyi Esnemesi (World\'s Greatest Stretch)', focus: 'Kalça, sırt ve omuz tek hareketle açılım', duration: '45 sn' },
+                    { name: 'World\'s Greatest Stretch', focus: 'Kalça, sırt ve omuz tek hareketle açılım', duration: '45 sn' },
                     { name: 'High Knees (Yüksek Diz Çekiş)', focus: 'Alt karın ve kardiyo aktivasyonu', duration: '45 sn' },
                     { name: 'Plank to Downward Dog', focus: 'Omuz ve arka bacak esnetme', duration: '45 sn' },
                     { name: 'Hafif Tempo Yarım Burpee', focus: 'Patlayıcı antrenman hazırlığı', duration: '45 sn' }
@@ -545,29 +503,13 @@ function athleteToolsHub() {
 
             const score = Math.min(100, Math.round((p / 50) * 40 + (s / 80) * 30 + (pl / 150) * 30));
             if (score >= 85) {
-                return {
-                    score,
-                    title: '🔥 Elit Street Workout Atleti',
-                    advice: 'Üstün vücut ağırlığı kontrolü! Tek kol şınav, Pistol Squat ve L-Sit kademelerine geçmeye hazırsın.'
-                };
+                return { score, title: 'Elit Street Workout Atleti', advice: 'Üstün vücut ağırlığı kontrolü! Tek kol şınav, Pistol Squat ve L-Sit kademelerine geçmeye hazırsın.' };
             } else if (score >= 60) {
-                return {
-                    score,
-                    title: '⚡ İleri Seviye Kalistenik',
-                    advice: 'Güçlü temel! Süpersetli antrenmanlar ve Elmas/Okçu şınav varyasyonlarıyla hipertrofiyi artırabilirsin.'
-                };
+                return { score, title: 'İleri Seviye Kalistenik', advice: 'Güçlü temel! Süpersetli antrenmanlar ve Elmas/Okçu şınav varyasyonlarıyla hipertrofiyi artırabilirsin.' };
             } else if (score >= 35) {
-                return {
-                    score,
-                    title: '💪 Fit & Gelişen Sporcu',
-                    advice: 'İyi bir temel oluşturmuşsun. Haftada 4 gün düzenli programlarla 4 hafta içinde İleri Seviye eşiğine çıkabilirsin.'
-                };
+                return { score, title: 'Fit & Gelişen Sporcu', advice: 'İyi bir temel oluşturmuşsun. Haftada 4 gün düzenli programlarla 4 hafta içinde İleri Seviye eşiğine çıkabilirsin.' };
             }
-            return {
-                score,
-                title: '🌱 Başlangıç / Temel İnşa',
-                advice: 'Harika bir başlangıç noktası! 7 Günlük Başlangıç Programı ve AI Koç form takibiyle kas-sinir uyumunu hızla güçlendir.'
-            };
+            return { score, title: 'Başlangıç / Temel İnşa', advice: '7 Günlük Başlangıç Programı ve AI Koç form takibiyle kas-sinir uyumunu hızla güçlendir.' };
         },
 
         currentMealPlan() {
@@ -595,22 +537,18 @@ function athleteToolsHub() {
                     localData[k] = localStorage.getItem(k);
                 }
             }
-
             let serverPayload = {};
             try {
                 const res = await fetch('/api/yedek-indir');
-                if (res.ok) {
-                    serverPayload = await res.json();
-                }
+                if (res.ok) serverPayload = await res.json();
             } catch (e) {}
 
             const fullBackup = {
-                app: 'Evde Spor (GymMane Edition)',
+                app: 'Evde Spor',
                 exported_at: new Date().toISOString(),
                 server_data: serverPayload,
                 local_storage: localData
             };
-
             const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -618,7 +556,7 @@ function athleteToolsHub() {
             a.download = `evde-spor-yedek-${new Date().toISOString().slice(0, 10)}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            this.backupMessage = '✅ Tüm antrenman, ölçüm ve yerel verilerin başarıyla .json dosyası olarak indirildi!';
+            this.backupMessage = 'Tüm antrenman, ölçüm ve yerel verilerin başarıyla .json dosyası olarak indirildi.';
         },
 
         importUserData(event) {
@@ -632,12 +570,12 @@ function athleteToolsHub() {
                         Object.entries(parsed.local_storage).forEach(([k, v]) => {
                             localStorage.setItem(k, v);
                         });
-                        this.backupMessage = '🎉 Yedek dosyası başarıyla geri yüklendi! Tüm yerel ölçümlerin ve ilerlemen güncellendi.';
+                        this.backupMessage = 'Yedek dosyası başarıyla geri yüklendi! Tüm yerel ölçümlerin ve ilerlemen güncellendi.';
                     } else {
-                        this.backupMessage = '⚠️ Geçerli bir Evde Spor yedek dosyası bulunamadı.';
+                        this.backupMessage = 'Geçerli bir Evde Spor yedek dosyası bulunamadı.';
                     }
                 } catch (err) {
-                    this.backupMessage = '⚠️ JSON dosyası okunamadı.';
+                    this.backupMessage = 'JSON dosyası okunamadı.';
                 }
             };
             reader.readAsText(file);

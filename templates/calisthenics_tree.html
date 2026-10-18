@@ -4,34 +4,35 @@
 
 {% block content %}
 <div class="relative z-10 max-w-7xl mx-auto animate-fade-up" x-data="skillTreeManager()">
-    <!-- Hero Header -->
-    <div class="relative mb-10 pb-8 border-b border-zinc-800/80">
-        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div>
-                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-wider mb-3">
-                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                    <span>CALISTHENICS SKILL TREE &bull; 5 KADEMELİ USTALIK YOLU</span>
+    <!-- Hero Header & Segmented Hub -->
+    <div class="relative mb-8 pb-6 border-b border-zinc-800/80 space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <img src="/static/images/skill_tree_icon.jpg" alt="Yetenek Ağacı" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-orange-500/40 shadow-lg shadow-orange-500/10 shrink-0">
+                <div>
+                    <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider mb-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                        <span>CALISTHENICS SKILL TREE &bull; 5 KADEMELİ USTALIK</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight leading-none">
+                        Kalistenik <span class="text-gradient">Yetenek Ağacı</span>
+                    </h1>
+                    <p class="text-zinc-400 mt-1 text-xs sm:text-sm max-w-xl">
+                        Temel hareketlerden elit kalistenik varyasyonlarına adım adım ilerle ve ustalaştığın hareketleri işaretle.
+                    </p>
                 </div>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
-                    Kalistenik <span class="text-gradient">Yetenek Ağacı</span>
-                </h1>
-                <p class="text-zinc-400 mt-2 text-base max-w-2xl font-medium">
-                    Temel vücut ağırlığı hareketlerinden elit jimnastik/kalistenik varyasyonlarına (Okçu Şınavı, Pistol Squat, Duvar Amutu, Nordic Curl, V-Up) adım adım ilerle. Ustalaştığın hareketleri işaretle!
-                </p>
             </div>
 
             <!-- User Mastery Counter Box -->
-            <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 flex items-center gap-5 shrink-0 shadow-xl">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-orange-500/20">
-                    🌳
-                </div>
+            <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 flex items-center gap-4 shrink-0 shadow-xl">
+                <img src="/static/images/skill_tree_icon.jpg" alt="Ustalık" class="w-12 h-12 rounded-xl object-cover border border-orange-500/40">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500 block">Kişisel Ustalık Skoru</span>
-                    <div class="text-2xl sm:text-3xl font-mono font-black text-white">
+                    <div class="text-xl sm:text-2xl font-mono font-black text-white">
                         <span x-text="masteredCount"></span> / <span>{{ total_skills }}</span>
                         <span class="text-xs font-bold text-orange-400 uppercase ml-1">Hareket</span>
                     </div>
-                    <div class="w-44 h-2 bg-zinc-800 rounded-full overflow-hidden mt-1.5">
+                    <div class="w-40 h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-1">
                         <div class="h-full bg-gradient-to-r from-orange-500 to-emerald-400 transition-all duration-500"
                              :style="'width: ' + Math.min(100, Math.round((masteredCount / {{ total_skills or 60 }}) * 100)) + '%'"></div>
                     </div>
@@ -39,18 +40,49 @@
             </div>
         </div>
 
+        <!-- 4-Way Segmented Hub -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <a href="/programlar" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white transition-all">
+                <img src="/static/images/home_gym_icon.jpg" alt="Kamplar" class="w-9 h-9 rounded-xl object-cover border border-zinc-700 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Hazır Kamplar</span>
+                    <span class="text-[10px] text-zinc-400 block truncate">Haftalık Planlar</span>
+                </div>
+            </a>
+            <a href="/antrenman-olustur" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white transition-all">
+                <img src="/static/images/workout_builder_icon.jpg" alt="Antrenman Kur" class="w-9 h-9 rounded-xl object-cover border border-zinc-700 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Antrenman Kur</span>
+                    <span class="text-[10px] text-zinc-400 block truncate">Algoritmik Motor</span>
+                </div>
+            </a>
+            <a href="/kalistenik-agaci" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-orange-500/15 border border-orange-500/50 text-white shadow-lg shadow-orange-500/10 transition-all">
+                <img src="/static/images/skill_tree_icon.jpg" alt="Yetenek Ağacı" class="w-9 h-9 rounded-xl object-cover border border-orange-500/40 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Yetenek Ağacı</span>
+                    <span class="text-[10px] text-orange-300 font-bold block truncate">Aktif Sekme</span>
+                </div>
+            </a>
+            <a href="/challenges" class="flex items-center gap-2.5 p-2.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white transition-all">
+                <img src="/static/images/challenges_trophy_icon.jpg" alt="Meydan Okuma" class="w-9 h-9 rounded-xl object-cover border border-zinc-700 shrink-0">
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-wider block truncate">Meydan Okuma</span>
+                    <span class="text-[10px] text-zinc-400 block truncate">30 Günlük Seriler</span>
+                </div>
+            </a>
+        </div>
+
         <!-- Track Filter Tabs -->
-        <div class="mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button @click="activeTrack = 'all'"
                     class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer"
                     :class="activeTrack === 'all' ? 'bg-accent text-white border-accent shadow-md shadow-orange-500/20' : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800'">
-                🌐 Tüm Yetenek Yolları (7 Dal)
+                Tüm Yetenek Yolları (7 Dal)
             </button>
             {% for tree in trees %}
             <button @click="activeTrack = '{{ tree.id }}'"
                     class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer flex items-center gap-1.5"
                     :class="activeTrack === '{{ tree.id }}' ? 'bg-accent text-white border-accent shadow-md shadow-orange-500/20' : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border-zinc-800'">
-                <span>{{ tree.icon }}</span>
                 <span>{{ tree.muscle_group }}</span>
             </button>
             {% endfor %}
