@@ -252,16 +252,18 @@ document.addEventListener('alpine:init', () => {
                 })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success) {
-                        window.location.href = '/profil';
+                    if (data && data.redirect) {
+                        window.location.href = data.redirect;
+                    } else if (data && data.success) {
+                        window.location.href = '/programlar';
                     } else {
                         window.location.href = '/programlar';
                     }
                 })
                 .catch(() => {
-                    window.location.href = '/profil';
+                    window.location.href = '/programlar';
                 });
-            }, 1600);
+            }, 1200);
         }
     }));
 });

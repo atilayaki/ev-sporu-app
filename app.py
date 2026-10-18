@@ -993,20 +993,29 @@ def create_app():
         return redirect(url_for('exercise_detail', slug=exercise.slug))
 
     @app.route('/breathe')
+    @app.route('/nefes')
+    @app.route('/nefes-egzersizi')
     def breathe():
         return render_template('breathe.html')
 
+    @app.route('/antrenman/<slug>')
+    def workout_player_short(slug):
+        return redirect(url_for('workout_player', slug=slug))
+
     @app.route('/quiz', methods=['GET', 'POST'])
-    @login_required
+    @app.route('/test', methods=['GET', 'POST'])
+    @app.route('/seviye-testi', methods=['GET', 'POST'])
     def quiz():
         if request.method == 'POST':
             data = request.get_json() or {}
-            current_user.quiz_completed = True
-            current_user.goal = data.get('goal', '')
-            current_user.fitness_level = data.get('fitness_level', '')
-            current_user.target_area = data.get('target_area', '')
-            db.session.commit()
-            return jsonify({'success': True})
+            if current_user.is_authenticated:
+                current_user.quiz_completed = True
+                current_user.goal = data.get('goal', '')
+                current_user.fitness_level = data.get('fitness_level', '')
+                current_user.target_area = data.get('target_area', '')
+                db.session.commit()
+                return jsonify({'success': True, 'redirect': '/profil'})
+            return jsonify({'success': True, 'redirect': '/programlar'})
         return render_template('quiz.html')
 
     @app.route('/challenges')

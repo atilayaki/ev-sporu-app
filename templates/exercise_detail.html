@@ -316,47 +316,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <!-- Stopwatch / Timer Card -->
                 <div class="bg-gradient-to-br from-zinc-900 via-zinc-900/80 to-zinc-950 p-6 rounded-2xl border border-zinc-800/80 shadow-lg"
-                     x-data="{
-                        time: {{ exercise.duration_seconds or 60 }},
-                        initial: {{ exercise.duration_seconds or 60 }},
-                        timer: null,
-                        running: false,
-                        get formatTime() {
-                            let m = Math.floor(this.time / 60);
-                            let s = this.time % 60;
-                            return (m < 10 ? '0'+m : m) + ':' + (s < 10 ? '0'+s : s);
-                        },
-                        start() {
-                            if(!this.running) {
-                                this.running = true;
-                                this.timer = setInterval(() => {
-                                    if(this.time > 0) {
-                                        this.time--;
-                                    } else {
-                                        clearInterval(this.timer);
-                                        this.running = false;
-                                        try {
-                                            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                                            const osc = ctx.createOscillator();
-                                            osc.connect(ctx.destination);
-                                            osc.frequency.value = 880;
-                                            osc.start();
-                                            osc.stop(ctx.currentTime + 0.3);
-                                        } catch(e){}
-                                    }
-                                }, 1000);
-                            }
-                        },
-                        stop() {
-                            this.running = false;
-                            clearInterval(this.timer);
-                        },
-                        reset() {
-                            this.running = false;
-                            clearInterval(this.timer);
-                            this.time = this.initial;
-                        }
-                     }">
+                     x-data="exerciseDetailTimer({{ exercise.duration_seconds or 60 }})">
                     <div class="flex items-center justify-between mb-4">
                         <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Antrenman Sayacı</span>
                         <span class="w-2 h-2 rounded-full" :class="running ? 'bg-orange-500 animate-ping' : 'bg-zinc-700'"></span>
@@ -367,13 +327,13 @@
                     </div>
 
                     <div class="flex items-center justify-center gap-3 pt-2">
-                        <button @click="start()" x-show="!running" class="bg-accent hover:bg-orange-500 text-white font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                        <button @click="start()" x-show="!running" class="bg-accent hover:bg-orange-500 text-white font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer">
                             Başlat
                         </button>
-                        <button @click="stop()" x-show="running" class="bg-red-500 hover:bg-red-600 text-white font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all">
+                        <button @click="stop()" x-show="running" class="bg-red-500 hover:bg-red-600 text-white font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer">
                             Durdur
                         </button>
-                        <button @click="reset()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all border border-zinc-700">
+                        <button @click="reset()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all border border-zinc-700 cursor-pointer">
                             Sıfırla
                         </button>
                     </div>
@@ -382,7 +342,7 @@
                 <!-- Video & AI Assistant Link Card -->
                 <div class="bg-zinc-900/60 p-6 rounded-2xl border border-zinc-800/80 flex flex-col justify-between">
                     <div>
-                        <span class="text-xs font-bold text-orange-400 uppercase tracking-widest block mb-2">Görsel Destek & AI</span>
+                        <span class="text-xs font-bold text-orange-400 uppercase tracking-widest block mb-2">Görsel Destek &amp; AI</span>
                         <h4 class="text-lg font-black text-white uppercase tracking-tight mb-2">Formunu Kusursuzlaştır</h4>
                         <p class="text-xs text-zinc-400 leading-relaxed">
                             Doğru form videosunu izleyebilir veya doğrudan AI Koç kamerasını açarak hareketin tekrar ve açı kontrolünü başlatabilirsin.
@@ -399,7 +359,8 @@
                         {% endif %}
 
                         <a href="/ai-koc?exercise={{ exercise.slug }}" class="w-full inline-flex items-center justify-center gap-2 text-xs font-black text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-4 py-3 rounded-xl transition-all shadow-md">
-                            <span>🤖 AI Koç ile Bu Hareketi Çalış</span>
+                            <img src="/static/images/ai_coach_icon.jpg" alt="AI Koç" class="w-5 h-5 rounded-md object-cover">
+                            <span>AI Koç ile Bu Hareketi Çalış</span>
                         </a>
                     </div>
                 </div>
@@ -409,16 +370,16 @@
             {% if current_user.is_authenticated %}
             <div class="flex flex-col sm:flex-row gap-4 border-t border-zinc-800/80 pt-8 mt-8">
                 <form action="/favori-ekle/{{ exercise.id }}" method="POST" class="flex-1">
-                    <button type="submit" class="w-full flex items-center justify-center px-6 py-4 rounded-xl font-bold uppercase tracking-wider text-xs transition-all {{ 'bg-zinc-800 text-orange-400 border border-orange-500/40 shadow-inner' if is_favorite else 'bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 hover:text-white' }}">
+                    <button type="submit" class="w-full flex items-center justify-center px-6 py-4 rounded-xl font-bold uppercase tracking-wider text-xs transition-all cursor-pointer {{ 'bg-zinc-800 text-orange-400 border border-orange-500/40 shadow-inner' if is_favorite else 'bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 hover:text-white' }}">
                         <svg class="w-5 h-5 mr-2 {{ 'fill-current text-accent' if is_favorite else '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                         <span>{{ 'Favorilerden Çıkar' if is_favorite else 'Favorilere Ekle' }}</span>
                     </button>
                 </form>
 
                 <form action="/ilerleme-kaydet/{{ exercise.id }}" method="POST" class="flex-[2]">
-                    <button type="submit" class="w-full flex items-center justify-center px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+                    <button type="submit" class="w-full flex items-center justify-center px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase tracking-wider text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20 cursor-pointer">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                        <span>Antrenmanı Tamamla & Kaydet</span>
+                        <span>Antrenmanı Tamamla &amp; Kaydet</span>
                     </button>
                 </form>
             </div>
@@ -430,4 +391,50 @@
         </div>
     </div>
 </div>
+
+<script>
+function exerciseDetailTimer(initialSeconds) {
+    return {
+        time: initialSeconds || 60,
+        initial: initialSeconds || 60,
+        timer: null,
+        running: false,
+        get formatTime() {
+            let m = Math.floor(this.time / 60);
+            let s = this.time % 60;
+            return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+        },
+        start() {
+            if (!this.running) {
+                this.running = true;
+                this.timer = setInterval(() => {
+                    if (this.time > 0) {
+                        this.time--;
+                    } else {
+                        clearInterval(this.timer);
+                        this.running = false;
+                        try {
+                            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            const osc = ctx.createOscillator();
+                            osc.connect(ctx.destination);
+                            osc.frequency.value = 880;
+                            osc.start();
+                            osc.stop(ctx.currentTime + 0.3);
+                        } catch (e) {}
+                    }
+                }, 1000);
+            }
+        },
+        stop() {
+            this.running = false;
+            clearInterval(this.timer);
+        },
+        reset() {
+            this.running = false;
+            clearInterval(this.timer);
+            this.time = this.initial;
+        }
+    };
+}
+</script>
 {% endblock %}

@@ -80,63 +80,9 @@
 
     <!-- Collapsible Interactive 3D Body Map & Multi-Muscle Workout Builder -->
     <script id="catalog-lite-json" type="application/json">{{ catalog_lite | tojson }}</script>
-    <div class="athletic-card rounded-3xl p-4 sm:p-6"
-         x-data="{
-            showMap: false,
-            mapMode: 'session',
-            hoveredMuscle: '',
-            selectedMuscle: {{ (selected_muscle or 'Tümü')|tojson }},
-            multiMuscles: {{ ([selected_muscle] if (selected_muscle and selected_muscle != 'Tümü') else ['Göğüs', 'Karın, Core']) | tojson }},
-            placeKitFilter: 'all',
-            catalogLite: JSON.parse(document.getElementById('catalog-lite-json').textContent || '[]'),
-            selectMuscle(m) {
-                if (this.mapMode === 'session') {
-                    const idx = this.multiMuscles.indexOf(m);
-                    if (idx > -1) {
-                        this.multiMuscles.splice(idx, 1);
-                    } else {
-                        this.multiMuscles.push(m);
-                    }
-                } else {
-                    if (this.selectedMuscle === m) {
-                        window.location.href = '/egzersizler';
-                    } else {
-                        window.location.href = '/egzersizler?muscle=' + encodeURIComponent(m);
-                    }
-                }
-            },
-            isHighlighted(m) {
-                if (this.hoveredMuscle === m) return true;
-                if (this.mapMode === 'session') return this.multiMuscles.includes(m);
-                return this.selectedMuscle === m;
-            },
-            get sessionPreviewExercises() {
-                if (this.multiMuscles.length === 0) return [];
-                let pool = this.catalogLite.filter(ex => {
-                    const mMatch = this.multiMuscles.some(sel => (ex.muscle_group || '').includes(sel));
-                    const pMatch = this.placeKitFilter === 'all' ? true : (this.placeKitFilter === 'zemin' ? ex.place_kit === 'zemin' : (ex.place_kit === 'zemin' || ex.place_kit === this.placeKitFilter));
-                    return mMatch && pMatch;
-                });
-                let picked = [];
-                let perMuscle = Math.max(2, Math.ceil(6 / this.multiMuscles.length));
-                this.multiMuscles.forEach(m => {
-                    let mList = pool.filter(e => (e.muscle_group || '').includes(m));
-                    mList.slice(0, perMuscle).forEach(item => {
-                        if (!picked.some(p => p.slug === item.slug) && picked.length < 6) {
-                            picked.push(item);
-                        }
-                    });
-                });
-                return picked;
-            },
-            startMultiMuscleSession() {
-                const list = this.sessionPreviewExercises;
-                if (!list.length) return;
-                const slugs = list.map(e => e.slug).join(',');
-                const title = 'Kas Haritası Seansı (' + this.multiMuscles.join(' + ') + ')';
-                window.location.href = '/ozel-antrenman?slugs=' + encodeURIComponent(slugs) + '&title=' + encodeURIComponent(title) + '&sets=3&reps=12&rest=45';
-            }
-         }">
+    <script id="selected-muscle-json" type="application/json">{{ (selected_muscle or 'Tümü') | tojson }}</script>
+    <script id="multi-muscles-json" type="application/json">{{ ([selected_muscle] if (selected_muscle and selected_muscle != 'Tümü') else ['Göğüs', 'Karın, Core']) | tojson }}</script>
+    <div class="athletic-card rounded-3xl p-4 sm:p-6" x-data="anatomyMapBuilder()">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
                 <img src="/static/images/muscle_radar_icon.jpg" alt="Kas Haritası" class="w-12 h-12 rounded-2xl object-cover border border-zinc-800 shrink-0">
@@ -502,4 +448,72 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+function anatomyMapBuilder() {
+    let catalogLite = [];
+    let selectedMuscle = 'Tümü';
+    let multiMuscles = ['Göğüs', 'Karın, Core'];
+    try { catalogLite = JSON.parse(document.getElementById('catalog-lite-json').textContent || '[]'); } catch (e) {}
+    try { selectedMuscle = JSON.parse(document.getElementById('selected-muscle-json').textContent || '"Tümü"'); } catch (e) {}
+    try { multiMuscles = JSON.parse(document.getElementById('multi-muscles-json').textContent || '["Göğüs", "Karın, Core"]'); } catch (e) {}
+
+    return {
+        showMap: false,
+        mapMode: 'session',
+        hoveredMuscle: '',
+        selectedMuscle: selectedMuscle,
+        multiMuscles: multiMuscles,
+        placeKitFilter: 'all',
+        catalogLite: catalogLite,
+        selectMuscle(m) {
+            if (this.mapMode === 'session') {
+                const idx = this.multiMuscles.indexOf(m);
+                if (idx > -1) {
+                    this.multiMuscles.splice(idx, 1);
+                } else {
+                    this.multiMuscles.push(m);
+                }
+            } else {
+                if (this.selectedMuscle === m) {
+                    window.location.href = '/egzersizler';
+                } else {
+                    window.location.href = '/egzersizler?muscle=' + encodeURIComponent(m);
+                }
+            }
+        },
+        isHighlighted(m) {
+            if (this.hoveredMuscle === m) return true;
+            if (this.mapMode === 'session') return this.multiMuscles.includes(m);
+            return this.selectedMuscle === m;
+        },
+        get sessionPreviewExercises() {
+            if (this.multiMuscles.length === 0) return [];
+            let pool = this.catalogLite.filter(ex => {
+                const mMatch = this.multiMuscles.some(sel => (ex.muscle_group || '').includes(sel));
+                const pMatch = this.placeKitFilter === 'all' ? true : (this.placeKitFilter === 'zemin' ? ex.place_kit === 'zemin' : (ex.place_kit === 'zemin' || ex.place_kit === this.placeKitFilter));
+                return mMatch && pMatch;
+            });
+            let picked = [];
+            let perMuscle = Math.max(2, Math.ceil(6 / this.multiMuscles.length));
+            this.multiMuscles.forEach(m => {
+                let mList = pool.filter(e => (e.muscle_group || '').includes(m));
+                mList.slice(0, perMuscle).forEach(item => {
+                    if (!picked.some(p => p.slug === item.slug) && picked.length < 6) {
+                        picked.push(item);
+                    }
+                });
+            });
+            return picked;
+        },
+        startMultiMuscleSession() {
+            const list = this.sessionPreviewExercises;
+            if (!list.length) return;
+            const slugs = list.map(e => e.slug).join(',');
+            const title = 'Kas Haritası Seansı (' + this.multiMuscles.join(' + ') + ')';
+            window.location.href = '/ozel-antrenman?slugs=' + encodeURIComponent(slugs) + '&title=' + encodeURIComponent(title) + '&sets=3&reps=12&rest=45';
+        }
+    };
+}
+</script>
 {% endblock %}

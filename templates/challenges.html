@@ -69,7 +69,8 @@
             <!-- Card Header & Image -->
             <div>
                 <div class="relative h-48 w-full overflow-hidden bg-zinc-950">
-                    <img src="/static/images/{{ challenge.slug }}.jpg" 
+                    {% set ch_img = 'standart-push-up-normal-sinav.jpg' if 'sinav' in challenge.slug else ('21-gunluk-karin-ve-core.jpg' if 'karin' in challenge.slug else ('standart-air-squat.jpg' if 'squat' in challenge.slug else 'page_hero_bg.jpg')) %}
+                    <img src="/static/images/{{ ch_img }}" 
                          onerror="this.src='/static/images/page_hero_bg.jpg'" 
                          alt="{{ challenge.title }}" 
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">

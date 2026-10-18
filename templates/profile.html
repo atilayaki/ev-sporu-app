@@ -158,27 +158,7 @@
         <!-- 4 Daily Widgets Grid: Water, Fasting, Calories, Daily Goals -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Water Tracker -->
-            <div class="athletic-card rounded-2xl p-5 text-center flex flex-col justify-between" x-data="{
-                    water: {{ today_log.water_ml if today_log else 0 }},
-                    addWater() {
-                        fetch('/api/water', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({amount: 250})
-                        }).then(res => res.json()).then(data => {
-                            this.water = data.water_ml;
-                        });
-                    },
-                    resetWater() {
-                        fetch('/api/water', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({action: 'reset'})
-                        }).then(res => res.json()).then(data => {
-                            this.water = data.water_ml;
-                        });
-                    }
-                }">
+            <div class="athletic-card rounded-2xl p-5 text-center flex flex-col justify-between" x-data="waterWidget({{ today_log.water_ml if today_log else 0 }})">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-blue-400 block mb-1">HİDRASYON</span>
                     <h3 class="text-base font-black text-white uppercase">Su Takibi</h3>
@@ -196,43 +176,7 @@
             </div>
 
             <!-- Intermittent Fasting Timer -->
-            <div class="athletic-card rounded-2xl p-5 text-center flex flex-col justify-between" x-data="{
-                    fastingStart: localStorage.getItem('fastingStart') ? parseInt(localStorage.getItem('fastingStart')) : null,
-                    elapsedSeconds: 0,
-                    timer: null,
-                    notified16h: localStorage.getItem('fastingNotified16h') === 'true',
-                    init() {
-                        if (this.fastingStart) {
-                            this.updateElapsed();
-                            this.timer = setInterval(() => this.updateElapsed(), 1000);
-                        }
-                    },
-                    updateElapsed() {
-                        if (!this.fastingStart) return;
-                        this.elapsedSeconds = Math.floor((Date.now() - this.fastingStart) / 1000);
-                    },
-                    get displayTime() {
-                        if (!this.fastingStart) return '00:00:00';
-                        let h = Math.floor(this.elapsedSeconds / 3600);
-                        let m = Math.floor((this.elapsedSeconds % 3600) / 60);
-                        let s = this.elapsedSeconds % 60;
-                        return [h, m, s].map(v => v < 10 ? '0' + v : v).join(':');
-                    },
-                    toggleFasting() {
-                        if (this.fastingStart) {
-                            this.fastingStart = null;
-                            this.elapsedSeconds = 0;
-                            localStorage.removeItem('fastingStart');
-                            localStorage.removeItem('fastingNotified16h');
-                            clearInterval(this.timer);
-                        } else {
-                            this.fastingStart = Date.now();
-                            localStorage.setItem('fastingStart', this.fastingStart);
-                            this.updateElapsed();
-                            this.timer = setInterval(() => this.updateElapsed(), 1000);
-                        }
-                    }
-                }">
+            <div class="athletic-card rounded-2xl p-5 text-center flex flex-col justify-between" x-data="fastingWidget()">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400 block mb-1">16:8 METABOLİZMA</span>
                     <h3 class="text-base font-black text-white uppercase">Aralıklı Oruç</h3>
@@ -246,18 +190,7 @@
             </div>
 
             <!-- Today's Consumed Calories -->
-            <div class="athletic-card rounded-2xl p-5 text-center flex flex-col justify-between" x-data="{
-                    calories: {{ today_log.calories_consumed if today_log and today_log.calories_consumed else 0 }},
-                    addCalories(amount) {
-                        fetch('/api/calories', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({amount: amount})
-                        }).then(res => res.json()).then(data => {
-                            this.calories = data.calories;
-                        });
-                    }
-                }">
+            <div class="athletic-card rounded-2xl p-5 text-center flex flex-col justify-between" x-data="calorieWidget({{ today_log.calories_consumed if today_log and today_log.calories_consumed else 0 }})">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block mb-1">ENERJİ TAKİBİ</span>
                     <h3 class="text-base font-black text-white uppercase">Alınan Kalori</h3>
@@ -275,17 +208,7 @@
             </div>
 
             <!-- Daily Quick Tasks -->
-            <div class="athletic-card rounded-2xl p-5 flex flex-col justify-between" x-data="{
-                    tasks: JSON.parse(localStorage.getItem('evdeSporTasks')) || [
-                        { id: 1, text: '2 Litre Su İç', done: false },
-                        { id: 2, text: '15 Dk Egzersiz Yap', done: false },
-                        { id: 3, text: '3 Dk Nefes Egzersizi', done: false }
-                    ],
-                    toggle(task) {
-                        task.done = !task.done;
-                        localStorage.setItem('evdeSporTasks', JSON.stringify(this.tasks));
-                    }
-                }">
+            <div class="athletic-card rounded-2xl p-5 flex flex-col justify-between" x-data="dailyTasksWidget()">
                 <div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block mb-1">DİSİPLİN</span>
                     <h3 class="text-base font-black text-white uppercase mb-3">Günlük Görevler</h3>
@@ -1175,6 +1098,99 @@ function muscleRadarRecovery() {
                 .slice(0, 3);
             const target = ready.length ? ready.join(',') : 'Göğüs,Karın';
             window.location.href = '/antrenman-olustur?muscles=' + encodeURIComponent(target);
+        }
+    };
+}
+
+function waterWidget(initialWater) {
+    return {
+        water: initialWater || 0,
+        addWater() {
+            fetch('/api/water', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: 250 })
+            }).then(res => res.json()).then(data => {
+                this.water = data.water_ml;
+            });
+        },
+        resetWater() {
+            fetch('/api/water', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reset' })
+            }).then(res => res.json()).then(data => {
+                this.water = data.water_ml;
+            });
+        }
+    };
+}
+
+function fastingWidget() {
+    return {
+        fastingStart: localStorage.getItem('fastingStart') ? parseInt(localStorage.getItem('fastingStart')) : null,
+        elapsedSeconds: 0,
+        timer: null,
+        notified16h: localStorage.getItem('fastingNotified16h') === 'true',
+        init() {
+            if (this.fastingStart) {
+                this.updateElapsed();
+                this.timer = setInterval(() => this.updateElapsed(), 1000);
+            }
+        },
+        updateElapsed() {
+            if (!this.fastingStart) return;
+            this.elapsedSeconds = Math.floor((Date.now() - this.fastingStart) / 1000);
+        },
+        get displayTime() {
+            if (!this.fastingStart) return '00:00:00';
+            let h = Math.floor(this.elapsedSeconds / 3600);
+            let m = Math.floor((this.elapsedSeconds % 3600) / 60);
+            let s = this.elapsedSeconds % 60;
+            return [h, m, s].map(v => v < 10 ? '0' + v : v).join(':');
+        },
+        toggleFasting() {
+            if (this.fastingStart) {
+                this.fastingStart = null;
+                this.elapsedSeconds = 0;
+                localStorage.removeItem('fastingStart');
+                localStorage.removeItem('fastingNotified16h');
+                clearInterval(this.timer);
+            } else {
+                this.fastingStart = Date.now();
+                localStorage.setItem('fastingStart', this.fastingStart);
+                this.updateElapsed();
+                this.timer = setInterval(() => this.updateElapsed(), 1000);
+            }
+        }
+    };
+}
+
+function calorieWidget(initialCalories) {
+    return {
+        calories: initialCalories || 0,
+        addCalories(amount) {
+            fetch('/api/calories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount })
+            }).then(res => res.json()).then(data => {
+                this.calories = data.calories;
+            });
+        }
+    };
+}
+
+function dailyTasksWidget() {
+    return {
+        tasks: JSON.parse(localStorage.getItem('evdeSporTasks') || 'null') || [
+            { id: 1, text: '2 Litre Su İç', done: false },
+            { id: 2, text: '15 Dk Egzersiz Yap', done: false },
+            { id: 3, text: '3 Dk Nefes Egzersizi', done: false }
+        ],
+        toggle(task) {
+            task.done = !task.done;
+            localStorage.setItem('evdeSporTasks', JSON.stringify(this.tasks));
         }
     };
 }
