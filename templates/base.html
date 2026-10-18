@@ -200,7 +200,11 @@
 
                 {% if current_user.is_authenticated %}
                     <a href="/profil" class="whitespace-nowrap hover:border-orange-500/60 transition-colors pl-1.5 pr-3 py-1 text-xs font-bold text-zinc-200 uppercase tracking-wide flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl">
-                        <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-black">{{ (current_user.name or 'S')[:1]|upper }}</span>
+                        {% if current_user.avatar_url %}
+                            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.name }}" class="w-6 h-6 rounded-lg object-cover border border-orange-500/40 shrink-0">
+                        {% else %}
+                            <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-black">{{ (current_user.name or 'S')[:1]|upper }}</span>
+                        {% endif %}
                         <span class="hidden sm:inline">Profilim</span>
                     </a>
                 {% else %}
@@ -272,7 +276,11 @@
         </a>
 
         <a href="{% if current_user.is_authenticated %}/profil{% else %}/araclar{% endif %}" class="flex flex-col items-center py-1 px-3 rounded-xl {% if p.startswith('/profil') or p.startswith('/araclar') %}text-orange-400{% else %}text-zinc-500 hover:text-zinc-300{% endif %} transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            {% if current_user.is_authenticated and current_user.avatar_url %}
+                <img src="{{ current_user.avatar_url }}" alt="Profil" class="w-5 h-5 rounded-full object-cover border border-orange-500/50">
+            {% else %}
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            {% endif %}
             <span class="text-[10px] font-extrabold tracking-tight mt-1">{% if current_user.is_authenticated %}Profilim{% else %}Araçlar{% endif %}</span>
         </a>
     </div>

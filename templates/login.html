@@ -2,113 +2,162 @@
 {% block title %}Giriş Yap - Evde Spor{% endblock %}
 
 {% block content %}
-<div class="relative max-w-6xl mx-auto md:my-4">
+<div class="relative max-w-5xl mx-auto md:my-4">
     <!-- Ambient glows -->
     <div class="absolute -top-24 -left-24 w-80 h-80 bg-orange-600/20 blur-[110px] rounded-full pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500/10 blur-[110px] rounded-full pointer-events-none"></div>
 
-    <div class="relative grid lg:grid-cols-2 rounded-[2rem] overflow-hidden border border-zinc-800/80 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] bg-zinc-950 animate-fade-up">
+    <div class="relative grid lg:grid-cols-12 rounded-[2rem] overflow-hidden border border-zinc-800/80 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] bg-zinc-950 animate-fade-up">
 
         <!-- LEFT: Visual panel -->
-        <div class="relative hidden lg:block min-h-[640px]">
+        <div class="relative hidden lg:flex lg:col-span-5 min-h-[620px] flex-col justify-between p-10 overflow-hidden">
             <img src="/static/images/auth_login_bg.jpg" alt="Evde antrenman yapan sporcu" class="absolute inset-0 w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-zinc-950/10"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent to-zinc-950/60"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/55 to-zinc-950/15"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent to-zinc-950/65"></div>
 
-            <div class="absolute top-8 left-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 border border-white/10 backdrop-blur-md text-[11px] font-bold uppercase tracking-widest text-zinc-200">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Tekrar hoş geldin
+            <div class="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-white/15 backdrop-blur-md text-[11px] font-bold uppercase tracking-widest text-zinc-200 self-start">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Tekrar Hoş Geldin</span>
             </div>
 
-            <div class="absolute bottom-0 left-0 right-0 p-10 space-y-6">
-                <h2 class="text-4xl xl:text-5xl font-black uppercase tracking-tight leading-[1.05] text-white">
-                    Serini<br><span class="text-gradient">bozma.</span>
+            <div class="relative z-10 space-y-6">
+                <h2 class="text-4xl font-black uppercase tracking-tight leading-[1.05] text-white">
+                    Serini<br><span class="text-gradient">Bozma.</span>
                 </h2>
-                <p class="text-zinc-300 max-w-sm leading-relaxed">Kaldığın yerden devam et. Programın, rozetlerin ve gelişim raporun seni bekliyor.</p>
+                <p class="text-zinc-300 text-sm leading-relaxed">
+                    Kaldığın yerden devam et. Programın, rozetlerin, kas radarın ve kişisel gelişim grafiğin seni bekliyor.
+                </p>
 
-                <div class="grid grid-cols-3 gap-3 max-w-md">
+                <div class="grid grid-cols-3 gap-2.5">
                     <div class="glass-panel rounded-2xl p-3 text-center">
-                        <div class="text-2xl">🔥</div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mt-1">Günlük Seri</div>
+                        <img src="/static/images/workout_builder_icon.jpg" alt="Seri" class="w-9 h-9 rounded-xl mx-auto object-cover border border-zinc-700">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-300 mt-1.5">Günlük Seri</div>
                     </div>
                     <div class="glass-panel rounded-2xl p-3 text-center">
-                        <div class="text-2xl">🏅</div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mt-1">Rozetler</div>
+                        <img src="/static/images/challenges_trophy_icon.jpg" alt="Rozetler" class="w-9 h-9 rounded-xl mx-auto object-cover border border-zinc-700">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-300 mt-1.5">Rozetler</div>
                     </div>
                     <div class="glass-panel rounded-2xl p-3 text-center">
-                        <div class="text-2xl">🤖</div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mt-1">AI Koç</div>
+                        <img src="/static/images/ai_coach_icon.jpg" alt="AI Koç" class="w-9 h-9 rounded-xl mx-auto object-cover border border-zinc-700">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-300 mt-1.5">AI Koç</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- RIGHT: Form panel -->
-        <div class="relative p-8 sm:p-12 lg:p-14 flex flex-col justify-center">
-            <div class="absolute inset-0 grid-texture opacity-60 pointer-events-none"></div>
+        <div class="relative lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
+            <div class="absolute inset-0 grid-texture opacity-50 pointer-events-none"></div>
 
             <div class="relative w-full max-w-md mx-auto">
-                <a href="/" class="inline-flex items-center gap-2.5 mb-10 text-xl font-black tracking-tight uppercase group">
-                    <div class="w-9 h-9 rounded-xl overflow-hidden shadow-lg shadow-orange-500/25 group-hover:scale-105 transition-transform duration-200 border border-orange-500/30 bg-zinc-950 shrink-0">
-                        <img src="/static/images/app_logo.jpg" alt="Evde Spor Logo" class="w-full h-full object-cover">
-                    </div>
-                    <span class="font-heading font-black tracking-tight text-white flex items-center">
-                        EVDE<span class="text-orange-500 ml-0.5">SPOR</span>
-                    </span>
-                </a>
+                <!-- Auth Segmented Switcher -->
+                <div class="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 mb-7">
+                    <a href="/giris" class="py-2 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-orange-500 text-white shadow-md shadow-orange-500/20">
+                        Giriş Yap
+                    </a>
+                    <a href="/kayit" class="py-2 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all">
+                        Üye Ol
+                    </a>
+                    <a href="/sifremi-unuttum" class="py-2 px-3 rounded-xl text-center text-xs font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all">
+                        Şifre Sıfırla
+                    </a>
+                </div>
 
-                <h1 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">Giriş <span class="text-gradient">Yap</span></h1>
-                <p class="text-zinc-400 mt-2 mb-8">Hesabına giriş yap ve antrenmanına kaldığın yerden devam et.</p>
+                <div class="mb-6">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-orange-400 block mb-1">SPORCU GİRİŞİ</span>
+                    <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                        Giriş <span class="text-gradient">Yap</span>
+                    </h1>
+                    <p class="text-zinc-400 text-xs sm:text-sm mt-1">
+                        Hesabına giriş yap ve antrenmanına kaldığın yerden devam et.
+                    </p>
+                </div>
 
-                <form method="POST" action="" class="space-y-5" x-data="{ show: false, loading: false }" @submit="loading = true">
+                <form method="POST" action="/giris" class="space-y-4" x-data="loginFormState()" @submit="loading = true">
                     {{ form.hidden_tag() }}
 
                     <div>
-                        <label for="email" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">E-posta</label>
+                        <label for="email" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-1.5">E-posta Adresi</label>
                         <div class="relative">
                             <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             {{ form.email(class="input-field", placeholder="ornek@mail.com", autocomplete="email", autofocus=true) }}
                         </div>
                         {% for error in form.email.errors %}
-                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                            <p class="text-red-400 text-xs mt-1.5 font-bold">{{ error }}</p>
                         {% endfor %}
                     </div>
 
                     <div>
-                        <label for="password" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-2">Şifre</label>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="password" class="block text-zinc-300 text-xs font-bold uppercase tracking-wider">Şifre</label>
+                            <a href="/sifremi-unuttum" class="text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors">
+                                Şifremi Unuttum?
+                            </a>
+                        </div>
                         <div class="relative">
                             <svg class="w-5 h-5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                            {{ form.password(class="input-field pr-12", placeholder="••••••••", autocomplete="current-password", **{':type': "show ? 'text' : 'password'"}) }}
-                            <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs font-bold uppercase px-2 py-1" x-text="show ? 'Gizle' : 'Göster'">Göster</button>
+                            {{ form.password(class="input-field pr-14", placeholder="••••••••", autocomplete="current-password", **{':type': "show ? 'text' : 'password'"}) }}
+                            <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-[11px] font-bold uppercase px-2 py-1 cursor-pointer" x-text="show ? 'Gizle' : 'Göster'">Göster</button>
                         </div>
                         {% for error in form.password.errors %}
-                            <p class="text-red-400 text-xs mt-1.5 font-medium">⚠ {{ error }}</p>
+                            <p class="text-red-400 text-xs mt-1.5 font-bold">{{ error }}</p>
                         {% endfor %}
                     </div>
 
-                    <button type="submit" class="btn-primary w-full !mt-8" :disabled="loading" :class="loading && 'opacity-80 cursor-wait'">
+                    <div class="flex items-center justify-between pt-1">
+                        <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" name="remember" checked class="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-orange-500 focus:ring-orange-500">
+                            <span class="text-xs font-bold text-zinc-300">Oturumumu açık tut</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full !mt-5 cursor-pointer" :disabled="loading" :class="loading && 'opacity-80 cursor-wait'">
                         <svg x-show="loading" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
                         <span x-text="loading ? 'Giriş yapılıyor...' : 'Giriş Yap'">Giriş Yap</span>
                         <svg x-show="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </button>
                 </form>
 
-                <div class="flex items-center gap-4 my-8">
+                <!-- Quick Demo Login Form -->
+                <form method="POST" action="/giris" class="mt-3">
+                    <input type="hidden" name="demo_login" value="1">
+                    <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/40 text-zinc-300 hover:text-white text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <img src="/static/images/ai_coach_icon.jpg" alt="Demo" class="w-4 h-4 rounded object-cover">
+                        <span>Tek Dokunuşla Demo Sporcu Girişi</span>
+                    </button>
+                </form>
+
+                <div class="flex items-center gap-4 my-6">
                     <div class="h-px flex-1 bg-zinc-800"></div>
-                    <span class="text-[11px] font-bold uppercase tracking-widest text-zinc-600">veya</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-600">veya üyeliksiz keşfet</span>
                     <div class="h-px flex-1 bg-zinc-800"></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <a href="/ai-koc" class="flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-orange-500/50 hover:bg-zinc-900 text-sm font-bold text-zinc-300 transition-all">🤖 AI Koç'u Dene</a>
-                    <a href="/egzersizler" class="flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-orange-500/50 hover:bg-zinc-900 text-sm font-bold text-zinc-300 transition-all">💪 Egzersizler</a>
+                    <a href="/ai-koc" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-orange-500/50 hover:bg-zinc-900 text-xs font-black uppercase tracking-wider text-zinc-300 transition-all">
+                        <img src="/static/images/ai_coach_icon.jpg" alt="AI Koç" class="w-4 h-4 rounded object-cover">
+                        <span>AI Koç</span>
+                    </a>
+                    <a href="/egzersizler" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-orange-500/50 hover:bg-zinc-900 text-xs font-black uppercase tracking-wider text-zinc-300 transition-all">
+                        <img src="/static/images/workout_builder_icon.jpg" alt="Hareketler" class="w-4 h-4 rounded object-cover">
+                        <span>Hareketler</span>
+                    </a>
                 </div>
 
-                <p class="text-center text-sm text-zinc-500 mt-8 font-medium">
-                    Hesabın yok mu?
-                    <a href="/kayit" class="text-orange-400 hover:text-orange-300 font-bold transition-colors">Ücretsiz kayıt ol →</a>
+                <p class="text-center text-xs sm:text-sm text-zinc-400 mt-6 font-medium">
+                    Henüz hesabın yok mu?
+                    <a href="/kayit" class="text-orange-400 hover:text-orange-300 font-black transition-colors">Ücretsiz Üye Ol &rarr;</a>
                 </p>
             </div>
         </div>
     </div>
 </div>
+<script>
+function loginFormState() {
+    return {
+        show: false,
+        loading: false
+    };
+}
+</script>
 {% endblock %}

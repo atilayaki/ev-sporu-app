@@ -85,7 +85,7 @@ def create_app():
         if os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
             tmp_db = '/tmp/site.db'
             version_file = '/tmp/db_version.txt'
-            CURRENT_DB_VERSION = '20261016_v6'
+            CURRENT_DB_VERSION = '20261018_v7'
             try:
                 needs_copy = not os.path.exists(tmp_db)
                 if not needs_copy:
@@ -117,6 +117,14 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+    with app.app_context():
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN avatar_url TEXT'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
     login_manager.init_app(app)
     login_manager.login_view = 'login'
     login_manager.login_message = "Bu sayfayı görüntülemek için giriş yapmalısınız."
@@ -683,6 +691,7 @@ def create_app():
             total_duration = sum([p.duration_spent or 0 for p in u.progress])
             leaderboard_data.append({
                 'name': u.name,
+                'avatar_url': u.avatar_url,
                 'score': total_duration,
                 'badges': len(u.badges)
             })
@@ -693,34 +702,194 @@ def create_app():
     # --- Kimlik Doğrulama Rotaları ---
     
     @app.route('/kayit', methods=['GET', 'POST'])
+    @app.route('/register', methods=['GET', 'POST'])
     def register():
         if current_user.is_authenticated:
-            return redirect(url_for('index'))
+            return redirect(url_for('profile'))
         form = RegistrationForm()
         if form.validate_on_submit():
+            clean_email = (form.email.data or '').strip().lower()
+            clean_name = (form.name.data or '').strip()
             hashed_password = generate_password_hash(form.password.data)
-            user = User(name=form.name.data, email=form.email.data, password_hash=hashed_password)
+            avatar_data = (request.form.get('avatar_data') or '').strip()
+            if avatar_data and len(avatar_data) <= 650000 and (avatar_data.startswith('data:image/') or avatar_data.startswith('/static/images/')):
+                chosen_avatar = avatar_data
+            else:
+                chosen_avatar = None
+
+            selected_goal = (request.form.get('goal') or '').strip() or None
+            selected_level = (request.form.get('fitness_level') or '').strip() or None
+
+            user = User(
+                name=clean_name,
+                email=clean_email,
+                password_hash=hashed_password,
+                avatar_url=chosen_avatar,
+                goal=selected_goal,
+                fitness_level=selected_level,
+                quiz_completed=bool(selected_goal or selected_level)
+            )
             db.session.add(user)
             db.session.commit()
-            flash('Kayıt başarılı! Şimdi giriş yapabilirsiniz.', 'success')
-            return redirect(url_for('login'))
+            login_user(user, remember=True)
+            flash(f'Hoş geldin {user.name}! Sporcu profilin oluşturuldu.', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page) if is_safe_next(next_page) else redirect(url_for('profile'))
         return render_template('register.html', form=form)
 
     @app.route('/giris', methods=['GET', 'POST'])
+    @app.route('/login', methods=['GET', 'POST'])
     def login():
         if current_user.is_authenticated:
-            return redirect(url_for('index'))
+            return redirect(url_for('profile'))
         form = LoginForm()
+        if request.method == 'POST' and request.form.get('demo_login') == '1':
+            demo_email = 'demo@evdespor.com'
+            demo_user = User.query.filter(db.func.lower(User.email) == demo_email).first()
+            if not demo_user:
+                demo_user = User(
+                    name='Demo Sporcu',
+                    email=demo_email,
+                    password_hash=generate_password_hash('demo1234'),
+                    avatar_url='/static/images/ai_coach_icon.jpg',
+                    goal='Kas Geliştirme',
+                    fitness_level='Orta',
+                    quiz_completed=True,
+                    current_streak=5,
+                    longest_streak=12
+                )
+                db.session.add(demo_user)
+                db.session.commit()
+            login_user(demo_user, remember=True)
+            flash('Demo Sporcu hesabıyla hızlı giriş yapıldı!', 'success')
+            return redirect(url_for('profile'))
+
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data).first()
+            clean_email = (form.email.data or '').strip().lower()
+            user = User.query.filter(db.func.lower(User.email) == clean_email).first()
             if user and check_password_hash(user.password_hash, form.password.data):
-                login_user(user, remember=True)
+                remember_me = request.form.get('remember', 'on') == 'on'
+                login_user(user, remember=remember_me)
                 next_page = request.args.get('next')
-                flash('Başarıyla giriş yaptınız!', 'success')
+                flash(f'Tekrar hoş geldin, {user.name}!', 'success')
                 return redirect(next_page) if is_safe_next(next_page) else redirect(url_for('index'))
             else:
-                flash('Giriş başarısız. Lütfen e-posta ve şifrenizi kontrol edin.', 'danger')
+                flash('E-posta adresi veya şifre hatalı. Şifrenizi unuttuysanız aşağıdaki bağlantıyı kullanabilirsiniz.', 'danger')
         return render_template('login.html', form=form)
+
+    @app.route('/sifremi-unuttum', methods=['GET', 'POST'])
+    @app.route('/forgot-password', methods=['GET', 'POST'])
+    def forgot_password():
+        if current_user.is_authenticated:
+            return redirect(url_for('profile'))
+        if request.method == 'POST':
+            email = (request.form.get('email') or '').strip().lower()
+            name_check = (request.form.get('name_check') or '').strip().lower()
+            new_password = request.form.get('new_password') or ''
+            confirm_password = request.form.get('confirm_password') or ''
+
+            if not email:
+                flash('Lütfen kayıtlı e-posta adresinizi girin.', 'danger')
+                return render_template('forgot_password.html')
+
+            user = User.query.filter(db.func.lower(User.email) == email).first()
+            if not user:
+                flash('Bu e-posta adresiyle kayıtlı bir sporcu hesabı bulunamadı.', 'danger')
+                return render_template('forgot_password.html', prefill_email=email)
+
+            if name_check and user.name.strip().lower() != name_check and name_check not in user.name.strip().lower():
+                flash('Girdiğiniz Ad Soyad bilgisi bu e-posta hesabıyla eşleşmedi.', 'danger')
+                return render_template('forgot_password.html', prefill_email=email)
+
+            if len(new_password) < 6:
+                flash('Yeni şifreniz en az 6 karakter olmalıdır.', 'danger')
+                return render_template('forgot_password.html', prefill_email=email)
+
+            if new_password != confirm_password:
+                flash('Yeni şifre ve şifre tekrarı birbiriyle eşleşmiyor.', 'danger')
+                return render_template('forgot_password.html', prefill_email=email)
+
+            user.password_hash = generate_password_hash(new_password)
+            db.session.commit()
+            login_user(user, remember=True)
+            flash('Şifreniz başarıyla sıfırlandı ve hesabınıza giriş yapıldı!', 'success')
+            return redirect(url_for('profile'))
+
+        return render_template('forgot_password.html')
+
+    @app.route('/api/auth/verify-reset', methods=['POST'])
+    def api_verify_reset():
+        data = request.get_json() or {}
+        email = (data.get('email') or '').strip().lower()
+        name_check = (data.get('name') or '').strip().lower()
+        if not email:
+            return jsonify({'success': False, 'message': 'Lütfen e-posta adresinizi girin.'}), 400
+        user = User.query.filter(db.func.lower(User.email) == email).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'Bu e-posta ile kayıtlı bir hesap bulunamadı.'}), 404
+        if name_check and user.name.strip().lower() != name_check and name_check not in user.name.strip().lower():
+            return jsonify({'success': False, 'message': 'Ad Soyad bilgisi kayıtlı hesapla eşleşmedi.'}), 400
+        import hashlib
+        code = str(int(hashlib.sha256((email + str(date.today())).encode()).hexdigest(), 16))[:6]
+        return jsonify({
+            'success': True,
+            'masked_name': user.name[:2] + '***',
+            'reset_code': code,
+            'message': 'Hesap doğrulandı. Yeni şifrenizi belirleyebilirsiniz.'
+        })
+
+    @app.route('/api/profile/avatar', methods=['POST'])
+    @login_required
+    def update_profile_avatar():
+        data = request.get_json() or {}
+        if data.get('action') == 'remove':
+            current_user.avatar_url = None
+            db.session.commit()
+            return jsonify({'success': True, 'status': 'success', 'avatar_url': None})
+        avatar_url = (data.get('avatar_url') or data.get('avatar_data') or '').strip()
+        if not avatar_url:
+            current_user.avatar_url = None
+            db.session.commit()
+            return jsonify({'success': True, 'status': 'success', 'avatar_url': None})
+        if len(avatar_url) > 650000:
+            return jsonify({'success': False, 'status': 'error', 'message': 'Görsel boyutu çok büyük.'}), 400
+        if not (avatar_url.startswith('data:image/') or avatar_url.startswith('/static/images/')):
+            return jsonify({'success': False, 'status': 'error', 'message': 'Geçersiz görsel formatı.'}), 400
+        current_user.avatar_url = avatar_url
+        db.session.commit()
+        return jsonify({'success': True, 'status': 'success', 'avatar_url': current_user.avatar_url})
+
+    @app.route('/api/profile/update-account', methods=['POST'])
+    @login_required
+    def update_profile_account():
+        data = request.get_json() or {}
+        new_name = (data.get('name') or '').strip()
+        new_goal = (data.get('goal') or '').strip()
+        new_level = (data.get('fitness_level') or '').strip()
+        new_password = data.get('new_password') or ''
+
+        if new_name and len(new_name) >= 2:
+            current_user.name = new_name[:100]
+        if new_goal:
+            current_user.goal = new_goal[:50]
+            current_user.quiz_completed = True
+        if new_level:
+            current_user.fitness_level = new_level[:50]
+            current_user.quiz_completed = True
+        if new_password:
+            if len(new_password) < 6:
+                return jsonify({'success': False, 'status': 'error', 'message': 'Yeni şifre en az 6 karakter olmalıdır.'}), 400
+            current_user.password_hash = generate_password_hash(new_password)
+
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'status': 'success',
+            'name': current_user.name,
+            'goal': current_user.goal,
+            'fitness_level': current_user.fitness_level,
+            'message': 'Profil ve hesap bilgileriniz başarıyla güncellendi!'
+        })
 
     @app.route('/cikis')
     def logout():
