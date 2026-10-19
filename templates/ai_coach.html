@@ -81,42 +81,24 @@
                 </div>
             </div>
 
-            <!-- LEFT TOOL STRIP (Instagram Floating Vertical Tools: Skeleton, Angle, 3D PiP, FOV, Reset, Fullscreen) -->
-            <div class="absolute left-3 sm:left-4 top-4 z-30 flex flex-col items-center gap-2 pointer-events-auto">
-                <!-- Skeleton Lines Toggle -->
+            <!-- STREAMLINED LEFT TOOL STRIP -->
+            <div class="absolute left-3 sm:left-4 top-4 z-30 flex flex-col items-center gap-2.5 pointer-events-auto">
                 <button onclick="toggleSkeleton()" id="skeleton-btn" title="İskelet Çizgileri"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm cursor-pointer">
+                        class="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-orange-400 hover:bg-black/90 flex items-center justify-center transition-all shadow-lg active:scale-90 text-sm cursor-pointer">
                     🦴
                 </button>
-                <!-- Live Angle Pill Toggle -->
-                <button onclick="toggleAnglePill()" id="angle-toggle-btn" title="Açı Göstergesi"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black cursor-pointer">
-                    📐
-                </button>
-                <!-- 3D Form Guide PiP Toggle -->
-                <button onclick="togglePipGuide()" id="pip-toggle-btn" title="3D Animasyon Rehberi Göster/Gizle"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-md border border-orange-500/40 text-orange-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-black cursor-pointer">
-                    🎬
-                </button>
-                <!-- Wide FOV / Fit Toggle -->
-                <button onclick="toggleFitMode()" id="fit-mode-btn" title="Geniş Kadraj / Doldur"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-amber-400 hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-[11px] font-black cursor-pointer">
-                    0.5×
-                </button>
-                <!-- Reset Counter -->
-                <button onclick="resetCounter()" title="Sayacı Sıfırla"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs cursor-pointer">
+                <button onclick="flipCamera()" title="Kamerayı Çevir (Ön/Arka)"
+                        class="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:bg-black/90 flex items-center justify-center transition-all shadow-lg active:rotate-180 text-sm cursor-pointer">
                     🔄
                 </button>
-                <!-- Fullscreen API -->
-                <button onclick="toggleFullscreen()" title="Tam Ekran"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs cursor-pointer">
-                    ⛶
+                <button onclick="resetCounter()" title="Sayacı Sıfırla"
+                        class="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-zinc-300 hover:text-white hover:bg-black/90 flex items-center justify-center transition-all shadow-lg active:scale-90 text-xs font-bold cursor-pointer">
+                    0
                 </button>
             </div>
 
             <!-- TOP-RIGHT FLOATING 3D FORM GUIDE PIP VIDEO -->
-            <div id="pip-guide-box" class="absolute right-3 top-4 z-30 w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden bg-black/80 border-2 border-orange-500/50 shadow-2xl pointer-events-auto transition-all duration-300 group">
+            <div id="pip-guide-box" class="hidden absolute right-3 top-4 z-30 w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden bg-black/80 border-2 border-orange-500/50 shadow-2xl pointer-events-auto transition-all duration-300 group">
                 <video id="pip-video" src="/static/animations/standart-air-squat.mp4" autoplay loop muted playsinline
                        class="w-full h-full object-cover"></video>
                 <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-1.5 text-center">
@@ -192,370 +174,17 @@
         </div>
     </main>
 
-    <!-- BOTTOM INSTAGRAM FILTER WHEEL (ALL 60 EXERCISES) & SHUTTER CONTROLS -->
+    <!-- BOTTOM MINIMALIST ACTION BAR -->
     <footer class="relative z-40 w-full pt-1 pb-4 flex flex-col items-center gap-2 pointer-events-auto">
-        
-        <!-- Instagram Story Filter Wheel (All 60 Exercises Smooth Snap Carousel) -->
-        <div class="w-full max-w-lg overflow-x-auto no-scrollbar py-2.5 flex items-center gap-3.5 snap-x snap-mandatory scroll-smooth px-[calc(50%-2rem)]" id="instagram-filter-wheel">
-            <!-- 1. Standart Air Squat -->
-            <button onclick="switchExercise('standart-air-squat')" id="filter-standart-air-squat" data-slug="standart-air-squat" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Standart Air Squat"
-                    class="filter-circle active snap-center shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-full border-[3.5px] border-white ring-4 ring-orange-500/50 bg-gradient-to-tr from-orange-600 to-amber-500 flex flex-col items-center justify-center text-xl shadow-xl transition-all transform scale-110 cursor-pointer relative group">
-                <span class="leading-none">🏋️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Standart A</span>
-            </button>
-            <!-- 2. Standart Push-up (Normal Şınav) -->
-            <button onclick="switchExercise('standart-push-up-normal-sinav')" id="filter-standart-push-up-normal-sinav" data-slug="standart-push-up-normal-sinav" data-category="upper" data-muscle="Göğüs" title="Standart Push-up (Normal Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">💪</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Standart P</span>
-            </button>
-            <!-- 3. Forearm Plank (Ön Kol Plankı) -->
-            <button onclick="switchExercise('forearm-plank-on-kol-planki')" id="filter-forearm-plank-on-kol-planki" data-slug="forearm-plank-on-kol-planki" data-category="core" data-muscle="Karın, Core" title="Forearm Plank (Ön Kol Plankı)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⏱️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Forearm Pl</span>
-            </button>
-            <!-- 4. Jumping Jacks -->
-            <button onclick="switchExercise('jumping-jacks')" id="filter-jumping-jacks" data-slug="jumping-jacks" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="Jumping Jacks"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⭐</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Jumping Ja</span>
-            </button>
-            <!-- 5. Forward Lunge (İleri Lunge) -->
-            <button onclick="switchExercise('forward-lunge-ileri-lunge')" id="filter-forward-lunge-ileri-lunge" data-slug="forward-lunge-ileri-lunge" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Forward Lunge (İleri Lunge)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🚶</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Forward Lu</span>
-            </button>
-            <!-- 6. Standard Crunch (Yarım Mekik) -->
-            <button onclick="switchExercise('standard-crunch-yarim-mekik')" id="filter-standard-crunch-yarim-mekik" data-slug="standard-crunch-yarim-mekik" data-category="core" data-muscle="Karın, Core" title="Standard Crunch (Yarım Mekik)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🍫</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Standard C</span>
-            </button>
-            <!-- 7. Glute Bridge (İki Bacak Kalça Köprüsü) -->
-            <button onclick="switchExercise('glute-bridge-iki-bacak-kalca-koprusu')" id="filter-glute-bridge-iki-bacak-kalca-koprusu" data-slug="glute-bridge-iki-bacak-kalca-koprusu" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Glute Bridge (İki Bacak Kalça Köprüsü)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🍑</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Glute Brid</span>
-            </button>
-            <!-- 8. Doorframe Biceps Curl -->
-            <button onclick="switchExercise('doorframe-biceps-curl')" id="filter-doorframe-biceps-curl" data-slug="doorframe-biceps-curl" data-category="upper" data-muscle="Omuz, Kol" title="Doorframe Biceps Curl"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🦾</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Doorframe </span>
-            </button>
-            <!-- 9. High Knees -->
-            <button onclick="switchExercise('high-knees')" id="filter-high-knees" data-slug="high-knees" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="High Knees"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🏃</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">High Knees</span>
-            </button>
-            <!-- 10. Mountain Climber -->
-            <button onclick="switchExercise('mountain-climber')" id="filter-mountain-climber" data-slug="mountain-climber" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="Mountain Climber"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🧗</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Mountain C</span>
-            </button>
-            <!-- 11. Wall Sit (Duvar Oturuşu) -->
-            <button onclick="switchExercise('wall-sit-duvar-oturusu')" id="filter-wall-sit-duvar-oturusu" data-slug="wall-sit-duvar-oturusu" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Wall Sit (Duvar Oturuşu)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🧱</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Wall Sit</span>
-            </button>
-            <!-- 12. Standard Burpee -->
-            <button onclick="switchExercise('standard-burpee')" id="filter-standard-burpee" data-slug="standard-burpee" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="Standard Burpee"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🔥</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Standard B</span>
-            </button>
-            <!-- 13. Knee Push-up (Diz Üstü Şınav) -->
-            <button onclick="switchExercise('knee-push-up-diz-ustu-sinav')" id="filter-knee-push-up-diz-ustu-sinav" data-slug="knee-push-up-diz-ustu-sinav" data-category="upper" data-muscle="Göğüs" title="Knee Push-up (Diz Üstü Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🧎</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Knee Push-</span>
-            </button>
-            <!-- 14. Incline Push-up (Eller Yüksekte Şınav) -->
-            <button onclick="switchExercise('incline-push-up-eller-yuksekte-sinav')" id="filter-incline-push-up-eller-yuksekte-sinav" data-slug="incline-push-up-eller-yuksekte-sinav" data-category="upper" data-muscle="Göğüs" title="Incline Push-up (Eller Yüksekte Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">📐</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Incline Pu</span>
-            </button>
-            <!-- 15. Decline Push-up (Ayaklar Yüksekte Şınav) -->
-            <button onclick="switchExercise('decline-push-up-ayaklar-yuksekte-sinav')" id="filter-decline-push-up-ayaklar-yuksekte-sinav" data-slug="decline-push-up-ayaklar-yuksekte-sinav" data-category="upper" data-muscle="Göğüs" title="Decline Push-up (Ayaklar Yüksekte Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🔥</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Decline Pu</span>
-            </button>
-            <!-- 16. Wide Grip Push-up (Geniş Tutuş Şınav) -->
-            <button onclick="switchExercise('wide-grip-push-up-genis-tutus-sinav')" id="filter-wide-grip-push-up-genis-tutus-sinav" data-slug="wide-grip-push-up-genis-tutus-sinav" data-category="upper" data-muscle="Göğüs" title="Wide Grip Push-up (Geniş Tutuş Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🦅</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Wide Grip </span>
-            </button>
-            <!-- 17. Diamond Push-up (Elmas Şınav) -->
-            <button onclick="switchExercise('diamond-push-up-elmas-sinav')" id="filter-diamond-push-up-elmas-sinav" data-slug="diamond-push-up-elmas-sinav" data-category="upper" data-muscle="Göğüs" title="Diamond Push-up (Elmas Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">💎</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Diamond Pu</span>
-            </button>
-            <!-- 18. Archer Push-up (Okçu Şınavı) -->
-            <button onclick="switchExercise('archer-push-up-okcu-sinavi')" id="filter-archer-push-up-okcu-sinavi" data-slug="archer-push-up-okcu-sinavi" data-category="upper" data-muscle="Göğüs" title="Archer Push-up (Okçu Şınavı)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🏹</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Archer Pus</span>
-            </button>
-            <!-- 19. Staggered Push-up (Kademeli Şınav) -->
-            <button onclick="switchExercise('staggered-push-up-kademeli-sinav')" id="filter-staggered-push-up-kademeli-sinav" data-slug="staggered-push-up-kademeli-sinav" data-category="upper" data-muscle="Göğüs" title="Staggered Push-up (Kademeli Şınav)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⚡</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Staggered </span>
-            </button>
-            <!-- 20. Superman Hold -->
-            <button onclick="switchExercise('superman-hold')" id="filter-superman-hold" data-slug="superman-hold" data-category="upper" data-muscle="Sırt" title="Superman Hold"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🦸</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Superman H</span>
-            </button>
-            <!-- 21. Swimmer (Yüzücü Pozisyonu) -->
-            <button onclick="switchExercise('swimmer-yuzucu-pozisyonu')" id="filter-swimmer-yuzucu-pozisyonu" data-slug="swimmer-yuzucu-pozisyonu" data-category="upper" data-muscle="Sırt" title="Swimmer (Yüzücü Pozisyonu)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🏊</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Swimmer</span>
-            </button>
-            <!-- 22. Prone Y-T-W Raises -->
-            <button onclick="switchExercise('prone-y-t-w-raises')" id="filter-prone-y-t-w-raises" data-slug="prone-y-t-w-raises" data-category="upper" data-muscle="Sırt" title="Prone Y-T-W Raises"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🙌</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Prone Y-T-</span>
-            </button>
-            <!-- 23. Reverse Snow Angels -->
-            <button onclick="switchExercise('reverse-snow-angels')" id="filter-reverse-snow-angels" data-slug="reverse-snow-angels" data-category="upper" data-muscle="Sırt" title="Reverse Snow Angels"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">👼</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Reverse Sn</span>
-            </button>
-            <!-- 24. Doorframe / Table Inverted Row -->
-            <button onclick="switchExercise('doorframe-table-inverted-row')" id="filter-doorframe-table-inverted-row" data-slug="doorframe-table-inverted-row" data-category="upper" data-muscle="Sırt" title="Doorframe / Table Inverted Row"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🚣</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Doorframe </span>
-            </button>
-            <!-- 25. Towel Lat Pulldown -->
-            <button onclick="switchExercise('towel-lat-pulldown')" id="filter-towel-lat-pulldown" data-slug="towel-lat-pulldown" data-category="upper" data-muscle="Sırt" title="Towel Lat Pulldown"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🧣</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Towel Lat </span>
-            </button>
-            <!-- 26. Bird-Dog -->
-            <button onclick="switchExercise('bird-dog')" id="filter-bird-dog" data-slug="bird-dog" data-category="upper" data-muscle="Sırt" title="Bird-Dog"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🐕</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Bird-Dog</span>
-            </button>
-            <!-- 27. Pike Push-up -->
-            <button onclick="switchExercise('pike-push-up')" id="filter-pike-push-up" data-slug="pike-push-up" data-category="upper" data-muscle="Omuz, Kol" title="Pike Push-up"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⛰️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Pike Push-</span>
-            </button>
-            <!-- 28. Feet-Elevated Pike Push-up -->
-            <button onclick="switchExercise('feet-elevated-pike-push-up')" id="filter-feet-elevated-pike-push-up" data-slug="feet-elevated-pike-push-up" data-category="upper" data-muscle="Omuz, Kol" title="Feet-Elevated Pike Push-up"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🚀</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Feet-Eleva</span>
-            </button>
-            <!-- 29. Wall Handstand Hold -->
-            <button onclick="switchExercise('wall-handstand-hold')" id="filter-wall-handstand-hold" data-slug="wall-handstand-hold" data-category="upper" data-muscle="Omuz, Kol" title="Wall Handstand Hold"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🤸</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Wall Hands</span>
-            </button>
-            <!-- 30. Chair Dips (Sandalye Arkası Dips) -->
-            <button onclick="switchExercise('chair-dips-sandalye-arkasi-dips')" id="filter-chair-dips-sandalye-arkasi-dips" data-slug="chair-dips-sandalye-arkasi-dips" data-category="upper" data-muscle="Omuz, Kol" title="Chair Dips (Sandalye Arkası Dips)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🪑</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Chair Dips</span>
-            </button>
-            <!-- 31. Triceps Floor Push-up (Plank to Push-up) -->
-            <button onclick="switchExercise('triceps-floor-push-up-plank-to-push-up')" id="filter-triceps-floor-push-up-plank-to-push-up" data-slug="triceps-floor-push-up-plank-to-push-up" data-category="upper" data-muscle="Omuz, Kol" title="Triceps Floor Push-up (Plank to Push-up)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">💥</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Triceps Fl</span>
-            </button>
-            <!-- 32. Dolphin Push-up -->
-            <button onclick="switchExercise('dolphin-push-up')" id="filter-dolphin-push-up" data-slug="dolphin-push-up" data-category="upper" data-muscle="Omuz, Kol" title="Dolphin Push-up"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🐬</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Dolphin Pu</span>
-            </button>
-            <!-- 33. Bodyweight Triceps Extension -->
-            <button onclick="switchExercise('bodyweight-triceps-extension')" id="filter-bodyweight-triceps-extension" data-slug="bodyweight-triceps-extension" data-category="upper" data-muscle="Omuz, Kol" title="Bodyweight Triceps Extension"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⚡</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Bodyweight</span>
-            </button>
-            <!-- 34. Sumo Squat -->
-            <button onclick="switchExercise('sumo-squat')" id="filter-sumo-squat" data-slug="sumo-squat" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Sumo Squat"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🏯</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Sumo Squat</span>
-            </button>
-            <!-- 35. Narrow Stance Squat -->
-            <button onclick="switchExercise('narrow-stance-squat')" id="filter-narrow-stance-squat" data-slug="narrow-stance-squat" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Narrow Stance Squat"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🦵</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Narrow Sta</span>
-            </button>
-            <!-- 36. Reverse Lunge (Geri Lunge) -->
-            <button onclick="switchExercise('reverse-lunge-geri-lunge')" id="filter-reverse-lunge-geri-lunge" data-slug="reverse-lunge-geri-lunge" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Reverse Lunge (Geri Lunge)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🔙</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Reverse Lu</span>
-            </button>
-            <!-- 37. Walking Lunge -->
-            <button onclick="switchExercise('walking-lunge')" id="filter-walking-lunge" data-slug="walking-lunge" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Walking Lunge"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🏃</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Walking Lu</span>
-            </button>
-            <!-- 38. Bulgarian Split Squat -->
-            <button onclick="switchExercise('bulgarian-split-squat')" id="filter-bulgarian-split-squat" data-slug="bulgarian-split-squat" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Bulgarian Split Squat"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🔥</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Bulgarian </span>
-            </button>
-            <!-- 39. Curtsy Lunge -->
-            <button onclick="switchExercise('curtsy-lunge')" id="filter-curtsy-lunge" data-slug="curtsy-lunge" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Curtsy Lunge"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">💃</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Curtsy Lun</span>
-            </button>
-            <!-- 40. Pistol Squat (Tek Bacak Squat) -->
-            <button onclick="switchExercise('pistol-squat-tek-bacak-squat')" id="filter-pistol-squat-tek-bacak-squat" data-slug="pistol-squat-tek-bacak-squat" data-category="leg" data-muscle="Ön Bacak, Kalça" title="Pistol Squat (Tek Bacak Squat)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🎯</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Pistol Squ</span>
-            </button>
-            <!-- 41. Single-Leg Glute Bridge -->
-            <button onclick="switchExercise('single-leg-glute-bridge')" id="filter-single-leg-glute-bridge" data-slug="single-leg-glute-bridge" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Single-Leg Glute Bridge"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🦩</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Single-Leg</span>
-            </button>
-            <!-- 42. Elevated Glute Bridge -->
-            <button onclick="switchExercise('elevated-glute-bridge')" id="filter-elevated-glute-bridge" data-slug="elevated-glute-bridge" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Elevated Glute Bridge"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">📈</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Elevated G</span>
-            </button>
-            <!-- 43. Nordic Curl (Ayaklar Sabitli Hamstring Büküşü) -->
-            <button onclick="switchExercise('nordic-curl-ayaklar-sabitli-hamstring-bukusu')" id="filter-nordic-curl-ayaklar-sabitli-hamstring-bukusu" data-slug="nordic-curl-ayaklar-sabitli-hamstring-bukusu" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Nordic Curl (Ayaklar Sabitli Hamstring Büküşü)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⚡</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Nordic Cur</span>
-            </button>
-            <!-- 44. Good Morning (Vücut Ağırlığı) -->
-            <button onclick="switchExercise('good-morning-vucut-agirligi')" id="filter-good-morning-vucut-agirligi" data-slug="good-morning-vucut-agirligi" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Good Morning (Vücut Ağırlığı)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🌅</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Good Morni</span>
-            </button>
-            <!-- 45. Standing Calf Raise (Çift Ayak Baldır Kaldırma) -->
-            <button onclick="switchExercise('standing-calf-raise-cift-ayak-baldir-kaldirma')" id="filter-standing-calf-raise-cift-ayak-baldir-kaldirma" data-slug="standing-calf-raise-cift-ayak-baldir-kaldirma" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Standing Calf Raise (Çift Ayak Baldır Kaldırma)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🦶</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Standing C</span>
-            </button>
-            <!-- 46. Single-Leg Calf Raise -->
-            <button onclick="switchExercise('single-leg-calf-raise')" id="filter-single-leg-calf-raise" data-slug="single-leg-calf-raise" data-category="leg" data-muscle="Arka Bacak, Baldır" title="Single-Leg Calf Raise"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🩰</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Single-Leg</span>
-            </button>
-            <!-- 47. Reverse Crunch (Ters Mekik) -->
-            <button onclick="switchExercise('reverse-crunch-ters-mekik')" id="filter-reverse-crunch-ters-mekik" data-slug="reverse-crunch-ters-mekik" data-category="core" data-muscle="Karın, Core" title="Reverse Crunch (Ters Mekik)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🔄</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Reverse Cr</span>
-            </button>
-            <!-- 48. Bicycle Crunch (Bisiklet Mekiği) -->
-            <button onclick="switchExercise('bicycle-crunch-bisiklet-mekigi')" id="filter-bicycle-crunch-bisiklet-mekigi" data-slug="bicycle-crunch-bisiklet-mekigi" data-category="core" data-muscle="Karın, Core" title="Bicycle Crunch (Bisiklet Mekiği)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🚴</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Bicycle Cr</span>
-            </button>
-            <!-- 49. Lying Leg Raise -->
-            <button onclick="switchExercise('lying-leg-raise')" id="filter-lying-leg-raise" data-slug="lying-leg-raise" data-category="core" data-muscle="Karın, Core" title="Lying Leg Raise"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">📐</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Lying Leg </span>
-            </button>
-            <!-- 50. High Plank (Düz Kol Plankı) -->
-            <button onclick="switchExercise('high-plank-duz-kol-planki')" id="filter-high-plank-duz-kol-planki" data-slug="high-plank-duz-kol-planki" data-category="core" data-muscle="Karın, Core" title="High Plank (Düz Kol Plankı)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🛡️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">High Plank</span>
-            </button>
-            <!-- 51. Side Plank (Yan Plank) -->
-            <button onclick="switchExercise('side-plank-yan-plank')" id="filter-side-plank-yan-plank" data-slug="side-plank-yan-plank" data-category="core" data-muscle="Karın, Core" title="Side Plank (Yan Plank)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⚡</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Side Plank</span>
-            </button>
-            <!-- 52. Side Plank Hip Dip -->
-            <button onclick="switchExercise('side-plank-hip-dip')" id="filter-side-plank-hip-dip" data-slug="side-plank-hip-dip" data-category="core" data-muscle="Karın, Core" title="Side Plank Hip Dip"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🌊</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Side Plank</span>
-            </button>
-            <!-- 53. Russian Twist -->
-            <button onclick="switchExercise('russian-twist')" id="filter-russian-twist" data-slug="russian-twist" data-category="core" data-muscle="Karın, Core" title="Russian Twist"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🌪️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Russian Tw</span>
-            </button>
-            <!-- 54. Deadbug -->
-            <button onclick="switchExercise('deadbug')" id="filter-deadbug" data-slug="deadbug" data-category="core" data-muscle="Karın, Core" title="Deadbug"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🪲</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Deadbug</span>
-            </button>
-            <!-- 55. Hollow Body Hold -->
-            <button onclick="switchExercise('hollow-body-hold')" id="filter-hollow-body-hold" data-slug="hollow-body-hold" data-category="core" data-muscle="Karın, Core" title="Hollow Body Hold"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🌙</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Hollow Bod</span>
-            </button>
-            <!-- 56. V-Up (Çakı Pozisyonu) -->
-            <button onclick="switchExercise('v-up-caki-pozisyonu')" id="filter-v-up-caki-pozisyonu" data-slug="v-up-caki-pozisyonu" data-category="core" data-muscle="Karın, Core" title="V-Up (Çakı Pozisyonu)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">✌️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">V-Up</span>
-            </button>
-            <!-- 57. Heel Touches (Topuk Dokunuşu) -->
-            <button onclick="switchExercise('heel-touches-topuk-dokunusu')" id="filter-heel-touches-topuk-dokunusu" data-slug="heel-touches-topuk-dokunusu" data-category="core" data-muscle="Karın, Core" title="Heel Touches (Topuk Dokunuşu)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">👟</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Heel Touch</span>
-            </button>
-            <!-- 58. Cross-Body Mountain Climber -->
-            <button onclick="switchExercise('cross-body-mountain-climber')" id="filter-cross-body-mountain-climber" data-slug="cross-body-mountain-climber" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="Cross-Body Mountain Climber"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⚔️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Cross-Body</span>
-            </button>
-            <!-- 59. Squat Jump -->
-            <button onclick="switchExercise('squat-jump')" id="filter-squat-jump" data-slug="squat-jump" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="Squat Jump"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">🚀</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Squat Jump</span>
-            </button>
-            <!-- 60. Skater Hops (Paten Sıçrayışı) -->
-            <button onclick="switchExercise('skater-hops-paten-sicrayisi')" id="filter-skater-hops-paten-sicrayisi" data-slug="skater-hops-paten-sicrayisi" data-category="cardio" data-muscle="Kardiyo, Kondisyon" title="Skater Hops (Paten Sıçrayışı)"
-                    class="filter-circle snap-center shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/20 bg-zinc-900/90 flex flex-col items-center justify-center text-lg opacity-80 hover:opacity-100 hover:border-white transition-all transform hover:scale-105 active:scale-95 shadow-md cursor-pointer relative group">
-                <span class="leading-none">⛸️</span>
-                <span class="text-[7px] font-black uppercase tracking-tighter text-white/90 truncate max-w-[44px] mt-0.5">Skater Hop</span>
+        <!-- Quick Exercise Selector Bar -->
+        <div class="w-full max-w-sm px-4 flex items-center justify-center gap-2">
+            <button onclick="toggleExercisesDrawer()" 
+                    class="w-full py-2.5 px-4 rounded-2xl bg-black/80 hover:bg-black border border-white/20 hover:border-orange-500/60 backdrop-blur-xl flex items-center justify-between text-xs font-bold text-white shadow-xl transition-all cursor-pointer">
+                <div class="flex items-center gap-2 truncate">
+                    <span class="text-orange-400">📋</span>
+                    <span id="drawer-btn-label" class="truncate">Hareketi Değiştir (60 Egzersiz)</span>
+                </div>
+                <span class="text-[10px] text-zinc-400 uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded-lg shrink-0">Seç ▼</span>
             </button>
         </div>
 
@@ -4059,6 +3688,7 @@
 
         const conf = exerciseConfig[exKey];
         if (activeExName) activeExName.innerText = conf.name.toUpperCase();
+        const drawerBtnLbl = document.getElementById('drawer-btn-label'); if (drawerBtnLbl) drawerBtnLbl.innerText = conf.name;
         if (counterLabel) counterLabel.innerText = conf.type === 'time' ? "Süre" : "Tekrar";
         if (repCounter) repCounter.innerText = conf.type === 'time' ? "0s" : "0";
         if (activeExBadge) activeExBadge.innerText = `Hedef: ${conf.target} • ${conf.muscleGroup}`;
