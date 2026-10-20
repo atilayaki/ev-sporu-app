@@ -350,8 +350,47 @@
     </script>
     {% endif %}
 
-    <!-- Service Worker Registration -->
+    <!-- Service Worker & Offline Workout Auto-Sync Engine -->
     <script>
+    function syncPendingWorkouts() {
+        if (!navigator.onLine) return;
+        try {
+            const raw = localStorage.getItem('pending_workout_sync');
+            if (!raw) return;
+            const queue = JSON.parse(raw);
+            if (!Array.isArray(queue) || queue.length === 0) return;
+
+            const remaining = [];
+            queue.forEach(item => {
+                const endpoint = item.endpoint || '/api/sync-progress';
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (!res || !res.success) remaining.push(item);
+                })
+                .catch(() => {
+                    remaining.push(item);
+                });
+            });
+
+            setTimeout(() => {
+                if (remaining.length > 0) {
+                    localStorage.setItem('pending_workout_sync', JSON.stringify(remaining));
+                } else {
+                    localStorage.removeItem('pending_workout_sync');
+                }
+            }, 2500);
+        } catch(e) {}
+    }
+    window.addEventListener('online', syncPendingWorkouts);
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(syncPendingWorkouts, 1500);
+    });
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').catch(() => {});

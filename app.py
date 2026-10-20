@@ -867,6 +867,7 @@ def create_app():
         new_goal = (data.get('goal') or '').strip()
         new_level = (data.get('fitness_level') or '').strip()
         new_password = data.get('new_password') or ''
+        confirm_password = data.get('confirm_password') or ''
 
         if new_name and len(new_name) >= 2:
             current_user.name = new_name[:100]
@@ -879,6 +880,8 @@ def create_app():
         if new_password:
             if len(new_password) < 6:
                 return jsonify({'success': False, 'status': 'error', 'message': 'Yeni şifre en az 6 karakter olmalıdır.'}), 400
+            if confirm_password and new_password != confirm_password:
+                return jsonify({'success': False, 'status': 'error', 'message': 'Yeni şifreler birbiriyle eşleşmiyor.'}), 400
             current_user.password_hash = generate_password_hash(new_password)
 
         db.session.commit()
@@ -1368,7 +1371,7 @@ def create_app():
 
     @app.route('/.well-known/assetlinks.json')
     def serve_assetlinks():
-        package_name = os.environ.get('ANDROID_PACKAGE_NAME', 'app.evdespor.fitness')
+        package_name = os.environ.get('ANDROID_PACKAGE_NAME', 'com.evdespor.app')
         sha256_fp = os.environ.get(
             'ANDROID_SHA256_FINGERPRINT',
             'FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C'

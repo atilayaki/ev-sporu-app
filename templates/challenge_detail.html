@@ -116,9 +116,9 @@
                                 {% endfor %}
 
                                 {% if is_current %}
-                                    <form action="/challenges/{{ challenge.slug }}/tamamla" method="POST" class="pt-1">
-                                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all cursor-pointer">
-                                            Günü Tamamla ve İlerle ✓
+                                    <form action="/challenges/{{ challenge.slug }}/tamamla" method="POST" class="pt-1" x-data="{ submitting: false }" @submit="submitting = true">
+                                        <button type="submit" :disabled="submitting" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2">
+                                            <span x-text="submitting ? 'Tebrikler! Kaydediliyor... ✨' : 'Günü Tamamla ve İlerle ✓'"></span>
                                         </button>
                                     </form>
                                 {% endif %}

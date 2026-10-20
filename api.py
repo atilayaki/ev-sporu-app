@@ -256,7 +256,7 @@ def analyze_nutrition():
         if not api_key:
             return jsonify({'success': False, 'message': 'API anahtari (GEMINI_API_KEY) tanimli degil.'}), 500
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-3.6-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Decode base64 to bytes
         import base64
@@ -297,33 +297,88 @@ def get_leaderboard():
 
 @api_bp.route('/sync-progress', methods=['POST'])
 def sync_progress():
-    data = request.get_json()
-    from models import db, User, UserProgress
-    # Dummy user sync (without real JWT auth for now, use simple name matching)
-    username = data.get('username')
-    duration = data.get('duration_spent', 0)
-    calories = data.get('calories_burned', 0)
-    readiness = data.get('readiness_score')
-    exertion = data.get('perceived_exertion')
-    
-    if not username:
-        return jsonify({'success': False, 'message': 'Username required'})
-        
-    user = User.query.filter_by(name=username).first()
+    data = request.get_json() or {}
+    from flask_login import current_user
+    from models import db, User, UserProgress, Exercise, DailyLog
+    from datetime import date
+    from werkzeug.security import generate_password_hash
+
+    # Handle batch workouts list or single workout
+    workout_list = data.get('workouts') if isinstance(data.get('workouts'), list) else [data]
+
+    # 1. Determine User
+    user = None
+    if current_user.is_authenticated:
+        user = current_user
+    else:
+        # Extract username from first item or root
+        username = (data.get('username') or (workout_list[0].get('username') if workout_list else '') or '').strip()
+        if username and username != 'Sporcu':
+            user = User.query.filter(db.func.lower(User.name) == username.lower()).first()
+            if not user:
+                clean_email = f"{username.lower().replace(' ', '')}@evdespor.local"
+                user = User.query.filter_by(email=clean_email).first()
+                if not user:
+                    user = User(name=username, email=clean_email, password_hash=generate_password_hash('sporcu123'))
+                    db.session.add(user)
+                    db.session.commit()
+
     if not user:
-        # Create user if doesn't exist
-        user = User(name=username, email=f"{username}@mobile.com", password_hash="dummy")
-        db.session.add(user)
-        db.session.commit()
-        
-    prog = UserProgress(
-        user_id=user.id,
-        duration_spent=duration,
-        calories_burned=calories,
-        readiness_score=readiness,
-        perceived_exertion=exertion
-    )
-    db.session.add(prog)
+        user = User.query.first()
+        if not user:
+            user = User(name='Sporcu', email='sporcu@evdespor.local', password_hash=generate_password_hash('sporcu123'))
+            db.session.add(user)
+            db.session.commit()
+
+    synced_count = 0
+    today = date.today()
+
+    for item in workout_list:
+        if not isinstance(item, dict):
+            continue
+        duration = int(item.get('duration_spent', 0) or 0)
+        calories = int(item.get('calories_burned', 0) or 0)
+        readiness = item.get('readiness_score')
+        exertion = item.get('perceived_exertion')
+        slug = (item.get('exercise_slug') or '').strip()
+
+        exercise_id = None
+        if slug:
+            ex = Exercise.query.filter_by(slug=slug).first()
+            if ex:
+                exercise_id = ex.id
+        if not exercise_id and item.get('exercise_id'):
+            exercise_id = int(item.get('exercise_id'))
+
+        prog = UserProgress(
+            user_id=user.id,
+            exercise_id=exercise_id,
+            duration_spent=duration,
+            calories_burned=calories,
+            readiness_score=readiness,
+            perceived_exertion=exertion
+        )
+        db.session.add(prog)
+        synced_count += 1
+
+    log = DailyLog.query.filter_by(user_id=user.id, log_date=today).first()
+    if not log:
+        log = DailyLog(user_id=user.id, log_date=today, calories_consumed=0, water_ml=0)
+        db.session.add(log)
+
+    # Award badges & streak
+    try:
+        from app import update_streak, award_badge
+        update_streak(user)
+        award_badge(user, 'İlk Adım')
+    except Exception:
+        pass
+
     db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Progress synced!'})
+
+    return jsonify({
+        'success': True,
+        'message': f'{synced_count} antrenman kaydı senkronize edildi!',
+        'synced_count': synced_count,
+        'user_id': user.id
+    })

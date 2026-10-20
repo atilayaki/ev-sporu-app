@@ -10,4 +10,24 @@ dump*.html
 dump*.py
 *.log
 opengym_catalog.json
+scripts_archive/
+test_*.png
+test_*.py
+fix_*.py
+find_*.py
+add_*.py
+get_*.py
+insert_*.py
+match_*.py
+move_*.py
+rename_*.py
+patch_db.py
+update_*.py
+verify_routes.py
+wrap_nav.py
+matched_exercises.json
+download_animations.py
+fetch_live.py
+generate_*.py
+parse_catalog.py
 

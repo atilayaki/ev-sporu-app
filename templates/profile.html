@@ -1109,7 +1109,8 @@ function profileManager() {
                         name: this.userName,
                         goal: this.userGoal,
                         fitness_level: this.userLevel,
-                        new_password: this.newPassword
+                        new_password: this.newPassword,
+                        confirm_password: this.confirmNewPassword
                     })
                 });
                 const data = await res.json();

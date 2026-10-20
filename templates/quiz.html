@@ -220,8 +220,47 @@
                 Yapay Zeka Planını Kişiselleştiriyor...
             </h3>
             <p class="text-zinc-400 text-sm max-w-md mx-auto">
-                Hedefin (<span class="text-orange-400 font-bold" x-text="answers.goal"></span>) ve kondisyon seviyen analiz ediliyor, en uygun egzersiz rotası profiline işleniyor.
+                Hedefin (<span class="text-orange-400 font-bold" x-text="answers.goal"></span>) ve seviyen analiz ediliyor, en uygun antrenman rotası oluşturuluyor.
             </p>
+        </div>
+    </div>
+
+    <!-- Step 4: Matched Program Result Showcase -->
+    <div x-show="resultReady && !isSubmitting" style="display: none;"
+         class="rounded-3xl border border-emerald-500/30 bg-zinc-900/90 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-2xl space-y-7 animate-fade-up">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>%98 Mükemmel Eşleşme Belirlendi</span>
+        </div>
+
+        <div>
+            <h3 class="text-2xl sm:text-3xl font-black text-white font-heading uppercase tracking-tight mb-2">
+                Senin İçin En Uygun Kamp Hazır!
+            </h3>
+            <p class="text-zinc-400 text-xs sm:text-sm max-w-lg mx-auto">
+                Verdiğin yanıtlara göre metabolik eşiğine ve hedefine en hızlı ulaştıracak program seçildi:
+            </p>
+        </div>
+
+        <!-- Program Card Preview -->
+        <div class="max-w-md mx-auto rounded-2xl bg-zinc-950/80 border border-orange-500/40 p-6 text-left shadow-xl shadow-orange-500/10 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-lg bg-orange-500/20 text-orange-400 text-[11px] font-black uppercase tracking-wider" x-text="matchedProgram.badge"></span>
+                <span class="text-xs font-mono font-bold text-zinc-400" x-text="matchedProgram.duration"></span>
+            </div>
+            <h4 class="text-xl font-black text-white uppercase tracking-tight" x-text="matchedProgram.title"></h4>
+            <p class="text-xs text-zinc-300 leading-relaxed font-normal" x-text="matchedProgram.desc"></p>
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <a :href="'/programlar/' + matchedProgram.slug + '/katil'"
+               class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 text-center">
+                Hemen Bu Programa Katıl &amp; Başla →
+            </a>
+            <a href="/profil" class="w-full sm:w-auto px-6 py-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors text-center">
+                Profilime Git
+            </a>
         </div>
     </div>
 </div>
@@ -231,10 +270,18 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('quiz', () => ({
         step: 1,
         isSubmitting: false,
+        resultReady: false,
         answers: {
             goal: null,
             fitness_level: null,
             target_area: null
+        },
+        matchedProgram: {
+            slug: '7-gunluk-baslangic',
+            title: '7 Günlük Başlangıç Kampı',
+            badge: 'Tavsiye Edilen',
+            duration: '7 Gün',
+            desc: 'Vücudunu sakatlık riski olmadan spora alıştıracak temel eklem & kas aktivasyonu.'
         },
         select(field, value) {
             this.answers[field] = value;
@@ -242,28 +289,74 @@ document.addEventListener('alpine:init', () => {
         nextStep() {
             this.step++;
         },
+        calculateMatch() {
+            const g = this.answers.goal || '';
+            const l = this.answers.fitness_level || '';
+            const t = this.answers.target_area || '';
+
+            if (t.includes('Karın')) {
+                this.matchedProgram = {
+                    slug: '21-gunluk-karin-ve-core',
+                    title: '21 Günlük Karın & Core Kampı',
+                    badge: 'Karın & Postür',
+                    duration: '21 Gün',
+                    desc: 'Sıkı bir karın ve sağlam bir postür için özel izometrik & patlayıcı döngü.'
+                };
+            } else if (g.includes('Kilo')) {
+                this.matchedProgram = {
+                    slug: '14-gunluk-hiit-yag-yakimi',
+                    title: '14 Günlük HIIT Yağ Yakımı',
+                    badge: 'Maksimum Kalori',
+                    duration: '14 Gün',
+                    desc: 'Yüksek metabolik hız ve maksimum kalori yakımı sağlayan aralıklı kardiyo yüklenmesi.'
+                };
+            } else if (l === 'Başlangıç') {
+                this.matchedProgram = {
+                    slug: '7-gunluk-baslangic',
+                    title: '7 Günlük Başlangıç Kampı',
+                    badge: 'Temel Alışkanlık',
+                    duration: '7 Gün',
+                    desc: 'Vücudunu sakatlık riski olmadan spora alıştıracak temel eklem ve kas aktivasyon programı.'
+                };
+            } else if (l === 'İleri') {
+                this.matchedProgram = {
+                    slug: 'ileri-seviye-patlayici-guc',
+                    title: 'İleri Seviye Patlayıcı Güç',
+                    badge: 'Elit Güç',
+                    duration: '4 Hafta',
+                    desc: 'Kalistenik ustalığı ve maksimum fonksiyonel kuvvet artışını hedefleyen ileri düzey kamp.'
+                };
+            } else {
+                this.matchedProgram = {
+                    slug: '4-haftalik-tum-vucut-guc',
+                    title: '4 Haftalık Tüm Vücut Güç Kampı',
+                    badge: 'Tam Vücut Gelişimi',
+                    duration: '28 Gün',
+                    desc: 'Dengeli hipertrofi ve tam fonksiyonel vücut formu sağlayan ana kuvvet kampı.'
+                };
+            }
+        },
         submitQuiz() {
+            this.calculateMatch();
             this.isSubmitting = true;
-            setTimeout(() => {
-                fetch('/quiz', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(this.answers)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.redirect) {
-                        window.location.href = data.redirect;
-                    } else if (data && data.success) {
-                        window.location.href = '/programlar';
-                    } else {
-                        window.location.href = '/programlar';
-                    }
-                })
-                .catch(() => {
-                    window.location.href = '/programlar';
-                });
-            }, 1200);
+            fetch('/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.answers)
+            })
+            .then(res => res.json())
+            .then(() => {
+                setTimeout(() => {
+                    this.isSubmitting = false;
+                    this.resultReady = true;
+                }, 1000);
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    this.isSubmitting = false;
+                    this.resultReady = true;
+                }, 1000);
+            });
         }
     }));
 });

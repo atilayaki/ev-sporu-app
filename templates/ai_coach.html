@@ -4479,7 +4479,7 @@
         resetCounter();
     }
 
-    // Save Workout
+    // Save Workout with Exercise Link & Offline Sync
     async function saveAiWorkout() {
         const conf = exerciseConfig[currentExercise];
         const totalAmount = conf.type === 'time' ? holdSeconds : reps;
@@ -4489,24 +4489,45 @@
         }
 
         const btn = document.getElementById('save-workout-btn');
-        btn.disabled = true;
+        if (btn) btn.disabled = true;
 
         const cal = Math.round(totalAmount * conf.calPerUnit);
+        const durationSeconds = conf.type === 'time' ? holdSeconds : Math.max(reps * 3, 15);
+
+        const payload = {
+            username: '{{ current_user.name if current_user.is_authenticated else "Sporcu" }}',
+            exercise_slug: currentExercise,
+            duration_spent: durationSeconds,
+            calories_burned: cal,
+            readiness_score: 9,
+            reps: conf.type === 'time' ? null : reps,
+            hold_seconds: conf.type === 'time' ? holdSeconds : null
+        };
+
+        const queueLocalWorkout = (item) => {
+            try {
+                const queue = JSON.parse(localStorage.getItem('pending_workout_sync') || '[]');
+                item.queued_at = new Date().toISOString();
+                queue.push(item);
+                localStorage.setItem('pending_workout_sync', JSON.stringify(queue));
+            } catch(e) {}
+        };
 
         try {
-            await fetch(`/api/sync-progress`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: '{{ current_user.name if current_user.is_authenticated else "Sporcu" }}',
-                    duration_spent: conf.type === 'time' ? holdSeconds : reps * 3,
-                    calories_burned: cal,
-                    readiness_score: 9
-                })
-            });
-        } catch(e) {}
+            if (navigator.onLine) {
+                await fetch(`/api/sync-progress`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                queueLocalWorkout(payload);
+            }
+        } catch(e) {
+            queueLocalWorkout(payload);
+        }
 
-        btn.disabled = false;
+        if (btn) btn.disabled = false;
         showWorkoutModal(totalAmount, cal, conf.type);
     }
 

@@ -1049,6 +1049,20 @@
                 this.recordMuscleRecoveryLocal();
                 const targetEndpoint = isCustomWorkoutMode ? '/api/ozel-antrenman-tamamla' : '/programlar/{{ program.slug }}/tamamla';
                 const fallbackRedirect = isCustomWorkoutMode ? '/antrenman-olustur' : '/programlar/{{ program.slug }}';
+                const workoutData = {
+                    endpoint: targetEndpoint,
+                    duration_spent: this.totalSeconds,
+                    calories_burned: Math.floor(this.totalCalories),
+                    queued_at: new Date().toISOString()
+                };
+
+                const queueOffline = (item) => {
+                    try {
+                        const queue = JSON.parse(localStorage.getItem('pending_workout_sync') || '[]');
+                        queue.push(item);
+                        localStorage.setItem('pending_workout_sync', JSON.stringify(queue));
+                    } catch(e) {}
+                };
 
                 fetch(targetEndpoint, {
                     method: 'POST',
@@ -1060,12 +1074,15 @@
                 })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.success) {
+                    if(data && data.success && data.redirect) {
                         window.location.href = data.redirect;
+                    } else {
+                        window.location.href = fallbackRedirect;
                     }
                 })
                 .catch(err => {
-                    console.error("Antrenman kaydı hatası:", err);
+                    console.warn("Çevrimdışı: Antrenman yerel kuyruğa kaydedildi.", err);
+                    queueOffline(workoutData);
                     window.location.href = fallbackRedirect;
                 });
             }
