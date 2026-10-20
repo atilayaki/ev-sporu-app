@@ -1371,11 +1371,15 @@ def create_app():
 
     @app.route('/.well-known/assetlinks.json')
     def serve_assetlinks():
-        package_name = os.environ.get('ANDROID_PACKAGE_NAME', 'com.evdespor.app')
         sha256_fp = os.environ.get(
             'ANDROID_SHA256_FINGERPRINT',
             'FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C'
         )
+        packages = list(dict.fromkeys([
+            'com.evdespor.app',
+            os.environ.get('ANDROID_PACKAGE_NAME', 'com.evdespor.app'),
+            'app.evdespor.fitness'
+        ]))
         return jsonify([
             {
                 "relation": [
@@ -1384,10 +1388,11 @@ def create_app():
                 ],
                 "target": {
                     "namespace": "android_app",
-                    "package_name": package_name,
+                    "package_name": pkg,
                     "sha256_cert_fingerprints": [sha256_fp]
                 }
             }
+            for pkg in packages
         ])
 
     @app.route('/.well-known/apple-app-site-association')
